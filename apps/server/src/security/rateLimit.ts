@@ -10,6 +10,10 @@ export class TokenBucket {
     this.tokens = capacity;
     this.last = now();
   }
+  available(): number {
+    const t = this.now();
+    return Math.min(this.capacity, this.tokens + ((t - this.last) / 1000) * this.perSecond);
+  }
   take(n = 1): boolean {
     const t = this.now();
     this.tokens = Math.min(this.capacity, this.tokens + ((t - this.last) / 1000) * this.perSecond);
@@ -37,6 +41,11 @@ export class KeyedLimiter {
     e.seen = this.now();
     if (this.buckets.size > 10000) this.gc();
     return e.b.take();
+  }
+  /** true if `key` still has budget (does not consume). */
+  allowed(key: string): boolean {
+    const e = this.buckets.get(key);
+    return !e || e.b.available() >= 1;
   }
   private gc() {
     const cutoff = this.now() - 10 * 60_000;

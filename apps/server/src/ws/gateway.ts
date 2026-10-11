@@ -29,7 +29,8 @@ export function clientIp(req: IncomingMessage): string {
 export function attachGateway(o: GatewayOptions) {
   const wss = new WebSocketServer({ noServer: true, maxPayload: MAX_MESSAGE_BYTES, perMessageDeflate: false });
   const connectLimiter = new KeyedLimiter(30, 0.5); // per IP
-  const joinLimiter = new KeyedLimiter(12, 0.2); // failed/attempted joins per IP (anti code brute-force)
+  // Failed joins per IP (wrong/full codes) — makes brute-forcing private room codes impractical.
+  const failedJoins = new KeyedLimiter(10, 0.1);
 
   o.server.on('upgrade', (req, socket, head) => {
     const url = new URL(req.url ?? '/', 'http://x');
@@ -125,10 +126,16 @@ export function attachGateway(o: GatewayOptions) {
           if (!ok) return fail('AUTH', 'Please log in again.');
         }
         const code = msg.code.toUpperCase();
-        if (!ROOM_CODE_RE.test(code)) return fail('ROOM_NOT_FOUND', 'That is not a valid office code.');
-        if (!joinLimiter.take(ip)) return fail('RATE_LIMIT', 'Too many join attempts. Take a coffee break and try again.');
+        if (!failedJoins.allowed(ip)) return fail('RATE_LIMIT', 'Too many failed join attempts. Take a coffee break and try again.');
+        if (!ROOM_CODE_RE.test(code)) {
+          failedJoins.take(ip);
+          return fail('ROOM_NOT_FOUND', 'That is not a valid office code.');
+        }
         const res = o.manager.join(code, tok.sub, sanitizeName(msg.name), msg.appearance, tok.kind === 'user', conn);
-        if ('error' in res) return fail(res.error!, res.message!);
+        if ('error' in res) {
+          if (res.error === 'ROOM_NOT_FOUND') failedJoins.take(ip);
+          return fail(res.error!, res.message!);
+        }
         clearTimeout(helloTimer);
         room = res.room;
         player = res.player;

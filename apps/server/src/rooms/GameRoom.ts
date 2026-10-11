@@ -887,7 +887,11 @@ export class GameRoom {
     const kind = this.sabotage.kind;
     this.sabotage = null;
     this.sabotageReadyAt = this.now() + this.settings.sabotageCooldown * 1000;
-    for (const p of this.players.values()) if (p.fixSession && p.fixSession.fix !== 'doorsOverride') p.fixSession = null;
+    for (const p of this.players.values())
+      if (p.fixSession && p.fixSession.fix !== 'doorsOverride') {
+        p.fixSession = null;
+        this.send(p, { t: 'taskClosed', reason: 'fixed' });
+      }
     const label: Record<SabotageKind, string> = {
       wifi: 'Wi-Fi restored. Everyone is back to pretending to work.',
       fire: 'Fire alarm reset. Nobody was barbecued.',
@@ -914,7 +918,11 @@ export class GameRoom {
   private unlockDoors() {
     this.doorsLockedUntil = null;
     for (const doorId of MAP.lockColliders.keys()) this.cols.setDynamic(doorId, null);
-    for (const p of this.players.values()) if (p.fixSession?.fix === 'doorsOverride') p.fixSession = null;
+    for (const p of this.players.values())
+      if (p.fixSession?.fix === 'doorsOverride') {
+        p.fixSession = null;
+        this.send(p, { t: 'taskClosed', reason: 'fixed' });
+      }
   }
 
   private fixRelevant(fix: FixTarget): boolean {
@@ -933,7 +941,10 @@ export class GameRoom {
     if (!s || !s.pending.has(fix)) return;
     s.pending.delete(fix);
     s.fixed.add(fix);
-    if (by.fixSession?.fix === fix) by.fixSession = null;
+    if (by.fixSession?.fix === fix) {
+      by.fixSession = null;
+      this.send(by, { t: 'taskClosed', reason: 'fixed' });
+    }
     if (s.pending.size === 0) this.resolveSabotage(by);
     else {
       this.notify(by, 'Station restored. Others still need fixing!', 'success', 'fixed');
