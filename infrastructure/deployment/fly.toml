@@ -1,0 +1,33 @@
+# Example Fly.io config for the game server (+ static client).
+# fly launch --no-deploy --copy-config --dockerfile infrastructure/docker/Dockerfile
+# fly secrets set SESSION_SECRET=$(openssl rand -hex 32) DATABASE_URL=... LIVEKIT_URL=... LIVEKIT_API_KEY=... LIVEKIT_API_SECRET=...
+app = "corporate-sus"
+primary_region = "ams"
+
+[build]
+  dockerfile = "../docker/Dockerfile"
+
+[env]
+  NODE_ENV = "production"
+  PORT = "2567"
+  SERVE_WEB = "true"
+  PUBLIC_ORIGIN = "https://corporate-sus.fly.dev"
+
+[http_service]
+  internal_port = 2567
+  force_https = true
+  # Live rooms are in memory: never let the platform stop the only instance mid-match.
+  auto_stop_machines = "off"
+  auto_start_machines = true
+  min_machines_running = 1
+
+  [[http_service.checks]]
+    interval = "15s"
+    timeout = "3s"
+    grace_period = "20s"
+    method = "GET"
+    path = "/api/health"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "512mb"

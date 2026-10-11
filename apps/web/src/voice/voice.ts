@@ -101,6 +101,10 @@ class VoiceManager {
           autoGainControl: true,
         });
         await room.localParticipant.publishTrack(this.mic, { source: Track.Source.Microphone });
+        // microphone unplugged or permission revoked mid-call → keep listening, show status
+        this.mic.mediaStreamTrack.addEventListener('ended', () =>
+          this.status({ status: 'denied', detail: 'Microphone disconnected — you can still listen.', transmitting: false }),
+        );
         await this.setTransmitting(useSettings.getState().voiceMode === 'open');
         this.status({ status: 'on', mode, detail: undefined });
       } catch (e) {

@@ -352,6 +352,8 @@ export function AccountModal({ onClose }: { onClose: () => void }) {
             onClick={async () => {
               await api.logout().catch(() => {});
               session.logout();
+              setMode('login');
+              setP('');
             }}
           >
             Log out

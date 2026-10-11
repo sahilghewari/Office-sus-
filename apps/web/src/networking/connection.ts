@@ -33,6 +33,9 @@ export class GameConnection {
 
   connect() {
     this.closedByUser = false;
+    // A fresh handshake is required on every (re)connection; if the server restarted
+    // and the room is gone, the hello is answered with ROOM_NOT_FOUND → fail cleanly.
+    this.welcomed = false;
     const g = useGame.getState();
     g.set({ status: this.attempts ? 'reconnecting' : 'connecting', code: this.code });
     const ws = new WebSocket(this.url());
@@ -129,7 +132,14 @@ export class GameConnection {
           ].includes(msg.code) &&
           !this.welcomed
         ) {
-          g.set({ status: 'failed', statusMessage: msg.message });
+          g.set({
+            status: 'failed',
+            statusMessage:
+              msg.code === 'ROOM_NOT_FOUND' && this.attempts > 0
+                ? 'The office server restarted and this room no longer exists. Please create or join a new room.'
+                : msg.message,
+          });
+          sessionStorage.removeItem('cs_room');
           this.close(false);
         } else {
           g.toast('warn', msg.message);

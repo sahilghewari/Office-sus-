@@ -86,8 +86,11 @@ export async function createGameServer(opts: CreateOptions = {}): Promise<GameSe
         root,
         prefix: '/',
         maxAge: '1h',
-        setHeaders: (res, path) => {
-          if (path.endsWith('index.html')) res.setHeader('Cache-Control', 'no-cache');
+        // @fastify/static ≥10 passes a Fastify-style reply here; older versions a raw ServerResponse.
+        setHeaders: (res: any, path: string) => {
+          if (!path.endsWith('index.html')) return;
+          if (typeof res.setHeader === 'function') res.setHeader('Cache-Control', 'no-cache');
+          else if (typeof res.header === 'function') res.header('Cache-Control', 'no-cache');
         },
       });
       app.setNotFoundHandler((req, reply) => {
