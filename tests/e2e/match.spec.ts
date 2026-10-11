@@ -39,6 +39,7 @@ test('landing → room → 4-player match → task → meeting → vote → game
   await solveOpenTask(page);
   await expect(page.getByTestId('task-success')).toBeVisible();
   await expect.poll(() => store(page, 'g.state.progress.done')).toBe(1);
+  await expect(page.getByTestId('task-overlay')).toBeHidden({ timeout: 5000 });
 
   // the manager eliminates Priya next to the browser player
   const [priya, marcus, chen] = bots;
