@@ -109,7 +109,7 @@ export function FilesTask({ data, submit, failures }: MinigameProps<{ files: { i
 const FOLDERS: { id: string; label: string; icon: string; color: string }[] = [
   { id: 'urgent', label: 'Urgent', icon: '🚨', color: 'btn-red' },
   { id: 'reply', label: 'Reply', icon: '↩️', color: '' },
-  { id: 'archive', label: 'Archive', icon: '🗄️', color: 'btn-ghost' },
+  { id: 'archive', label: 'Archive', icon: '🗄️', color: 'btn-purple' },
   { id: 'spam', label: 'Spam', icon: '🗑️', color: 'btn-orange' },
 ];
 
@@ -135,7 +135,7 @@ export function EmailsTask({ data, submit, failures }: MinigameProps<{ emails: {
       <ul className="overflow-y-auto border-r border-slate-200 bg-slate-50">
         {data.emails.map((e) => (
           <li key={e.id}>
-            <button className={`w-full border-b border-slate-200 px-3 py-2 text-left ${current?.id === e.id ? 'bg-blue-100' : ''} ${assign[e.id] ? 'opacity-40' : ''}`} onClick={() => !assign[e.id] && setOpen(e.id)}>
+            <button className={`w-full border-b border-slate-200 px-3 py-2 text-left ${current?.id === e.id ? 'bg-blue-100' : ''} ${assign[e.id] ? 'opacity-40' : ''}`} onClick={() => !assign[e.id] && setOpen(e.id)} data-testid={`email-item-${e.id}`}>
               <div className="truncate text-xs font-bold">{e.from}</div>
               <div className="truncate text-xs">{e.subject}</div>
               {assign[e.id] && <div className="text-[10px] font-bold text-corp-purple uppercase">→ {assign[e.id]}</div>}

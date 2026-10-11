@@ -11,6 +11,9 @@ import { AccountModal, HowToPlayModal, PrivacyModal, SettingsModal } from './ui/
 import { runIntent } from './networking/flow';
 import { connectToRoom } from './networking/connection';
 import { api, ensureSession } from './networking/api';
+import { Gallery } from './pages/Gallery';
+
+const GALLERY = import.meta.env.DEV && new URLSearchParams(location.search).has('gallery');
 
 export function App() {
   const screen = useApp((s) => s.screen);
@@ -23,6 +26,7 @@ export function App() {
 
   // Boot: resume a room after refresh, or follow an invite link.
   useEffect(() => {
+    if (GALLERY) return;
     void (async () => {
       const params = new URLSearchParams(location.search);
       const invite = params.get('room');
@@ -49,7 +53,8 @@ export function App() {
 
   return (
     <div className={`relative h-full w-full ${reduced ? 'reduce-motion' : ''}`}>
-      {screen === 'landing' && <Landing />}
+      {GALLERY && <Gallery />}
+      {!GALLERY && screen === 'landing' && <Landing />}
       {screen === 'customize' && (
         <CustomizeScreen
           onDone={() => {

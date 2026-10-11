@@ -114,6 +114,7 @@ class VoiceManager {
 
   setGains(g: Record<string, number>) {
     this.gains = g;
+    if (import.meta.env.DEV) (window as any).__voiceGains = g; // test visibility
     this.applyGains();
   }
 

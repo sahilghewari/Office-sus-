@@ -2,7 +2,7 @@
   "name": "corporate-sus",
   "private": true,
   "version": "1.0.0",
-  "description": "Corporate Sus — a 2.5D isometric multiplayer social-deduction game. Trust nobody. Especially management.",
+  "description": "Corporate Sus \u2014 a 2.5D isometric multiplayer social-deduction game. Trust nobody. Especially management.",
   "type": "module",
   "workspaces": [
     "packages/*",
@@ -25,7 +25,8 @@
     "test:e2e": "playwright test",
     "db:migrate": "npm run db:migrate -w @corp/server",
     "db:deploy": "npm run db:deploy -w @corp/server",
-    "loadtest": "tsx tests/load/loadtest.ts"
+    "loadtest": "tsx tests/load/loadtest.ts",
+    "bots": "tsx scripts/bots.ts"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.0",

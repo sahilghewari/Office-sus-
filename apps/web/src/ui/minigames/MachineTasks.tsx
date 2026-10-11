@@ -440,7 +440,7 @@ export function ExcelTask({ data, submit, failures }: MinigameProps<{ cols: stri
           </thead>
           <tbody>
             {data.rows.map((r, ri) => (
-              <tr key={r.label} className={rowOk(ri) ? 'bg-emerald-50' : ''}>
+              <tr key={r.label} className={r.vals.includes(null) && rowOk(ri) ? 'bg-emerald-50' : ''}>
                 <td className="border border-slate-200 px-2 py-1 font-sans font-semibold">{r.label}</td>
                 {r.vals.map((v, ci) => (
                   <td key={ci} className="border border-slate-200 px-1 py-0.5 text-center">
@@ -459,7 +459,7 @@ export function ExcelTask({ data, submit, failures }: MinigameProps<{ cols: stri
                   </td>
                 ))}
                 <td className="border border-slate-200 px-2 py-1 text-center font-bold">
-                  {r.total} {rowOk(ri) && '✓'}
+                  {r.total} {r.vals.includes(null) && rowOk(ri) && '✓'}
                 </td>
               </tr>
             ))}
@@ -478,7 +478,7 @@ export function ExcelTask({ data, submit, failures }: MinigameProps<{ cols: stri
 
 export function IdScanTask({ data, submit, failures }: MinigameProps<{ name: string; title: string; code: string }>) {
   const area = useRef<HTMLDivElement>(null);
-  const [pos, setPos] = useState({ x: 30, y: 60 });
+  const [pos, setPos] = useState({ x: 110, y: 112 });
   const [drag, setDrag] = useState<{ dx: number; dy: number } | null>(null);
   const [hold, setHold] = useState(0);
   const [scanned, setScanned] = useState(false);
@@ -562,7 +562,7 @@ export function IdScanTask({ data, submit, failures }: MinigameProps<{ name: str
         >
           <span className="text-sm text-mist">Badge read. Enter the employee number to confirm:</span>
           <input className="input font-mono w-28 text-center text-lg" value={code} maxLength={4} inputMode="numeric" onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))} autoFocus aria-label="Employee number" data-testid="badge-code" />
-          <button className="btn btn-yellow btn-sm" type="submit" disabled={code.length !== 4}>
+          <button className="btn btn-yellow btn-sm" type="submit" disabled={code.length !== 4} data-testid="badge-verify">
             Verify
           </button>
         </form>

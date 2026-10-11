@@ -195,7 +195,7 @@ function PlayerCard(props: {
   const { p } = props;
   return (
     <div
-      className={`relative flex flex-col items-center rounded-2xl border-2 p-3 transition ${p.dead ? 'border-white/5 bg-black/30 opacity-50 grayscale' : props.selected ? 'border-corp-yellow bg-corp-yellow/10' : props.selectable ? 'cursor-pointer border-white/10 bg-white/5 hover:-translate-y-1 hover:border-corp-cyan' : 'border-white/10 bg-white/5'}`}
+      className={`relative flex flex-col items-center rounded-2xl border-2 bg-[radial-gradient(circle_at_50%_35%,rgba(61,123,255,0.18),transparent_70%)] p-3 transition ${p.dead ? 'border-white/5 bg-black/30 opacity-50 grayscale' : props.selected ? 'border-corp-yellow bg-corp-yellow/10' : props.selectable ? 'cursor-pointer border-white/10 bg-white/5 hover:-translate-y-1 hover:border-corp-cyan' : 'border-white/10 bg-white/5'}`}
       onClick={props.selectable ? props.onSelect : undefined}
       role={props.selectable ? 'button' : undefined}
       tabIndex={props.selectable ? 0 : undefined}
@@ -207,7 +207,7 @@ function PlayerCard(props: {
       {props.voted && !props.showResults && <span className="chip absolute top-2 right-2 bg-corp-mint text-[10px] text-ink">voted</span>}
       {props.myVote && !props.showResults && <span className="chip absolute top-8 right-2 bg-corp-yellow text-[10px] text-ink">your vote</span>}
       <div className={p.dead ? '' : 'anim-bob'} style={{ animationDelay: `${(p.id.charCodeAt(0) % 10) / 10}s` }}>
-        <Avatar appearance={p.appearance} size={64} expression={props.expression} />
+        <Avatar appearance={p.appearance} size={96} expression={props.expression} />
       </div>
       <div className={`font-display mt-1 max-w-full truncate text-lg font-semibold ${props.teammate ? 'text-red-300' : ''}`}>
         {p.name}

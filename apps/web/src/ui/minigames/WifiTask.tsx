@@ -68,7 +68,7 @@ export function WifiTask({ data, submit }: MinigameProps<{ left: string[]; right
           </text>
           {data.right.map((c, i) => (
             <g key={c}>
-              <rect x={W - 82} y={rowY(i) - 16} width={44} height={32} rx={6} fill={bad === i ? '#ef3e4a' : '#151a2a'} stroke={HEX[c]} strokeWidth={3} />
+              <rect x={W - 82} y={rowY(i) - 16} width={44} height={32} rx={6} fill={bad === i ? '#ef3e4a' : '#151a2a'} stroke={HEX[c]} strokeWidth={3} data-testid={`port-${c}`} />
               <rect x={W - 70} y={rowY(i) - 6} width={20} height={12} rx={2} fill="#000" />
               <circle cx={W - 24} cy={rowY(i)} r={5} fill={Object.values(links).includes(i) ? '#3ddc97' : '#3a3f55'} />
             </g>

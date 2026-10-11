@@ -28,7 +28,16 @@ export function TaskOverlay() {
     }
   }, [task?.result, set]);
   useEffect(() => setDone(null), [task?.session]);
-  const submit = useMemo(() => (answer: unknown) => task && send({ t: 'taskSubmit', session: task.session, answer }), [task?.session]);
+  const submit = useMemo(
+    () => (answer: unknown) => {
+      if (!task) return;
+      // dev gallery verifies locally; real games always go through the server
+      if (import.meta.env.DEV && task.session.startsWith('gallery-')) return (window as any).__gallerySubmit?.(answer);
+      send({ t: 'taskSubmit', session: task.session, answer });
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [task?.session],
+  );
   if (!task) return null;
   const info = TASK_INFO[task.taskType];
   const Comp = { wifi: WifiTask, expense: ExpenseTask, coffee: CoffeeTask, printer: PrinterTask, meeting: MeetingTask, files: FilesTask, emails: EmailsTask, server: ServerTask, excel: ExcelTask, idscan: IdScanTask }[task.taskType];
