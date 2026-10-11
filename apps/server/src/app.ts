@@ -46,14 +46,15 @@ export async function createGameServer(opts: CreateOptions = {}): Promise<GameSe
 
   const app = Fastify({ logger: false, bodyLimit: 16 * 1024, trustProxy: true });
   await app.register(cors, { origin: config.production ? config.publicOrigin : true, credentials: false });
-  await app.register(rateLimit, { global: true, max: 300, timeWindow: '1 minute' });
+  await app.register(rateLimit, { global: true, max: 300 * config.rateLimitScale, timeWindow: '1 minute' });
+  if (config.rateLimitScale > 1) log(`⚠ Rate limits scaled ×${config.rateLimitScale} (load testing).`);
   app.addHook('onSend', async (_req, reply, payload) => {
     reply.header('X-Content-Type-Options', 'nosniff');
     reply.header('Referrer-Policy', 'strict-origin-when-cross-origin');
     reply.header('X-Frame-Options', 'DENY');
     return payload;
   });
-  registerRoutes(app, { tokens, store, manager, voice, directory, startedAt: Date.now() });
+  registerRoutes(app, { tokens, store, manager, voice, directory, startedAt: Date.now(), rateLimitScale: config.rateLimitScale });
 
   if (config.serveWeb) {
     const here = dirname(fileURLToPath(import.meta.url));
@@ -80,6 +81,7 @@ export async function createGameServer(opts: CreateOptions = {}): Promise<GameSe
     allowedOrigins: config.publicOrigin,
     enforceOrigin: config.production,
     log,
+    rateLimitScale: config.rateLimitScale,
   });
   await app.listen({ port: config.port, host: config.host });
   const addr = app.server.address();

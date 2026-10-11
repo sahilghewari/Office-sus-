@@ -27,6 +27,8 @@ export interface Config {
   livekit: { url: string; apiKey: string; apiSecret: string } | null;
   serveWeb: boolean;
   testHooks: boolean;
+  /** Multiplies per-IP connection/API limits (load testing from one machine). */
+  rateLimitScale: number;
 }
 
 export function loadConfig(overrides: Partial<Config> = {}): Config {
@@ -55,6 +57,7 @@ export function loadConfig(overrides: Partial<Config> = {}): Config {
     livekit: lk,
     serveWeb: env.SERVE_WEB === 'true',
     testHooks,
+    rateLimitScale: Math.max(1, Number(env.RATE_LIMIT_SCALE ?? 1) || 1),
     ...overrides,
   };
 }

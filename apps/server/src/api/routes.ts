@@ -15,6 +15,7 @@ export interface ApiDeps {
   voice: VoiceService;
   directory: RoomDirectory;
   startedAt: number;
+  rateLimitScale?: number;
 }
 
 const SESSION_TTL_MS = 1000 * 60 * 60 * 24 * 30;
@@ -52,7 +53,9 @@ export function registerRoutes(app: FastifyInstance, d: ApiDeps) {
       stats: await d.store.getStats(userId),
     };
   };
-  const authLimit = { config: { rateLimit: { max: 10, timeWindow: '1 minute' } } };
+  const k = d.rateLimitScale ?? 1;
+  const lim = (max: number) => ({ config: { rateLimit: { max: max * k, timeWindow: '1 minute' } } });
+  const authLimit = lim(10);
 
   app.get('/api/health', async () => {
     const totals = d.manager.totals();
@@ -77,7 +80,7 @@ export function registerRoutes(app: FastifyInstance, d: ApiDeps) {
     persistentAccounts: d.store.kind === 'postgres',
   }));
 
-  app.post('/api/auth/guest', { config: { rateLimit: { max: 30, timeWindow: '1 minute' } } }, async () => ({
+  app.post('/api/auth/guest', lim(30), async () => ({
     token: d.tokens.guest(),
     kind: 'guest',
   }));
@@ -152,14 +155,14 @@ export function registerRoutes(app: FastifyInstance, d: ApiDeps) {
     return { ok: true };
   });
 
-  app.post('/api/rooms', { config: { rateLimit: { max: 10, timeWindow: '1 minute' } } }, async (req, reply) => {
+  app.post('/api/rooms', lim(10), async (req, reply) => {
     if (!authOf(req)) return reply.code(401).send({ error: 'Session required.' });
     const isPublic = (req.body as any)?.isPublic === true;
     const room = await d.manager.createRoom(isPublic);
     return { code: room.code };
   });
 
-  app.get<{ Params: { code: string } }>('/api/rooms/:code', { config: { rateLimit: { max: 30, timeWindow: '1 minute' } } }, async (req, reply) => {
+  app.get<{ Params: { code: string } }>('/api/rooms/:code', lim(30), async (req, reply) => {
     const code = req.params.code.toUpperCase();
     if (!ROOM_CODE_RE.test(code)) return reply.code(404).send({ error: 'Invalid code.' });
     const local = d.manager.get(code);
@@ -169,7 +172,7 @@ export function registerRoutes(app: FastifyInstance, d: ApiDeps) {
     return { code, phase: l.phase, players: l.players, capacity: l.capacity, instanceUrl: l.instanceUrl };
   });
 
-  app.post('/api/matchmake', { config: { rateLimit: { max: 20, timeWindow: '1 minute' } } }, async (req, reply) => {
+  app.post('/api/matchmake', lim(20), async (req, reply) => {
     if (!authOf(req)) return reply.code(401).send({ error: 'Session required.' });
     return d.manager.quickMatch();
   });

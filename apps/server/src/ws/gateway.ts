@@ -16,6 +16,7 @@ export interface GatewayOptions {
   allowedOrigins: string[];
   enforceOrigin: boolean;
   log: (m: string) => void;
+  rateLimitScale?: number;
 }
 
 const MAX_MESSAGE_BYTES = 16 * 1024;
@@ -28,7 +29,8 @@ export function clientIp(req: IncomingMessage): string {
 
 export function attachGateway(o: GatewayOptions) {
   const wss = new WebSocketServer({ noServer: true, maxPayload: MAX_MESSAGE_BYTES, perMessageDeflate: false });
-  const connectLimiter = new KeyedLimiter(30, 0.5); // per IP
+  const k = o.rateLimitScale ?? 1;
+  const connectLimiter = new KeyedLimiter(30 * k, 0.5 * k); // per IP
   // Failed joins per IP (wrong/full codes) — makes brute-forcing private room codes impractical.
   const failedJoins = new KeyedLimiter(10, 0.1);
 

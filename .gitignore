@@ -8,4 +8,3 @@ playwright-report
 test-results
 .DS_Store
 apps/server/prisma/dev.db
-tests/load/results-*.json

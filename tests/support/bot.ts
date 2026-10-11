@@ -36,6 +36,7 @@ export class Bot {
   private waiters: { pred: (m: ServerMessage) => boolean; res: (m: ServerMessage) => void }[] = [];
   closed = false;
   token = '';
+  snapDelays: number[] = [];
 
   constructor(
     readonly baseUrl: string,
@@ -66,7 +67,11 @@ export class Bot {
       this.bytes += text.length;
       this.received++;
       const m = JSON.parse(text) as ServerMessage;
-      if (m.t === 'snap') this.snap = m;
+      if (m.t === 'snap') {
+        this.snap = m;
+        // one-way delay from server send → client receive (same-machine clocks in load tests)
+        if (this.snapDelays.length < 4000) this.snapDelays.push(Date.now() - m.serverTime);
+      }
       else {
         if (m.t === 'state') this.state = m;
         if (m.t === 'welcome') this.id = m.you;

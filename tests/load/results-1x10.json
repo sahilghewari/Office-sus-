@@ -1,0 +1,39 @@
+{
+  "config": {
+    "rooms": 1,
+    "playersPerRoom": 10,
+    "seconds": 25,
+    "totalClients": 10
+  },
+  "machine": {
+    "platform": "darwin",
+    "arch": "arm64",
+    "node": "v22.23.2",
+    "cpus": 10
+  },
+  "serverCpuPercent": {
+    "avg": 4.1,
+    "max": 9.8
+  },
+  "serverRssMb": {
+    "avg": 115,
+    "max": 126
+  },
+  "tick": {
+    "count": 703,
+    "avgMs": 0.451,
+    "maxMs": 3.49
+  },
+  "messagesToClientsPerSec": 203,
+  "kbPerSecPerClient": 5,
+  "snapshotDelayMs": {
+    "p50": 0,
+    "p95": 1,
+    "p99": 3
+  },
+  "connectFailures": 0,
+  "droppedConnections": 0,
+  "phases": {
+    "ACTIVE": 10
+  }
+}
