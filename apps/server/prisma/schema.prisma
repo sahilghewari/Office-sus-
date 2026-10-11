@@ -1,0 +1,100 @@
+// Corporate Sus — persistent data only. Live room state never touches the DB.
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String        @id @default(uuid())
+  username     String        @unique
+  usernameKey  String        @unique // lower-cased for case-insensitive uniqueness
+  passwordHash String
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  profile      Profile?
+  stats        PlayerStats?
+  sessions     Session[]
+  matchPlayers MatchPlayer[]
+  reportsFiled Report[]      @relation("reporter")
+}
+
+model Session {
+  id        String   @id // sha256 of the session secret, never the secret itself
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+
+  @@index([userId])
+}
+
+model Profile {
+  userId     String @id
+  user       User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  color      String @default("blue")
+  shirt      String @default("white")
+  skin       String @default("s2")
+  hairstyle  String @default("short")
+  hairColor  String @default("brown")
+  outfit     String @default("suit")
+  accessory  String @default("badge")
+}
+
+model PlayerStats {
+  userId         String @id
+  user           User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  gamesPlayed    Int    @default(0)
+  wins           Int    @default(0)
+  losses         Int    @default(0)
+  employeeWins   Int    @default(0)
+  managerWins    Int    @default(0)
+  tasksCompleted Int    @default(0)
+  eliminations   Int    @default(0)
+}
+
+model Match {
+  id           String        @id @default(uuid())
+  roomCode     String
+  createdAt    DateTime      @default(now())
+  startedAt    DateTime
+  endedAt      DateTime
+  winningTeam  String
+  reason       String
+  totalPlayers Int
+  durationMs   Int
+  players      MatchPlayer[]
+}
+
+model MatchPlayer {
+  id             String  @id @default(uuid())
+  matchId        String
+  match          Match   @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  userId         String?
+  user           User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+  displayName    String
+  role           String
+  won            Boolean
+  tasksCompleted Int
+  eliminations   Int
+
+  @@index([matchId])
+  @@index([userId])
+}
+
+model Report {
+  id           String   @id @default(uuid())
+  reporterId   String?
+  reporter     User?    @relation("reporter", fields: [reporterId], references: [id], onDelete: SetNull)
+  reporterName String
+  reportedId   String   // session identity of the reported player (may be a guest)
+  reportedName String
+  roomCode     String
+  category     String
+  note         String?
+  status       String   @default("open")
+  createdAt    DateTime @default(now())
+}
