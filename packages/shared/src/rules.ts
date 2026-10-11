@@ -77,7 +77,11 @@ export interface TallyResult {
  * Rules: a unique plurality on a player ejects them. A tie (including a tie
  * with skip) or a leading skip ejects nobody. No votes → nobody.
  */
-export function tallyVotes(votes: Map<string, string>, eligibleVoters: Set<string>, eligibleTargets: Set<string>): TallyResult {
+export function tallyVotes(
+  votes: Map<string, string>,
+  eligibleVoters: Set<string>,
+  eligibleTargets: Set<string>,
+): TallyResult {
   const counts: Record<string, number> = {};
   for (const [voter, target] of votes) {
     if (!eligibleVoters.has(voter)) continue;
@@ -105,13 +109,23 @@ const clamp = (v: unknown, min: number, max: number, def: number, step = 1): num
 };
 
 /** Sanitise host-submitted settings into a valid, balanced configuration. */
-export function sanitizeSettings(input: Partial<GameSettings>, current: GameSettings = DEFAULT_SETTINGS, playerCount = 0): GameSettings {
+export function sanitizeSettings(
+  input: Partial<GameSettings>,
+  current: GameSettings = DEFAULT_SETTINGS,
+  playerCount = 0,
+): GameSettings {
   const s: GameSettings = { ...current };
   const i = input as Record<string, unknown>;
-  s.maxPlayers = clamp(i.maxPlayers ?? s.maxPlayers, Math.max(MIN_PLAYERS, playerCount), MAX_PLAYERS, s.maxPlayers);
+  s.maxPlayers = clamp(
+    i.maxPlayers ?? s.maxPlayers,
+    Math.max(MIN_PLAYERS, playerCount),
+    MAX_PLAYERS,
+    s.maxPlayers,
+  );
   s.managers = clamp(i.managers ?? s.managers, 0, 3, s.managers);
   s.killCooldown = clamp(i.killCooldown ?? s.killCooldown, 10, 60, s.killCooldown, 5);
-  if (i.killRange === 'short' || i.killRange === 'normal' || i.killRange === 'long') s.killRange = i.killRange;
+  if (i.killRange === 'short' || i.killRange === 'normal' || i.killRange === 'long')
+    s.killRange = i.killRange;
   s.tasksPerPlayer = clamp(i.tasksPerPlayer ?? s.tasksPerPlayer, 1, 6, s.tasksPerPlayer);
   s.playerSpeed = clamp(i.playerSpeed ?? s.playerSpeed, 0.75, 1.5, s.playerSpeed, 0.05);
   s.discussionTime = clamp(i.discussionTime ?? s.discussionTime, 0, 180, s.discussionTime, 5);

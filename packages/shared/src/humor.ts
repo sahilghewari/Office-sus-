@@ -17,7 +17,7 @@ export const TASK_DONE_LINES = [
   'Management has acknowledged your existence.',
   'Great work. No raise approved.',
   'Logged. Nobody will ever read it.',
-  'Your contribution has been added to someone else\'s slide deck.',
+  "Your contribution has been added to someone else's slide deck.",
   'Excellent. Here is a pizza party (pizza not included).',
   'Task complete. Please enjoy this complimentary sense of purpose.',
 ];
@@ -33,7 +33,7 @@ export const TERMINATION_LINES = [
 export const NO_TERMINATION_LINES = [
   'Management has scheduled another meeting.',
   'The committee will form a sub-committee.',
-  'Let\'s circle back on this next quarter.',
+  "Let's circle back on this next quarter.",
 ];
 
 export const MEETING_LINES = [

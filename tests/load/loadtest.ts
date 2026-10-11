@@ -24,7 +24,17 @@ const BASE = `http://127.0.0.1:${PORT}`;
 
 async function main() {
   const srv = spawn('npx', ['tsx', 'apps/server/src/index.ts'], {
-    env: { ...process.env, PORT: String(PORT), HOST: '127.0.0.1', DATABASE_URL: '', REDIS_URL: '', LIVEKIT_URL: '', ENABLE_TEST_HOOKS: 'true', NODE_ENV: 'development', RATE_LIMIT_SCALE: '1000' },
+    env: {
+      ...process.env,
+      PORT: String(PORT),
+      HOST: '127.0.0.1',
+      DATABASE_URL: '',
+      REDIS_URL: '',
+      LIVEKIT_URL: '',
+      ENABLE_TEST_HOOKS: 'true',
+      NODE_ENV: 'development',
+      RATE_LIMIT_SCALE: '1000',
+    },
     stdio: ['ignore', 'pipe', 'pipe'],
   });
   let serverPid = 0;
@@ -65,7 +75,9 @@ async function main() {
     host.send({ t: 'start' });
     bots.push(...roomBots);
   }
-  console.log(`connected ${bots.length} bots in ${ROOMS} rooms (${Date.now() - t0} ms, ${failures} failures)`);
+  console.log(
+    `connected ${bots.length} bots in ${ROOMS} rooms (${Date.now() - t0} ms, ${failures} failures)`,
+  );
   await sleep(9000); // STARTING + ROLE_REVEAL
 
   // behaviour: wander between random stations at 20 Hz (realistic input load)
@@ -89,7 +101,11 @@ async function main() {
   for (let s = 0; s < SECONDS; s++) {
     await sleep(1000);
     try {
-      const [cpu, rss] = execSync(`ps -o %cpu=,rss= -p ${serverPid}`).toString().trim().split(/\s+/).map(Number);
+      const [cpu, rss] = execSync(`ps -o %cpu=,rss= -p ${serverPid}`)
+        .toString()
+        .trim()
+        .split(/\s+/)
+        .map(Number);
       samples.push({ cpu, rssMb: Math.round(rss / 1024) });
     } catch {}
   }
@@ -106,9 +122,20 @@ async function main() {
   const avg = (xs: number[]) => (xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : 0);
   const result = {
     config: { rooms: ROOMS, playersPerRoom: PLAYERS, seconds: SECONDS, totalClients: bots.length },
-    machine: { platform: process.platform, arch: process.arch, node: process.version, cpus: (await import('node:os')).cpus().length },
-    serverCpuPercent: { avg: +avg(samples.map((s) => s.cpu)).toFixed(1), max: Math.max(...samples.map((s) => s.cpu)) },
-    serverRssMb: { avg: Math.round(avg(samples.map((s) => s.rssMb))), max: Math.max(...samples.map((s) => s.rssMb)) },
+    machine: {
+      platform: process.platform,
+      arch: process.arch,
+      node: process.version,
+      cpus: (await import('node:os')).cpus().length,
+    },
+    serverCpuPercent: {
+      avg: +avg(samples.map((s) => s.cpu)).toFixed(1),
+      max: Math.max(...samples.map((s) => s.cpu)),
+    },
+    serverRssMb: {
+      avg: Math.round(avg(samples.map((s) => s.rssMb))),
+      max: Math.max(...samples.map((s) => s.rssMb)),
+    },
     tick: health.tick,
     messagesToClientsPerSec: Math.round(msgs / SECONDS),
     kbPerSecPerClient: +(bytes / SECONDS / 1024 / bots.length).toFixed(1),

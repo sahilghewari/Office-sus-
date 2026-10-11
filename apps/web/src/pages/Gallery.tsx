@@ -13,9 +13,21 @@ export function Gallery() {
   const [seed, setSeed] = useState(1);
   const [log, setLog] = useState<string[]>([]);
   const set = useGame((s) => s.set);
-  const puzzles = useMemo(() => Object.fromEntries(TASK_TYPES.map((t, i) => [t, generatePuzzle(t, createRng(seed * 100 + i))])), [seed]);
+  const puzzles = useMemo(
+    () => Object.fromEntries(TASK_TYPES.map((t, i) => [t, generatePuzzle(t, createRng(seed * 100 + i))])),
+    [seed],
+  );
   const open = (t: TaskType) => {
-    set({ task: { session: `gallery-${t}-${seed}`, taskType: t, station: '', data: puzzles[t].data, fake: false, result: null } });
+    set({
+      task: {
+        session: `gallery-${t}-${seed}`,
+        taskType: t,
+        station: '',
+        data: puzzles[t].data,
+        fake: false,
+        result: null,
+      },
+    });
   };
   // Intercept submissions locally (no server in the gallery).
   (window as any).__gallerySubmit = (answer: unknown) => {
@@ -23,12 +35,23 @@ export function Gallery() {
     if (!task) return;
     const ok = verifyAnswer(puzzles[task.taskType], answer);
     setLog((l) => [`${task.taskType}: ${ok ? 'ACCEPTED' : 'rejected'}`, ...l].slice(0, 12));
-    set({ task: { ...task, result: { ok, line: ok ? 'Verified by the shared verifier.' : 'Rejected by the verifier.', n: (task.result?.n ?? 0) + 1 } } });
+    set({
+      task: {
+        ...task,
+        result: {
+          ok,
+          line: ok ? 'Verified by the shared verifier.' : 'Rejected by the verifier.',
+          n: (task.result?.n ?? 0) + 1,
+        },
+      },
+    });
   };
   return (
     <div className="relative h-full overflow-auto bg-navy-950 p-8">
       <h1 className="font-display text-3xl font-bold">Minigame gallery (dev)</h1>
-      <p className="text-mist">Seed {seed}. Each button opens the real minigame UI with a freshly generated puzzle.</p>
+      <p className="text-mist">
+        Seed {seed}. Each button opens the real minigame UI with a freshly generated puzzle.
+      </p>
       <div className="mt-4 flex flex-wrap gap-2">
         {TASK_TYPES.map((t) => (
           <button key={t} className="btn" onClick={() => open(t)} data-testid={`gallery-${t}`}>

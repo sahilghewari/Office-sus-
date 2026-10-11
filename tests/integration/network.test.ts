@@ -21,7 +21,11 @@ afterAll(async () => {
 });
 
 const post = (path: string, body: unknown, token?: string) =>
-  fetch(base + path, { method: 'POST', headers: { 'content-type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) }, body: JSON.stringify(body) });
+  fetch(base + path, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+    body: JSON.stringify(body),
+  });
 
 async function lobby(n: number, opts: { managers?: number[]; tasks?: number } = {}) {
   const hostTok = await Bot.token(base);
@@ -30,8 +34,12 @@ async function lobby(n: number, opts: { managers?: number[]; tasks?: number } = 
   bots.push(await new Bot(base, 'Host', 0).connect(code, hostTok));
   for (let i = 1; i < n; i++) bots.push(await new Bot(base, `Bot${i}`, i).connect(code));
   const [host] = bots;
-  host.send({ t: 'settings', settings: { tasksPerPlayer: opts.tasks ?? 1, discussionTime: 0, votingTime: 15 } });
-  if (opts.managers) host.send({ t: 'test', cmd: 'forceManagers', args: { ids: opts.managers.map((i) => bots[i].id) } });
+  host.send({
+    t: 'settings',
+    settings: { tasksPerPlayer: opts.tasks ?? 1, discussionTime: 0, votingTime: 15 },
+  });
+  if (opts.managers)
+    host.send({ t: 'test', cmd: 'forceManagers', args: { ids: opts.managers.map((i) => bots[i].id) } });
   for (const b of bots.slice(1)) b.send({ t: 'ready', ready: true });
   await sleep(200);
   return { code, bots, host };
@@ -57,12 +65,20 @@ describe('HTTP API', () => {
   });
 
   it('registration, login, profile, logout and deletion', async () => {
-    const reg = await post('/api/auth/register', { username: 'KPI Kevin', password: 'synergy123', appearance: DEFAULT_APPEARANCE });
+    const reg = await post('/api/auth/register', {
+      username: 'KPI Kevin',
+      password: 'synergy123',
+      appearance: DEFAULT_APPEARANCE,
+    });
     expect(reg.status).toBe(200);
     const { token } = await reg.json();
-    expect((await post('/api/auth/register', { username: 'kpi kevin', password: 'synergy123' })).status).toBe(409);
+    expect((await post('/api/auth/register', { username: 'kpi kevin', password: 'synergy123' })).status).toBe(
+      409,
+    );
     expect((await post('/api/auth/register', { username: 'Weak', password: 'short' })).status).toBe(400);
-    expect((await post('/api/auth/login', { username: 'KPI Kevin', password: 'wrong-pass1' })).status).toBe(401);
+    expect((await post('/api/auth/login', { username: 'KPI Kevin', password: 'wrong-pass1' })).status).toBe(
+      401,
+    );
     const login = await post('/api/auth/login', { username: 'kpi kevin', password: 'synergy123' });
     expect(login.status).toBe(200);
     const t2 = (await login.json()).token;
@@ -75,7 +91,11 @@ describe('HTTP API', () => {
     expect(rec!.passwordHash.startsWith('scrypt$')).toBe(true);
     await post('/api/auth/logout', {}, t2);
     expect((await fetch(base + '/api/me', { headers: { Authorization: `Bearer ${t2}` } })).status).toBe(401);
-    const del = await fetch(base + '/api/me', { method: 'DELETE', headers: { 'content-type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify({ password: 'synergy123' }) });
+    const del = await fetch(base + '/api/me', {
+      method: 'DELETE',
+      headers: { 'content-type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ password: 'synergy123' }),
+    });
     expect(del.status).toBe(200);
     expect(await server.store.findUserByName('KPI Kevin')).toBeNull();
   });
@@ -100,7 +120,14 @@ describe('WebSocket security', () => {
   it('rejects invalid tokens, codes, versions and garbage', async () => {
     const tok = await Bot.token(base);
     const code = await Bot.createRoom(base, tok);
-    const hello = { t: 'hello', v: PROTOCOL_VERSION, token: tok, code, name: 'Eve', appearance: DEFAULT_APPEARANCE };
+    const hello = {
+      t: 'hello',
+      v: PROTOCOL_VERSION,
+      token: tok,
+      code,
+      name: 'Eve',
+      appearance: DEFAULT_APPEARANCE,
+    };
     expect((await rawHello({ ...hello, token: 'x'.repeat(40) })).code).toBe('AUTH');
     expect((await rawHello({ ...hello, code: 'ZZZZZZ' })).code).toBe('ROOM_NOT_FOUND');
     expect((await rawHello({ ...hello, v: 1 })).code).toBe('VERSION');
@@ -263,5 +290,4 @@ describe('multiplayer over real sockets', () => {
     }
     expect(limited).toBe(true);
   });
-
 });

@@ -41,7 +41,13 @@ function nearestWalkable(g: Uint8Array, gx: number, gy: number): [number, number
   return null;
 }
 
-export function findPath(ax: number, ay: number, bx: number, by: number, cols: ColliderIndex = createColliders()): [number, number][] | null {
+export function findPath(
+  ax: number,
+  ay: number,
+  bx: number,
+  by: number,
+  cols: ColliderIndex = createColliders(),
+): [number, number][] | null {
   const g = ensure(cols);
   const s = nearestWalkable(g, Math.floor(ax * RES), Math.floor(ay * RES));
   const e = nearestWalkable(g, Math.floor(bx * RES), Math.floor(by * RES));
@@ -110,7 +116,8 @@ export function findPath(ax: number, ay: number, bx: number, by: number, cols: C
   }
   if (came[goal] === -1 && goal !== start) return null;
   const path: [number, number][] = [];
-  for (let n = goal; n !== -1; n = came[n]) path.push([(n % W + 0.5) / RES, (Math.floor(n / W) + 0.5) / RES]);
+  for (let n = goal; n !== -1; n = came[n])
+    path.push([((n % W) + 0.5) / RES, (Math.floor(n / W) + 0.5) / RES]);
   path.reverse();
   // string-pull: drop collinear points
   const out: [number, number][] = [];

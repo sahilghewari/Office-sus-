@@ -6,7 +6,18 @@ import { CHAT_MAX_LEN } from '@corp/shared';
  * Rendering on the client is always plain text (React escapes it).
  */
 const BLOCKED = [
-  'fuck', 'shit', 'cunt', 'bitch', 'asshole', 'nigger', 'nigga', 'faggot', 'retard', 'whore', 'slut', 'kys',
+  'fuck',
+  'shit',
+  'cunt',
+  'bitch',
+  'asshole',
+  'nigger',
+  'nigga',
+  'faggot',
+  'retard',
+  'whore',
+  'slut',
+  'kys',
 ];
 const BLOCKED_RE = new RegExp(`\\b(${BLOCKED.join('|')})\\w*`, 'gi');
 

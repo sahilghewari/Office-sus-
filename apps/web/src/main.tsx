@@ -20,7 +20,9 @@ createRoot(document.getElementById('root')!).render(
 
 // Dev/test introspection (stripped from production builds).
 if (import.meta.env.DEV) {
-  void Promise.all([import('./stores/game'), import('./stores/app'), import('./networking/connection')]).then(([g, a, c]) => {
-    (window as any).__cs = { useGame: g.useGame, useApp: a.useApp, getConnection: c.getConnection };
-  });
+  void Promise.all([import('./stores/game'), import('./stores/app'), import('./networking/connection')]).then(
+    ([g, a, c]) => {
+      (window as any).__cs = { useGame: g.useGame, useApp: a.useApp, getConnection: c.getConnection };
+    },
+  );
 }

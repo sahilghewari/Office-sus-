@@ -19,7 +19,7 @@ export default defineConfig({
     chunkSizeWarningLimit: 2000,
     rollupOptions: {
       output: {
-        manualChunks: { phaser: ['phaser'], livekit: ['livekit-client'], react: ['react', 'react-dom'] },
+        manualChunks: { react: ['react', 'react-dom'] },
       },
     },
   },

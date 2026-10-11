@@ -92,7 +92,6 @@ import {
   type SnapPlayer,
   type StateMsg,
   type Station,
-  type Team,
   type WinResult,
 } from '@corp/shared';
 import { TokenBucket } from '../security/rateLimit';
@@ -318,7 +317,8 @@ export class GameRoom {
     conn: Conn,
   ): { error: string; message: string } | { player: Player; reconnected: boolean } {
     if (this.disposed) return { error: 'ROOM_CLOSED', message: 'This office has closed.' };
-    if (this.kicked.has(identity)) return { error: 'KICKED', message: 'You were removed from this lobby by the host.' };
+    if (this.kicked.has(identity))
+      return { error: 'KICKED', message: 'You were removed from this lobby by the host.' };
     const existing = this.players.get(identity);
     if (existing) {
       // Reconnect (or second tab with the same identity): newest connection wins.
@@ -342,7 +342,8 @@ export class GameRoom {
     }
     const lobbyFull = this.playerCount >= this.settings.maxPlayers;
     const spectator = this.phase !== 'WAITING' || lobbyFull;
-    if (spectator && this.players.size >= MAX_PLAYERS + 6) return { error: 'ROOM_FULL', message: 'This office is at capacity.' };
+    if (spectator && this.players.size >= MAX_PLAYERS + 6)
+      return { error: 'ROOM_FULL', message: 'This office is at capacity.' };
     if (this.phase === 'WAITING' && lobbyFull) return { error: 'ROOM_FULL', message: 'This lobby is full.' };
     const p = new Player(identity, name, this.uniqueAppearance(appearance), registered, this.now);
     p.conn = conn;
@@ -360,7 +361,10 @@ export class GameRoom {
     this.byPublic.set(p.publicId, p);
     if (!this.hostId && !spectator) this.hostId = identity;
     this.sendWelcome(p, false);
-    this.systemChat(spectator ? `${p.name} is spectating.` : `${p.name} joined the company.`, this.phase === 'WAITING' ? 'lobby' : 'ghost');
+    this.systemChat(
+      spectator ? `${p.name} is spectating.` : `${p.name} joined the company.`,
+      this.phase === 'WAITING' ? 'lobby' : 'ghost',
+    );
     this.markDirty();
     return { player: p, reconnected: false };
   }
@@ -380,7 +384,9 @@ export class GameRoom {
   }
 
   private uniqueAppearance(a: Appearance, self?: Player): Appearance {
-    const taken = new Set([...this.players.values()].filter((p) => p !== self && !p.spectator).map((p) => p.appearance.color));
+    const taken = new Set(
+      [...this.players.values()].filter((p) => p !== self && !p.spectator).map((p) => p.appearance.color),
+    );
     if (!taken.has(a.color)) return a;
     const free = CHARACTER_COLORS.find((c) => !taken.has(c.id));
     return { ...a, color: free ? free.id : a.color };
@@ -429,14 +435,19 @@ export class GameRoom {
     this.byPublic.delete(p.publicId);
     if (reason === 'kicked') this.kicked.add(p.identity);
     if (this.hostId === p.identity) this.assignHost();
-    this.systemChat(`${p.name} ${reason === 'kicked' ? 'was escorted out by security' : 'left the company'}.`, 'lobby');
+    this.systemChat(
+      `${p.name} ${reason === 'kicked' ? 'was escorted out by security' : 'left the company'}.`,
+      'lobby',
+    );
     this.markDirty();
   }
 
   private assignHost() {
-    const candidates = this.activePlayers.filter((p) => p.connected && !p.left).sort((a, b) => a.joinedAt - b.joinedAt);
+    const candidates = this.activePlayers
+      .filter((p) => p.connected && !p.left)
+      .sort((a, b) => a.joinedAt - b.joinedAt);
     const prev = this.hostId;
-    this.hostId = candidates[0]?.identity ?? (this.activePlayers.find((p) => !p.left)?.identity ?? null);
+    this.hostId = candidates[0]?.identity ?? this.activePlayers.find((p) => !p.left)?.identity ?? null;
     if (prev && this.hostId && prev !== this.hostId) {
       const h = this.players.get(this.hostId);
       if (h) this.notifyAll(`${h.name} is now the host.`, 'info');
@@ -452,11 +463,21 @@ export class GameRoom {
     if (p.conn && p.connected) p.conn.send(msg);
   }
 
-  private notify(p: Player, text: string, kind: 'info' | 'warn' | 'danger' | 'success' = 'info', sfx?: string) {
+  private notify(
+    p: Player,
+    text: string,
+    kind: 'info' | 'warn' | 'danger' | 'success' = 'info',
+    sfx?: string,
+  ) {
     this.send(p, { t: 'notice', kind, text, sfx });
   }
 
-  private notifyAll(text: string, kind: 'info' | 'warn' | 'danger' | 'success' = 'info', except?: Player, sfx?: string) {
+  private notifyAll(
+    text: string,
+    kind: 'info' | 'warn' | 'danger' | 'success' = 'info',
+    except?: Player,
+    sfx?: string,
+  ) {
     for (const p of this.players.values()) if (p !== except) this.notify(p, text, kind, sfx);
   }
 
@@ -477,7 +498,8 @@ export class GameRoom {
     const m: ChatMessage = { ...msg, id: ++this.chatId, ts: this.now() };
     this.chatLog.push(m);
     if (this.chatLog.length > 200) this.chatLog.splice(0, this.chatLog.length - 200);
-    for (const p of this.players.values()) if (this.canReadChannel(p, m.channel)) this.send(p, { t: 'chat', msg: m });
+    for (const p of this.players.values())
+      if (this.canReadChannel(p, m.channel)) this.send(p, { t: 'chat', msg: m });
   }
 
   private systemChat(text: string, channel: ChatChannel) {
@@ -537,7 +559,9 @@ export class GameRoom {
     const managerCount = effectiveManagerCount(this.settings, roster.length);
     let roles: Map<string, Role>;
     if (this.forcedManagers && this.deps.testHooks) {
-      roles = new Map(roster.map((p) => [p.identity, this.forcedManagers!.includes(p.publicId) ? 'manager' : 'employee']));
+      roles = new Map(
+        roster.map((p) => [p.identity, this.forcedManagers!.includes(p.publicId) ? 'manager' : 'employee']),
+      );
     } else {
       roles = assignRoles(
         roster.map((p) => p.identity),
@@ -566,7 +590,9 @@ export class GameRoom {
     this.doorsReadyAt = this.sabotageReadyAt;
     this.emergencyReadyAt = t + ROLE_REVEAL_MS + EMERGENCY_GRACE_MS;
     this.setPhase('ROLE_REVEAL', ROLE_REVEAL_MS);
-    this.deps.log?.(`[${this.code}] match ${this.matchNo} started with ${roster.length} players, ${managerCount} manager(s)`);
+    this.deps.log?.(
+      `[${this.code}] match ${this.matchNo} started with ${roster.length} players, ${managerCount} manager(s)`,
+    );
     this.refreshVoiceForAll();
   }
 
@@ -598,7 +624,8 @@ export class GameRoom {
     }
     const roster = this.activePlayers.filter((p) => p.role);
     const endedAt = this.now();
-    const headline = win.winner === 'employees' ? 'THE EMPLOYEES SURVIVED MONDAY!' : 'MANAGEMENT HAS TAKEN OVER.';
+    const headline =
+      win.winner === 'employees' ? 'THE EMPLOYEES SURVIVED MONDAY!' : 'MANAGEMENT HAS TAKEN OVER.';
     const progress = this.progress();
     this.gameOver = {
       winner: win.winner,
@@ -624,8 +651,30 @@ export class GameRoom {
     // Celebration positions: winners gather in CEO cabin (managers) or the workspace (employees).
     const spots: [number, number][] =
       win.winner === 'managers'
-        ? [[25.5, 6], [24, 6.6], [27, 6.6], [23, 5.5], [28, 5.5], [25.5, 7.6], [24, 8], [27, 8], [22.8, 7.3], [28.6, 7.4]]
-        : [[17, 20], [18.5, 20.5], [15.5, 20.5], [17, 21.8], [19.8, 21], [14.2, 21.4], [12.6, 20], [21.2, 20.2], [17.5, 19.3], [16, 19.5]];
+        ? [
+            [25.5, 6],
+            [24, 6.6],
+            [27, 6.6],
+            [23, 5.5],
+            [28, 5.5],
+            [25.5, 7.6],
+            [24, 8],
+            [27, 8],
+            [22.8, 7.3],
+            [28.6, 7.4],
+          ]
+        : [
+            [17, 20],
+            [18.5, 20.5],
+            [15.5, 20.5],
+            [17, 21.8],
+            [19.8, 21],
+            [14.2, 21.4],
+            [12.6, 20],
+            [21.2, 20.2],
+            [17.5, 19.3],
+            [16, 19.5],
+          ];
     // Everyone (ghosts included) is visible again during GAME_OVER — see omniscient().
     roster.forEach((p, i) => this.place(p, spots[i % spots.length][0], spots[i % spots.length][1]));
     this.systemChat(`${headline} (${win.reason.replace(/_/g, ' ')})`, 'lobby');
@@ -717,8 +766,16 @@ export class GameRoom {
     });
     if (!res) return false;
     // Distinguish "all managers gone because they left" for the results screen.
-    if (res.reason === 'managers_voted_out' && roster.filter((p) => p.role === 'manager').every((p) => p.left)) res.reason = 'managers_left';
-    if (res.reason === 'parity' && roster.filter((p) => p.role === 'employee' && p.left).length > 0 && this.stats.eliminations === 0)
+    if (
+      res.reason === 'managers_voted_out' &&
+      roster.filter((p) => p.role === 'manager').every((p) => p.left)
+    )
+      res.reason = 'managers_left';
+    if (
+      res.reason === 'parity' &&
+      roster.filter((p) => p.role === 'employee' && p.left).length > 0 &&
+      this.stats.eliminations === 0
+    )
       res.reason = 'employees_left';
     this.endMatch(res);
     return true;
@@ -765,7 +822,7 @@ export class GameRoom {
     const voters = new Set(living.filter((p) => !p.left).map((p) => p.publicId));
     const targets = new Set(living.map((p) => p.publicId));
     const tally = tallyVotes(this.meeting.votes, voters, targets);
-    const ejected = tally.ejected ? this.byPublic.get(tally.ejected) ?? null : null;
+    const ejected = tally.ejected ? (this.byPublic.get(tally.ejected) ?? null) : null;
     let voterMap: Record<string, string[]> | undefined;
     if (!this.settings.anonymousVotes) {
       voterMap = {};
@@ -876,7 +933,14 @@ export class GameRoom {
       }
       if (pl.viewingCctv && !this.cctvOnline) this.send(pl, { t: 'cctv', online: false, feeds: [] });
     }
-    const sfx = kind === 'fire' ? 'alarm' : kind === 'server' ? 'serverFail' : kind === 'power' ? 'powerDown' : 'warning';
+    const sfx =
+      kind === 'fire'
+        ? 'alarm'
+        : kind === 'server'
+          ? 'serverFail'
+          : kind === 'power'
+            ? 'powerDown'
+            : 'warning';
     this.notifyAll(SABOTAGE_LINES[kind], critical ? 'danger' : 'warn', undefined, sfx);
     this.markDirty();
     return null;
@@ -933,7 +997,12 @@ export class GameRoom {
   private markFixed(fix: FixTarget, by: Player) {
     if (fix === 'doorsOverride') {
       this.unlockDoors();
-      this.notifyAll(`Door override engaged by ${by.name}. Conference rooms unlocked.`, 'success', undefined, 'doorOpen');
+      this.notifyAll(
+        `Door override engaged by ${by.name}. Conference rooms unlocked.`,
+        'success',
+        undefined,
+        'doorOpen',
+      );
       this.markDirty();
       return;
     }
@@ -957,13 +1026,20 @@ export class GameRoom {
   // -------------------------------------------------------------------------
 
   visionRadius(p: Player): number {
-    const base = BASE_VISION * (p.role === 'manager' ? this.settings.managerVision : this.settings.employeeVision);
+    const base =
+      BASE_VISION * (p.role === 'manager' ? this.settings.managerVision : this.settings.employeeVision);
     if (this.sabotage?.kind === 'power' && p.role !== 'manager') return base * LIGHTS_OUT_VISION_FACTOR;
     return base;
   }
 
   private omniscient(viewer: Player): boolean {
-    return viewer.spectator || !viewer.alive || this.phase === 'GAME_OVER' || this.phase === 'WAITING' || this.phase === 'RETURNING_TO_LOBBY';
+    return (
+      viewer.spectator ||
+      !viewer.alive ||
+      this.phase === 'GAME_OVER' ||
+      this.phase === 'WAITING' ||
+      this.phase === 'RETURNING_TO_LOBBY'
+    );
   }
 
   /** Can `viewer` see position (x,y) right now? */
@@ -1001,9 +1077,12 @@ export class GameRoom {
         this.markDirty();
         return this.maybeScheduleAutoStart();
       case 'profile':
-        if (this.phase !== 'WAITING') return this.reject(p, 'BAD_PHASE', 'You can only change outfits in the lobby.');
+        if (this.phase !== 'WAITING')
+          return this.reject(p, 'BAD_PHASE', 'You can only change outfits in the lobby.');
         {
-          const taken = [...this.players.values()].some((o) => o !== p && !o.spectator && o.appearance.color === msg.appearance.color);
+          const taken = [...this.players.values()].some(
+            (o) => o !== p && !o.spectator && o.appearance.color === msg.appearance.color,
+          );
           if (taken) return this.reject(p, 'COLOR_TAKEN', 'That colour is already taken by a coworker.');
           p.name = msg.name.trim();
           p.appearance = msg.appearance;
@@ -1012,7 +1091,8 @@ export class GameRoom {
         return;
       case 'settings':
         if (!this.isHost(p)) return this.reject(p, 'NOT_HOST', 'Only the host can change settings.');
-        if (this.phase !== 'WAITING') return this.reject(p, 'BAD_PHASE', 'Settings are locked during a match.');
+        if (this.phase !== 'WAITING')
+          return this.reject(p, 'BAD_PHASE', 'Settings are locked during a match.');
         this.settings = sanitizeSettings(msg.settings, this.settings, this.playerCount);
         this.markDirty();
         this.deps.onChange?.(this);
@@ -1021,13 +1101,18 @@ export class GameRoom {
         if (!this.isHost(p)) return this.reject(p, 'NOT_HOST', 'Only the host can start the match.');
         const notReady = this.activePlayers.filter((o) => o !== p && o.connected && !o.ready);
         if (this.phase === 'WAITING' && notReady.length)
-          return this.reject(p, 'NOT_READY', `Waiting for ${notReady.map((o) => o.name).join(', ')} to be ready.`);
+          return this.reject(
+            p,
+            'NOT_READY',
+            `Waiting for ${notReady.map((o) => o.name).join(', ')} to be ready.`,
+          );
         const err = this.startCountdown();
         if (err) this.reject(p, 'CANNOT_START', err);
         return;
       }
       case 'kick': {
-        if (!this.isHost(p) || this.phase !== 'WAITING') return this.reject(p, 'NOT_HOST', 'Only the host can do that in the lobby.');
+        if (!this.isHost(p) || this.phase !== 'WAITING')
+          return this.reject(p, 'NOT_HOST', 'Only the host can do that in the lobby.');
         const target = this.byPublic.get(msg.target);
         if (!target || target === p) return;
         this.send(target, { t: 'kicked', reason: 'The host removed you from the lobby.' });
@@ -1067,7 +1152,8 @@ export class GameRoom {
         return this.onChat(p, msg.text);
       case 'returnToLobby':
         if (this.phase !== 'GAME_OVER') return;
-        if (!this.isHost(p)) return this.reject(p, 'NOT_HOST', 'Waiting for the host to return everyone to the lobby.');
+        if (!this.isHost(p))
+          return this.reject(p, 'NOT_HOST', 'Waiting for the host to return everyone to the lobby.');
         return this.returnToLobby();
       case 'voiceToken':
         return void this.sendVoiceToken(p);
@@ -1080,7 +1166,8 @@ export class GameRoom {
       case 'reportPlayer': {
         const target = this.byPublic.get(msg.target);
         if (!target || target === p) return;
-        if (!p.reportBucket.take()) return this.reject(p, 'RATE_LIMIT', 'You have filed enough reports for now.');
+        if (!p.reportBucket.take())
+          return this.reject(p, 'RATE_LIMIT', 'You have filed enough reports for now.');
         this.deps.onReport?.({
           reporterUserId: p.userDbId,
           reporterName: p.name,
@@ -1088,9 +1175,13 @@ export class GameRoom {
           reportedName: target.name,
           roomCode: this.code,
           category: msg.category,
-          note: msg.note ? sanitizeChat(msg.note) ?? undefined : undefined,
+          note: msg.note ? (sanitizeChat(msg.note) ?? undefined) : undefined,
         });
-        this.notify(p, `Thanks — your report about ${target.name} was filed with the moderation team.`, 'success');
+        this.notify(
+          p,
+          `Thanks — your report about ${target.name} was filed with the moderation team.`,
+          'success',
+        );
         return;
       }
       case 'cctv':
@@ -1187,8 +1278,15 @@ export class GameRoom {
 
     if (st.kind === 'fix') {
       if (!p.alive) return this.reject(p, 'GHOST', 'Ghosts cannot repair office systems.');
-      if (!st.fix || !this.fixRelevant(st.fix)) return this.notify(p, 'This system is working fine. Suspiciously fine.');
-      const fs: FixSession = { stationId: st.id, fix: st.fix, openedAt: this.now(), holding: false, holdSince: 0 };
+      if (!st.fix || !this.fixRelevant(st.fix))
+        return this.notify(p, 'This system is working fine. Suspiciously fine.');
+      const fs: FixSession = {
+        stationId: st.id,
+        fix: st.fix,
+        openedAt: this.now(),
+        holding: false,
+        holdSince: 0,
+      };
       if (st.fix === 'power') fs.puzzle = generatePowerPuzzle(this.rng);
       p.fixSession = fs;
       p.taskSession = null;
@@ -1198,10 +1296,18 @@ export class GameRoom {
     }
 
     // task station
-    if (!p.alive && p.role === 'manager') return this.reject(p, 'GHOST', 'Eliminated managers have nothing left to fake.');
+    if (!p.alive && p.role === 'manager')
+      return this.reject(p, 'GHOST', 'Eliminated managers have nothing left to fake.');
     const task = p.tasks.find((t) => t.stationId === st.id && !t.done);
-    if (!task) return this.notify(p, p.tasks.some((t) => t.stationId === st.id) ? 'Already done. No raise approved.' : 'This is not on your task list.');
-    if (this.stationDisabled(st)) return this.reject(p, 'DISABLED', 'This station is offline due to an ongoing outage.');
+    if (!task)
+      return this.notify(
+        p,
+        p.tasks.some((t) => t.stationId === st.id)
+          ? 'Already done. No raise approved.'
+          : 'This is not on your task list.',
+      );
+    if (this.stationDisabled(st))
+      return this.reject(p, 'DISABLED', 'This station is offline due to an ongoing outage.');
     const puzzle = generatePuzzle(task.type, this.rng);
     const session: TaskSession = {
       id: `s${++this.sessionCounter}`,
@@ -1213,7 +1319,14 @@ export class GameRoom {
     };
     p.taskSession = session;
     p.fixSession = null;
-    this.send(p, { t: 'taskOpen', session: session.id, taskType: task.type, station: st.id, data: puzzle.data, fake: session.fake });
+    this.send(p, {
+      t: 'taskOpen',
+      session: session.id,
+      taskType: task.type,
+      station: st.id,
+      data: puzzle.data,
+      fake: session.fake,
+    });
     this.markDirty();
   }
 
@@ -1233,7 +1346,12 @@ export class GameRoom {
     const task = p.tasks.find((t) => t.id === s.taskId);
     if (!task || task.done) return this.reject(p, 'DONE', 'Already done.');
     if (this.now() - s.startedAt < TASK_INFO[task.type].minMs) {
-      return this.send(p, { t: 'taskResult', session: s.id, ok: false, line: 'Too fast. Suspiciously productive.' });
+      return this.send(p, {
+        t: 'taskResult',
+        session: s.id,
+        ok: false,
+        line: 'Too fast. Suspiciously productive.',
+      });
     }
     if (!verifyAnswer(s.puzzle, answer)) {
       return this.send(p, { t: 'taskResult', session: s.id, ok: false, line: 'Not quite. Check your work.' });
@@ -1268,7 +1386,8 @@ export class GameRoom {
     if (!fs || fs.stationId !== stationId || fs.fix !== 'power') return;
     if (this.phase !== 'ACTIVE' || !p.alive) return;
     if (!this.nearStation(p, STATION_BY_ID[stationId], TASK_LEASH)) return;
-    if (this.now() - fs.openedAt < 1500 || !verifyPower(answer)) return this.send(p, { t: 'fixResult', station: stationId, ok: false });
+    if (this.now() - fs.openedAt < 1500 || !verifyPower(answer))
+      return this.send(p, { t: 'fixResult', station: stationId, ok: false });
     this.send(p, { t: 'fixResult', station: stationId, ok: true });
     this.markFixed('power', p);
   }
@@ -1320,13 +1439,17 @@ export class GameRoom {
     if (this.phase !== 'ACTIVE') return fail('Not during this phase.');
     if (p.role !== 'manager' || !p.alive || p.spectator) return fail('You are not authorised to do that.');
     if (p.inVent) return fail('Leave the passage first.');
-    if (!target || target.spectator || !target.alive || target.role !== 'employee') return fail('Invalid target.');
+    if (!target || target.spectator || !target.alive || target.role !== 'employee')
+      return fail('Invalid target.');
     if (t < p.killReadyAt) return fail('Termination is on cooldown.');
     if (target.inVent) return fail('Invalid target.');
     const range = KILL_RANGES[this.settings.killRange];
     if (dist(p.x, p.y, target.x, target.y) > range + 0.05) return fail('Too far away.');
     if (!lineOfSight(p.x, p.y, target.x, target.y)) return fail('There is a wall in the way.');
-    const lockedBetween = this.doorsLockedUntil && roomAt(p.x, p.y) !== roomAt(target.x, target.y) && !lineOfSight(p.x, p.y, target.x, target.y);
+    const lockedBetween =
+      this.doorsLockedUntil &&
+      roomAt(p.x, p.y) !== roomAt(target.x, target.y) &&
+      !lineOfSight(p.x, p.y, target.x, target.y);
     if (lockedBetween) return fail('Blocked.');
 
     const variant = Math.floor(this.rng() * ELIMINATION_NAMES.length);
@@ -1340,7 +1463,14 @@ export class GameRoom {
     p.killReadyAt = t + this.settings.killCooldown * 1000;
     p.taskSession = null;
     this.stats.eliminations++;
-    const body: Body = { id: `b${this.stats.eliminations}-${this.matchNo}`, victim: target, x: target.x, y: target.y, variant, room: roomName(roomAt(target.x, target.y)) };
+    const body: Body = {
+      id: `b${this.stats.eliminations}-${this.matchNo}`,
+      victim: target,
+      x: target.x,
+      y: target.y,
+      variant,
+      room: roomName(roomAt(target.x, target.y)),
+    };
     this.bodies.push(body);
     // Only players who could actually witness it get the animation event.
     for (const o of this.players.values()) {
@@ -1361,7 +1491,8 @@ export class GameRoom {
     if (p.inVent) return;
     const body = this.bodies.find((b) => b.id === bodyId);
     if (!body) return this.reject(p, 'NO_BODY', 'That incident was already reported.');
-    if (dist(p.x, p.y, body.x, body.y) > REPORT_RANGE + 0.05) return this.reject(p, 'TOO_FAR', 'Get closer to report.');
+    if (dist(p.x, p.y, body.x, body.y) > REPORT_RANGE + 0.05)
+      return this.reject(p, 'TOO_FAR', 'Get closer to report.');
     this.startMeeting('report', p, body);
   }
 
@@ -1371,20 +1502,29 @@ export class GameRoom {
     if (!p.alive || p.spectator) return this.reject(p, 'GHOST', 'Ghosts cannot call meetings.');
     if (p.inVent) return;
     if (this.sabotage?.critical) return this.reject(p, 'CRITICAL', 'Deal with the emergency first!');
-    if (p.emergencyLeft <= 0) return this.reject(p, 'NO_MEETINGS', 'You have used all your emergency meetings.');
-    if (t < this.emergencyReadyAt) return this.reject(p, 'COOLDOWN', `The button is warming up (${Math.ceil((this.emergencyReadyAt - t) / 1000)}s).`);
-    if (!this.nearStation(p, STATION_BY_ID.emergency, EMERGENCY_RANGE)) return this.reject(p, 'TOO_FAR', 'Get to the conference table.');
+    if (p.emergencyLeft <= 0)
+      return this.reject(p, 'NO_MEETINGS', 'You have used all your emergency meetings.');
+    if (t < this.emergencyReadyAt)
+      return this.reject(
+        p,
+        'COOLDOWN',
+        `The button is warming up (${Math.ceil((this.emergencyReadyAt - t) / 1000)}s).`,
+      );
+    if (!this.nearStation(p, STATION_BY_ID.emergency, EMERGENCY_RANGE))
+      return this.reject(p, 'TOO_FAR', 'Get to the conference table.');
     p.emergencyLeft--;
     this.startMeeting('emergency', p, null);
   }
 
   private onVent(p: Player, action: 'enter' | 'move' | 'exit', ventId?: string) {
     const t = this.now();
-    if (this.phase !== 'ACTIVE' || p.role !== 'manager' || !p.alive) return this.reject(p, 'VENT', 'Employees may not use maintenance passages.');
+    if (this.phase !== 'ACTIVE' || p.role !== 'manager' || !p.alive)
+      return this.reject(p, 'VENT', 'Employees may not use maintenance passages.');
     if (action === 'enter') {
       const v = ventId ? VENT_BY_ID[ventId] : undefined;
       if (!v || p.inVent || t < p.ventReadyAt) return;
-      if (dist(p.x, p.y, v.x, v.y) > VENT_RANGE + 0.35) return this.reject(p, 'TOO_FAR', 'Get closer to the access panel.');
+      if (dist(p.x, p.y, v.x, v.y) > VENT_RANGE + 0.35)
+        return this.reject(p, 'TOO_FAR', 'Get closer to the access panel.');
       p.taskSession = null;
       p.inVent = v.id;
       p.x = v.x;
@@ -1395,7 +1535,8 @@ export class GameRoom {
       this.ventFx(v.id, 'enter', p);
     } else if (action === 'move') {
       const cur = p.inVent ? VENT_BY_ID[p.inVent] : undefined;
-      if (!cur || !ventId || !cur.links.includes(ventId) || t < p.ventReadyAt - VENT_COOLDOWN_MS + 250) return;
+      if (!cur || !ventId || !cur.links.includes(ventId) || t < p.ventReadyAt - VENT_COOLDOWN_MS + 250)
+        return;
       const v = VENT_BY_ID[ventId];
       p.inVent = v.id;
       p.x = v.x;
@@ -1424,7 +1565,8 @@ export class GameRoom {
     if (this.meeting.votes.has(p.publicId)) return this.reject(p, 'ALREADY_VOTED', 'You already voted.');
     if (target !== SKIP) {
       const t = this.byPublic.get(target);
-      if (!t || !t.alive || t.spectator || !t.role) return this.reject(p, 'BAD_TARGET', 'You cannot vote for them.');
+      if (!t || !t.alive || t.spectator || !t.role)
+        return this.reject(p, 'BAD_TARGET', 'You cannot vote for them.');
     }
     this.meeting.votes.set(p.publicId, target);
     this.markDirty();
@@ -1437,11 +1579,18 @@ export class GameRoom {
 
   private onChat(p: Player, raw: string) {
     let channel: ChatChannel;
-    if (this.phase === 'WAITING' || this.phase === 'STARTING' || this.phase === 'GAME_OVER' || this.phase === 'RETURNING_TO_LOBBY') channel = 'lobby';
+    if (
+      this.phase === 'WAITING' ||
+      this.phase === 'STARTING' ||
+      this.phase === 'GAME_OVER' ||
+      this.phase === 'RETURNING_TO_LOBBY'
+    )
+      channel = 'lobby';
     else if (p.spectator || !p.alive) channel = 'ghost';
     else if (isMeetingPhase(this.phase) && this.phase !== 'VOTE_RESULTS') channel = 'meeting';
     else if (isMeetingPhase(this.phase)) channel = 'meeting';
-    else return this.reject(p, 'CHAT_CLOSED', 'Chat opens during HR meetings. Use your voice (or your eyes).');
+    else
+      return this.reject(p, 'CHAT_CLOSED', 'Chat opens during HR meetings. Use your voice (or your eyes).');
     if (!p.chatBucket.take()) return this.reject(p, 'RATE_LIMIT', 'You are typing faster than HR can read.');
     const text = sanitizeChat(raw);
     if (!text) return;
@@ -1451,8 +1600,10 @@ export class GameRoom {
 
   private onTestHook(p: Player, cmd: string, args: Record<string, unknown>) {
     if (!this.deps.testHooks) return this.reject(p, 'FORBIDDEN', 'Unknown command.');
-    if (cmd === 'forceManagers' && this.phase === 'WAITING' && Array.isArray(args.ids)) this.forcedManagers = args.ids.map(String);
-    if (cmd === 'teleport' && typeof args.x === 'number' && typeof args.y === 'number') this.place(p, args.x, args.y);
+    if (cmd === 'forceManagers' && this.phase === 'WAITING' && Array.isArray(args.ids))
+      this.forcedManagers = args.ids.map(String);
+    if (cmd === 'teleport' && typeof args.x === 'number' && typeof args.y === 'number')
+      this.place(p, args.x, args.y);
     if (cmd === 'fastForward' && typeof args.ms === 'number') {
       // Shortens current timers (tests only).
       if (this.phaseEndsAt) this.phaseEndsAt -= args.ms;
@@ -1478,7 +1629,8 @@ export class GameRoom {
 
   async sendVoiceToken(p: Player) {
     const v = this.deps.voice;
-    if (!v || !v.enabled || !v.url) return this.send(p, { t: 'voiceUnavailable', reason: 'Voice chat is not configured on this server.' });
+    if (!v || !v.enabled || !v.url)
+      return this.send(p, { t: 'voiceUnavailable', reason: 'Voice chat is not configured on this server.' });
     try {
       p.voiceEnabled = true;
       const mode = this.voiceMode(p);
@@ -1511,7 +1663,8 @@ export class GameRoom {
       for (const sp of this.players.values()) {
         if (sp === listener) continue;
         const sMode = this.voiceMode(sp);
-        const sameRoom = (lMode === 'ghost' || lMode === 'spectator') === (sMode === 'ghost' || sMode === 'spectator');
+        const sameRoom =
+          (lMode === 'ghost' || lMode === 'spectator') === (sMode === 'ghost' || sMode === 'spectator');
         if (!sameRoom) continue;
         if (open || meeting || lMode === 'ghost' || lMode === 'spectator') {
           g[sp.publicId] = 1;
@@ -1522,7 +1675,12 @@ export class GameRoom {
           continue;
         }
         const d = dist(listener.x, listener.y, sp.x, sp.y);
-        let gain = d <= VOICE_FULL_VOLUME_RADIUS ? 1 : d >= VOICE_RADIUS ? 0 : 1 - (d - VOICE_FULL_VOLUME_RADIUS) / (VOICE_RADIUS - VOICE_FULL_VOLUME_RADIUS);
+        let gain =
+          d <= VOICE_FULL_VOLUME_RADIUS
+            ? 1
+            : d >= VOICE_RADIUS
+              ? 0
+              : 1 - (d - VOICE_FULL_VOLUME_RADIUS) / (VOICE_RADIUS - VOICE_FULL_VOLUME_RADIUS);
         if (gain > 0 && !lineOfSight(listener.x, listener.y, sp.x, sp.y)) gain *= 0.35;
         g[sp.publicId] = Math.round(gain * gain * 100) / 100;
       }
@@ -1579,7 +1737,8 @@ export class GameRoom {
           if (!this.checkWin()) this.setPhase('ACTIVE', null);
           break;
         case 'MEETING_INTRO':
-          if (this.settings.discussionTime > 0) this.setPhase('DISCUSSION', this.settings.discussionTime * 1000);
+          if (this.settings.discussionTime > 0)
+            this.setPhase('DISCUSSION', this.settings.discussionTime * 1000);
           else {
             this.setPhase('DISCUSSION', 0);
           }
@@ -1669,7 +1828,8 @@ export class GameRoom {
       }
       const bs: BodyView[] = [];
       for (const b of bodies) {
-        if (this.canSeePoint(viewer, b.x, b.y)) bs.push({ id: b.id, victimId: b.victim.publicId, x: b.x, y: b.y, variant: b.variant });
+        if (this.canSeePoint(viewer, b.x, b.y))
+          bs.push({ id: b.id, victimId: b.victim.publicId, x: b.x, y: b.y, variant: b.variant });
       }
       this.send(viewer, {
         t: 'snap',
@@ -1696,7 +1856,10 @@ export class GameRoom {
       id: c.id,
       name: c.name,
       players: this.activePlayers
-        .filter((o) => o.alive && !o.inVent && o.x >= c.box.x0 && o.x <= c.box.x1 && o.y >= c.box.y0 && o.y <= c.box.y1)
+        .filter(
+          (o) =>
+            o.alive && !o.inVent && o.x >= c.box.x0 && o.x <= c.box.x1 && o.y >= c.box.y0 && o.y <= c.box.y1,
+        )
         .map((o) => ({ id: o.publicId, x: Math.round(o.x * 10) / 10, y: Math.round(o.y * 10) / 10 })),
     }));
     this.send(p, { t: 'cctv', online: true, feeds });
@@ -1725,7 +1888,8 @@ export class GameRoom {
           speaking: o.speaking,
         };
         if (over) pp.role = o.role ?? undefined;
-        else if (viewer.role === 'manager' && o.role === 'manager' && isInMatch(this.phase)) pp.role = 'manager';
+        else if (viewer.role === 'manager' && o.role === 'manager' && isInMatch(this.phase))
+          pp.role = 'manager';
         else if (o === viewer && viewer.role) pp.role = viewer.role;
         return pp;
       });
@@ -1751,7 +1915,8 @@ export class GameRoom {
     if (fs) {
       let progress = 0;
       if (fs.holding) {
-        if (fs.fix === 'serverA' || fs.fix === 'serverB') progress = s?.serverBothSince ? Math.min(1, (this.now() - s.serverBothSince) / SERVER_SYNC_MS) : 0;
+        if (fs.fix === 'serverA' || fs.fix === 'serverB')
+          progress = s?.serverBothSince ? Math.min(1, (this.now() - s.serverBothSince) / SERVER_SYNC_MS) : 0;
         else progress = Math.min(1, (this.now() - fs.holdSince) / (HOLD_MS[fs.fix] ?? 2000));
       }
       fixView = { station: fs.stationId, progress };
@@ -1766,7 +1931,9 @@ export class GameRoom {
       settings: this.settings,
       hostId: this.hostId ? (this.players.get(this.hostId)?.publicId ?? null) : null,
       players,
-      spectators: [...this.players.values()].filter((o) => o.spectator && o.connected).map((o) => ({ id: o.publicId, name: o.name })),
+      spectators: [...this.players.values()]
+        .filter((o) => o.spectator && o.connected)
+        .map((o) => ({ id: o.publicId, name: o.name })),
       progress: this.progress(),
       sabotage: s
         ? {

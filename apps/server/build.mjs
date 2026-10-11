@@ -1,5 +1,6 @@
 // Bundles the server (and the shared package) into a single ESM file.
 import { build } from 'esbuild';
+import { fileURLToPath } from 'node:url';
 
 await build({
   entryPoints: ['src/index.ts'],
@@ -15,7 +16,9 @@ await build({
     {
       name: 'bundle-shared',
       setup(b) {
-        b.onResolve({ filter: /^@corp\/shared$/ }, () => ({ path: new URL('../../packages/shared/src/index.ts', import.meta.url).pathname }));
+        b.onResolve({ filter: /^@corp\/shared$/ }, () => ({
+          path: fileURLToPath(new URL('../../packages/shared/src/index.ts', import.meta.url)),
+        }));
       },
     },
   ],

@@ -25,7 +25,8 @@ export class ColliderIndex {
     const cx1 = Math.min(MAP_W, Math.floor(b.x1 / CELL));
     const cy0 = Math.max(-1, Math.floor(b.y0 / CELL));
     const cy1 = Math.min(MAP_H, Math.floor(b.y1 / CELL));
-    for (let y = cy0; y <= cy1; y++) for (let x = cx0; x <= cx1; x++) this.cells[(y + 1) * (MAP_W + 2) + (x + 1)].push(id);
+    for (let y = cy0; y <= cy1; y++)
+      for (let x = cx0; x <= cx1; x++) this.cells[(y + 1) * (MAP_W + 2) + (x + 1)].push(id);
     return id;
   }
 
@@ -90,7 +91,12 @@ function circleBoxPush(x: number, y: number, r: number, b: Box): [number, number
 }
 
 /** Resolve any overlap of a circle with colliders. Returns corrected position. */
-export function resolveCollisions(cols: ColliderIndex, x: number, y: number, r = PLAYER_RADIUS): [number, number] {
+export function resolveCollisions(
+  cols: ColliderIndex,
+  x: number,
+  y: number,
+  r = PLAYER_RADIUS,
+): [number, number] {
   for (let iter = 0; iter < 4; iter++) {
     let moved = false;
     for (const b of cols.query(x, y, r + 0.05, scratch)) {

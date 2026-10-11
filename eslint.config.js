@@ -1,8 +1,18 @@
 import js from '@eslint/js';
 import tseslint from 'typescript-eslint';
+import reactHooks from 'eslint-plugin-react-hooks';
+import globals from 'globals';
 
 export default tseslint.config(
-  { ignores: ['**/dist/**', '**/node_modules/**', 'playwright-report/**', 'test-results/**'] },
+  {
+    ignores: [
+      '**/dist/**',
+      '**/node_modules/**',
+      'playwright-report/**',
+      'test-results/**',
+      'apps/server/prisma/migrations/**',
+    ],
+  },
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {
@@ -13,7 +23,13 @@ export default tseslint.config(
     },
   },
   {
-    files: ['**/*.{js,mjs,cjs}'],
-    languageOptions: { globals: { process: 'readonly', console: 'readonly' } },
+    files: ['apps/web/**/*.{ts,tsx}'],
+    plugins: { 'react-hooks': reactHooks },
+    rules: { ...reactHooks.configs.recommended.rules },
+    languageOptions: { globals: globals.browser },
+  },
+  {
+    files: ['**/*.{js,mjs,cjs}', 'scripts/**', 'apps/server/**', 'tests/**'],
+    languageOptions: { globals: { ...globals.node } },
   },
 );

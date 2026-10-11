@@ -265,7 +265,9 @@ export class PrismaStore implements Store {
     return this.db.$transaction(async (tx: any) => {
       const userIds = m.players.map((p) => p.userId).filter(Boolean) as string[];
       const existing = new Set(
-        (await tx.user.findMany({ where: { id: { in: userIds } }, select: { id: true } })).map((u: any) => u.id),
+        (await tx.user.findMany({ where: { id: { in: userIds } }, select: { id: true } })).map(
+          (u: any) => u.id,
+        ),
       );
       const match = await tx.match.create({
         data: {

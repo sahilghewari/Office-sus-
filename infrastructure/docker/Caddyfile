@@ -1,0 +1,20 @@
+# Automatic HTTPS (Let's Encrypt) + WebSocket reverse proxy.
+{$PUBLIC_DOMAIN} {
+	encode zstd gzip
+
+	# LiveKit signalling (media itself flows over UDP/TURN directly to the host)
+	handle_path /livekit* {
+		reverse_proxy host.docker.internal:7880
+	}
+
+	# Game server: REST API, WebSocket rooms (/ws) and the static web client
+	reverse_proxy game:2567 {
+		header_up X-Forwarded-For {remote_host}
+	}
+
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		Permissions-Policy "microphone=(self), camera=()"
+		-Server
+	}
+}

@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 
-export type Action = 'up' | 'down' | 'left' | 'right' | 'interact' | 'report' | 'kill' | 'sabotage' | 'map' | 'ptt';
+export type Action =
+  'up' | 'down' | 'left' | 'right' | 'interact' | 'report' | 'kill' | 'sabotage' | 'map' | 'ptt';
 
 export const DEFAULT_KEYS: Record<Action, string[]> = {
   up: ['KeyW', 'ArrowUp'],

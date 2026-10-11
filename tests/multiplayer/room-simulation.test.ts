@@ -1,5 +1,13 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import { STATION_BY_ID, VENT_BY_ID, solveFromData, TASK_INFO, findPath, createColliders, BASE_SPEED } from '@corp/shared';
+import {
+  STATION_BY_ID,
+  VENT_BY_ID,
+  solveFromData,
+  TASK_INFO,
+  findPath,
+  createColliders,
+  BASE_SPEED,
+} from '@corp/shared';
 import { FakeConn, Sim } from '../support/sim';
 
 const cols = createColliders();
@@ -130,9 +138,24 @@ describe('authoritative match flow', () => {
     // chat works and ghost chat is isolated
     sim.send(a, { t: 'chat', text: 'I saw P1 near the server room.' });
     sim.send(v, { t: 'chat', text: 'it was P1!!' });
-    expect(sim.conn(b).all('chat').map((x) => x.msg.text)).toContain('I saw P1 near the server room.');
-    expect(sim.conn(b).all('chat').map((x) => x.msg.text)).not.toContain('it was P1!!');
-    expect(sim.conn(v).all('chat').map((x) => x.msg.text)).toContain('it was P1!!');
+    expect(
+      sim
+        .conn(b)
+        .all('chat')
+        .map((x) => x.msg.text),
+    ).toContain('I saw P1 near the server room.');
+    expect(
+      sim
+        .conn(b)
+        .all('chat')
+        .map((x) => x.msg.text),
+    ).not.toContain('it was P1!!');
+    expect(
+      sim
+        .conn(v)
+        .all('chat')
+        .map((x) => x.msg.text),
+    ).toContain('it was P1!!');
     sim.advance(60_000);
     expect(sim.room.phase).toBe('VOTING');
     // ghosts cannot vote; double votes rejected; anonymity until the end
@@ -464,7 +487,12 @@ describe('sabotage', () => {
     expect(sim.conn(a).last('ventFx')?.kind).toBe('enter');
     // hidden from snapshots
     sim.advance(100);
-    expect(sim.conn(a).last('snap')!.p.find((p) => p.i === m.publicId)).toBeUndefined();
+    expect(
+      sim
+        .conn(a)
+        .last('snap')!
+        .p.find((p) => p.i === m.publicId),
+    ).toBeUndefined();
     // cannot jump to an unconnected vent
     sim.advance(400);
     sim.send(m, { t: 'vent', action: 'move', vent: 'v-ceo' });
@@ -499,9 +527,19 @@ describe('ghosts', () => {
     expect(sim.room.buildState(a).progress.done).toBe(before + g.tasks.length);
     sim.teleport(a, 21, 11.8);
     sim.advance(100);
-    expect(sim.conn(a).last('snap')!.p.find((p) => p.i === g.publicId)).toBeUndefined();
+    expect(
+      sim
+        .conn(a)
+        .last('snap')!
+        .p.find((p) => p.i === g.publicId),
+    ).toBeUndefined();
     // ghosts can see the living
-    expect(sim.conn(g).last('snap')!.p.find((p) => p.i === a.publicId)).toBeTruthy();
+    expect(
+      sim
+        .conn(g)
+        .last('snap')!
+        .p.find((p) => p.i === a.publicId),
+    ).toBeTruthy();
     // ghost walks through a wall
     sim.teleport(g, 13, 12);
     let seq = 1000;
@@ -516,7 +554,12 @@ describe('ghosts', () => {
     expect(sim.room.phase).toBe('ACTIVE');
     // ghost chat during play stays among ghosts
     sim.send(g, { t: 'chat', text: 'boo' });
-    expect(sim.conn(a).all('chat').some((c) => c.msg.text === 'boo')).toBe(false);
+    expect(
+      sim
+        .conn(a)
+        .all('chat')
+        .some((c) => c.msg.text === 'boo'),
+    ).toBe(false);
     // living players cannot chat outside meetings
     sim.send(a, { t: 'chat', text: 'hello?' });
     expect(sim.conn(a).last('error')?.code).toBe('CHAT_CLOSED');

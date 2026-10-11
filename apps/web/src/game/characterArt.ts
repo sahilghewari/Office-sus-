@@ -532,7 +532,14 @@ export function drawCharacter(ctx: CanvasRenderingContext2D, a: Appearance, p: P
   ctx.restore();
 }
 
-function drawHair(ctx: CanvasRenderingContext2D, style: string, color: string, front: boolean, hy: number, hr: number) {
+function drawHair(
+  ctx: CanvasRenderingContext2D,
+  style: string,
+  color: string,
+  front: boolean,
+  hy: number,
+  hr: number,
+) {
   const g = ctx.createLinearGradient(0, hy - hr - 4, 0, hy);
   g.addColorStop(0, shade(color, 0.2));
   g.addColorStop(1, shade(color, -0.1));
@@ -682,7 +689,14 @@ export function animDefs(): AnimDef[] {
     { name: 'walk_b', frames: walk('back'), rate: 12, loop: true },
     {
       name: 'work',
-      frames: Array.from({ length: 4 }, (_, i) => ({ facing: 'back' as Facing, legSwing: 0, armL: -1.1 - (i % 2) * 0.25, armR: -1.1 - ((i + 1) % 2) * 0.25, bob: 0, lift: 0 })),
+      frames: Array.from({ length: 4 }, (_, i) => ({
+        facing: 'back' as Facing,
+        legSwing: 0,
+        armL: -1.1 - (i % 2) * 0.25,
+        armR: -1.1 - ((i + 1) % 2) * 0.25,
+        bob: 0,
+        lift: 0,
+      })),
       rate: 8,
       loop: true,
     },
@@ -705,7 +719,15 @@ export function animDefs(): AnimDef[] {
     },
     {
       name: 'sad',
-      frames: [0, 1].map((i) => ({ facing: 'front' as Facing, legSwing: 0, armL: 0.05, armR: 0.05, bob: 2 + i, lift: 0, expression: 'sad' as Expression })),
+      frames: [0, 1].map((i) => ({
+        facing: 'front' as Facing,
+        legSwing: 0,
+        armL: 0.05,
+        armR: 0.05,
+        bob: 2 + i,
+        lift: 0,
+        expression: 'sad' as Expression,
+      })),
       rate: 1.5,
       loop: true,
     },
@@ -713,7 +735,11 @@ export function animDefs(): AnimDef[] {
 }
 
 /** Builds a sprite sheet canvas and returns frame rectangles per animation. */
-export function buildSheet(a: Appearance): { canvas: HTMLCanvasElement; anims: { name: string; frames: number[]; rate: number; loop: boolean }[]; frameCount: number } {
+export function buildSheet(a: Appearance): {
+  canvas: HTMLCanvasElement;
+  anims: { name: string; frames: number[]; rate: number; loop: boolean }[];
+  frameCount: number;
+} {
   const defs = animDefs();
   const total = defs.reduce((n, d) => n + d.frames.length, 0);
   const cols = 8;
@@ -753,7 +779,11 @@ export function buildSheet(a: Appearance): { canvas: HTMLCanvasElement; anims: {
 }
 
 /** Draws a single static avatar (used by React UI). */
-export function renderAvatar(canvas: HTMLCanvasElement, a: Appearance, opts: { expression?: Expression; ghost?: boolean; pose?: Partial<Pose>; scale?: number } = {}) {
+export function renderAvatar(
+  canvas: HTMLCanvasElement,
+  a: Appearance,
+  opts: { expression?: Expression; ghost?: boolean; pose?: Partial<Pose>; scale?: number } = {},
+) {
   const dpr = Math.min(2, window.devicePixelRatio || 1);
   const cssW = canvas.clientWidth || 72;
   const cssH = canvas.clientHeight || 100;

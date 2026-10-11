@@ -17,10 +17,27 @@ import { api } from '../networking/api';
 
 type Tab = 'color' | 'outfit' | 'hair' | 'accessory' | 'skin';
 
-const FUNNY_NAMES = ['Synergy Sam', 'Deck Daria', 'KPI Kevin', 'Intern Ian', 'Pivot Pat', 'Agile Ali', 'Q4 Quinn', 'Memo Mia'];
+const FUNNY_NAMES = [
+  'Synergy Sam',
+  'Deck Daria',
+  'KPI Kevin',
+  'Intern Ian',
+  'Pivot Pat',
+  'Agile Ali',
+  'Q4 Quinn',
+  'Memo Mia',
+];
 
 /** Character creator. Used as a full screen and inside the lobby. */
-export function CustomizePanel({ onDone, doneLabel = 'Save & Continue', takenColors = [] }: { onDone: () => void; doneLabel?: string; takenColors?: string[] }) {
+export function CustomizePanel({
+  onDone,
+  doneLabel = 'Save & Continue',
+  takenColors = [],
+}: {
+  onDone: () => void;
+  doneLabel?: string;
+  takenColors?: string[];
+}) {
   const session = useSession();
   const [name, setName] = useState(session.name);
   const [a, setA] = useState<Appearance>(session.appearance);
@@ -76,7 +93,9 @@ export function CustomizePanel({ onDone, doneLabel = 'Save & Continue', takenCol
           </div>
         </div>
         <label className="w-full">
-          <span className="mb-1 block text-xs font-bold tracking-widest text-mist/70 uppercase">Your name</span>
+          <span className="mb-1 block text-xs font-bold tracking-widest text-mist/70 uppercase">
+            Your name
+          </span>
           <input
             className="input font-display text-lg"
             value={name}
@@ -133,7 +152,9 @@ export function CustomizePanel({ onDone, doneLabel = 'Save & Continue', takenCol
                       className={`relative h-12 rounded-xl border-2 transition hover:scale-105 disabled:cursor-not-allowed disabled:opacity-25 ${a.color === c.id ? 'border-white ring-4 ring-corp-cyan/40' : 'border-white/10'}`}
                       style={{ background: c.hex }}
                     >
-                      {taken && <span className="absolute inset-0 flex items-center justify-center text-lg">✕</span>}
+                      {taken && (
+                        <span className="absolute inset-0 flex items-center justify-center text-lg">✕</span>
+                      )}
                     </button>
                   );
                 })}
@@ -142,7 +163,13 @@ export function CustomizePanel({ onDone, doneLabel = 'Save & Continue', takenCol
             <Section title="Shirt colour">
               <div className="grid grid-cols-8 gap-2">
                 {SHIRT_COLORS.map((c) => (
-                  <button key={c.id} aria-label={c.id} onClick={() => upd({ shirt: c.id })} className={`h-10 rounded-lg border-2 ${a.shirt === c.id ? 'border-white ring-4 ring-corp-cyan/40' : 'border-white/10'}`} style={{ background: c.hex }} />
+                  <button
+                    key={c.id}
+                    aria-label={c.id}
+                    onClick={() => upd({ shirt: c.id })}
+                    className={`h-10 rounded-lg border-2 ${a.shirt === c.id ? 'border-white ring-4 ring-corp-cyan/40' : 'border-white/10'}`}
+                    style={{ background: c.hex }}
+                  />
                 ))}
               </div>
             </Section>
@@ -151,7 +178,12 @@ export function CustomizePanel({ onDone, doneLabel = 'Save & Continue', takenCol
         {tab === 'outfit' && (
           <Grid>
             {OUTFITS.map((o) => (
-              <Option key={o.id} active={a.outfit === o.id} onClick={() => upd({ outfit: o.id })} label={o.name}>
+              <Option
+                key={o.id}
+                active={a.outfit === o.id}
+                onClick={() => upd({ outfit: o.id })}
+                label={o.name}
+              >
                 <Avatar appearance={{ ...a, outfit: o.id }} size={56} />
               </Option>
             ))}
@@ -161,7 +193,12 @@ export function CustomizePanel({ onDone, doneLabel = 'Save & Continue', takenCol
           <div className="space-y-5">
             <Grid>
               {HAIRSTYLES.map((h) => (
-                <Option key={h.id} active={a.hair === h.id} onClick={() => upd({ hair: h.id })} label={h.name}>
+                <Option
+                  key={h.id}
+                  active={a.hair === h.id}
+                  onClick={() => upd({ hair: h.id })}
+                  label={h.name}
+                >
                   <Avatar appearance={{ ...a, hair: h.id }} size={56} />
                 </Option>
               ))}
@@ -169,7 +206,13 @@ export function CustomizePanel({ onDone, doneLabel = 'Save & Continue', takenCol
             <Section title="Hair colour">
               <div className="flex gap-2">
                 {HAIR_COLORS.map((c) => (
-                  <button key={c.id} aria-label={c.id} onClick={() => upd({ hairColor: c.id })} className={`h-10 w-10 rounded-full border-2 ${a.hairColor === c.id ? 'border-white ring-4 ring-corp-cyan/40' : 'border-white/10'}`} style={{ background: c.hex }} />
+                  <button
+                    key={c.id}
+                    aria-label={c.id}
+                    onClick={() => upd({ hairColor: c.id })}
+                    className={`h-10 w-10 rounded-full border-2 ${a.hairColor === c.id ? 'border-white ring-4 ring-corp-cyan/40' : 'border-white/10'}`}
+                    style={{ background: c.hex }}
+                  />
                 ))}
               </div>
             </Section>
@@ -178,7 +221,12 @@ export function CustomizePanel({ onDone, doneLabel = 'Save & Continue', takenCol
         {tab === 'accessory' && (
           <Grid>
             {ACCESSORIES.map((o) => (
-              <Option key={o.id} active={a.accessory === o.id} onClick={() => upd({ accessory: o.id })} label={o.name}>
+              <Option
+                key={o.id}
+                active={a.accessory === o.id}
+                onClick={() => upd({ accessory: o.id })}
+                label={o.name}
+              >
                 <Avatar appearance={{ ...a, accessory: o.id }} size={56} />
               </Option>
             ))}
@@ -209,7 +257,17 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 function Grid({ children }: { children: React.ReactNode }) {
   return <div className="grid grid-cols-3 gap-3 sm:grid-cols-4">{children}</div>;
 }
-function Option({ active, onClick, label, children }: { active: boolean; onClick: () => void; label: string; children: React.ReactNode }) {
+function Option({
+  active,
+  onClick,
+  label,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  label: string;
+  children: React.ReactNode;
+}) {
   return (
     <button
       onClick={onClick}

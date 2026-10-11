@@ -18,7 +18,14 @@ export function ensureCharacterTexture(scene: Phaser.Scene, a: Appearance): stri
   let total = 0;
   for (const an of anims) total = Math.max(total, ...an.frames);
   for (let i = 0; i <= total; i++) {
-    tex.add(i, 0, (i % cols) * FRAME_W * SHEET_SCALE, Math.floor(i / cols) * FRAME_H * SHEET_SCALE, FRAME_W * SHEET_SCALE, FRAME_H * SHEET_SCALE);
+    tex.add(
+      i,
+      0,
+      (i % cols) * FRAME_W * SHEET_SCALE,
+      Math.floor(i / cols) * FRAME_H * SHEET_SCALE,
+      FRAME_W * SHEET_SCALE,
+      FRAME_H * SHEET_SCALE,
+    );
   }
   for (const an of anims) {
     scene.anims.create({
@@ -97,7 +104,15 @@ export class CharacterView {
   setTeammateMarker(on: boolean) {
     if (on && !this.marker) {
       this.marker = this.scene.add
-        .text(0, 0, '▼ MANAGER', { fontFamily: 'Fredoka, sans-serif', fontSize: '10px', fontStyle: '700', color: '#ff5662', stroke: '#2a0a10', strokeThickness: 3, resolution: 2 })
+        .text(0, 0, '▼ MANAGER', {
+          fontFamily: 'Fredoka, sans-serif',
+          fontSize: '10px',
+          fontStyle: '700',
+          color: '#ff5662',
+          stroke: '#2a0a10',
+          strokeThickness: 3,
+          resolution: 2,
+        })
         .setOrigin(0.5, 1)
         .setDepth(9_000_001);
       this.label.setColor('#ff8a90');
@@ -110,7 +125,10 @@ export class CharacterView {
 
   setSpeaking(on: boolean) {
     if (on && !this.speaking) {
-      this.speaking = this.scene.add.text(0, 0, '🔊', { fontSize: '12px', resolution: 2 }).setOrigin(0.5, 1).setDepth(9_000_002);
+      this.speaking = this.scene.add
+        .text(0, 0, '🔊', { fontSize: '12px', resolution: 2 })
+        .setOrigin(0.5, 1)
+        .setDepth(9_000_002);
     } else if (!on && this.speaking) {
       this.speaking.destroy();
       this.speaking = null;
@@ -159,7 +177,8 @@ export class CharacterView {
     const ghost = this.mode === 'ghost';
     this.shadow.setVisible(!ghost);
     this.sprite.setAlpha(ghost ? 0.62 : 1);
-    const a = this.container.alpha + ((this.visibleTarget ? 1 : 0) - this.container.alpha) * Math.min(1, dtMs / 120);
+    const a =
+      this.container.alpha + ((this.visibleTarget ? 1 : 0) - this.container.alpha) * Math.min(1, dtMs / 120);
     this.container.setAlpha(a);
     const top = sy - 64;
     this.label.setPosition(sx, top).setAlpha(labelVisible ? a : 0);

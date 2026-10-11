@@ -1,0 +1,76 @@
+# Corporate Sus — full stack for a small self-hosted launch.
+#   cp .env.example .env   (set SESSION_SECRET, PUBLIC_DOMAIN, LIVEKIT keys)
+#   docker compose -f infrastructure/docker/docker-compose.yml --env-file .env up -d --build
+name: corporate-sus
+
+services:
+  game:
+    build:
+      context: ../..
+      dockerfile: infrastructure/docker/Dockerfile
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 2567
+      SERVE_WEB: "true"
+      PUBLIC_ORIGIN: https://${PUBLIC_DOMAIN:?set PUBLIC_DOMAIN}
+      SESSION_SECRET: ${SESSION_SECRET:?set SESSION_SECRET}
+      DATABASE_URL: postgresql://corp:${POSTGRES_PASSWORD:-corp}@postgres:5432/corporate_sus
+      REDIS_URL: redis://redis:6379
+      LIVEKIT_URL: wss://${PUBLIC_DOMAIN}/livekit
+      LIVEKIT_API_KEY: ${LIVEKIT_API_KEY:-}
+      LIVEKIT_API_SECRET: ${LIVEKIT_API_SECRET:-}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    expose: ["2567"]
+
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: corp
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-corp}
+      POSTGRES_DB: corporate_sus
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U corp -d corporate_sus"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+
+  # Optional self-hosted voice. Remove this service if you use LiveKit Cloud
+  # and point LIVEKIT_URL at your cloud project instead.
+  livekit:
+    image: livekit/livekit-server:v1.9
+    restart: unless-stopped
+    command: ["--config", "/etc/livekit.yaml"]
+    environment:
+      LIVEKIT_KEYS: "${LIVEKIT_API_KEY}: ${LIVEKIT_API_SECRET}"
+    volumes: [./livekit.yaml:/etc/livekit.yaml:ro]
+    network_mode: host # WebRTC media needs direct UDP access
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports: ["80:80", "443:443", "443:443/udp"]
+    environment:
+      PUBLIC_DOMAIN: ${PUBLIC_DOMAIN}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on: [game]
+    extra_hosts: ["host.docker.internal:host-gateway"]
+
+volumes:
+  pgdata:
+  caddy_data:
+  caddy_config:

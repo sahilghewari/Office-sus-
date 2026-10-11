@@ -1,4 +1,11 @@
-import { DEFAULT_APPEARANCE, CHARACTER_COLORS, TICK_MS, type ClientMessage, type ServerMessage, type StateMsg } from '@corp/shared';
+import {
+  DEFAULT_APPEARANCE,
+  CHARACTER_COLORS,
+  TICK_MS,
+  type ClientMessage,
+  type ServerMessage,
+  type StateMsg,
+} from '@corp/shared';
 import { GameRoom, type Conn, type Player } from '../../apps/server/src/rooms/GameRoom';
 
 /** In-process harness: a real GameRoom driven by a fake clock and fake sockets. */
@@ -47,7 +54,13 @@ export class Sim {
   add(name: string): Player {
     const c = new FakeConn();
     const i = this.players.length;
-    const res = this.room.join(`g_${name}`, name, { ...DEFAULT_APPEARANCE, color: CHARACTER_COLORS[i].id }, false, c);
+    const res = this.room.join(
+      `g_${name}`,
+      name,
+      { ...DEFAULT_APPEARANCE, color: CHARACTER_COLORS[i].id },
+      false,
+      c,
+    );
     if (!('player' in res)) throw new Error(res.message);
     this.conns.set(res.player.publicId, c);
     this.players.push(res.player);
@@ -74,7 +87,12 @@ export class Sim {
   /** Lobby with N players, everyone ready, match started and ACTIVE. */
   startMatch(n: number, managers?: string[]): Player[] {
     const ps = Array.from({ length: n }, (_, i) => this.add(`P${i + 1}`));
-    if (managers) this.send(ps[0], { t: 'test', cmd: 'forceManagers', args: { ids: managers.map((nm) => ps.find((p) => p.name === nm)!.publicId) } });
+    if (managers)
+      this.send(ps[0], {
+        t: 'test',
+        cmd: 'forceManagers',
+        args: { ids: managers.map((nm) => ps.find((p) => p.name === nm)!.publicId) },
+      });
     for (const p of ps) this.send(p, { t: 'ready', ready: true });
     this.send(ps[0], { t: 'start' });
     this.advance(3100); // STARTING

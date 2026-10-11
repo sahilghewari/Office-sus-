@@ -20,7 +20,9 @@ export async function createRoom(page: Page): Promise<string> {
 }
 
 export async function store<T>(page: Page, fn: string): Promise<T> {
-  return page.evaluate(`(() => { const g = window.__cs.useGame.getState(); return (${fn}); })()`) as Promise<T>;
+  return page.evaluate(
+    `(() => { const g = window.__cs.useGame.getState(); return (${fn}); })()`,
+  ) as Promise<T>;
 }
 
 /** Sends a raw protocol message through the page's live connection (dev/test only). */
@@ -58,7 +60,10 @@ async function drag(page: Page, fromId: string, toId: string, holdMs = 0) {
 export async function solveOpenTask(page: Page, opts: { respectMinTime?: boolean } = {}) {
   await expect(page.getByTestId('task-overlay')).toBeVisible();
   await page.waitForTimeout(600); // let the pop-in animation settle before aiming drags
-  const { type, data } = await store<{ type: TaskType; data: any }>(page, '({ type: g.task.taskType, data: g.task.data })');
+  const { type, data } = await store<{ type: TaskType; data: any }>(
+    page,
+    '({ type: g.task.taskType, data: g.task.data })',
+  );
   // The server rejects impossibly fast completions; a scripted player waits like a human would.
   if (opts.respectMinTime !== false) await page.waitForTimeout(TASK_INFO[type].minMs);
   const ans: any = solveFromData(type, data);
@@ -86,7 +91,8 @@ export async function solveOpenTask(page: Page, opts: { respectMinTime?: boolean
       }
       break;
     case 'coffee':
-      for (const [ing, n] of Object.entries(ans as Record<string, number>)) for (let i = 0; i < n; i++) await page.getByTestId(`add-${ing}`).click();
+      for (const [ing, n] of Object.entries(ans as Record<string, number>))
+        for (let i = 0; i < n; i++) await page.getByTestId(`add-${ing}`).click();
       await page.getByTestId('brew').click();
       break;
     case 'printer':
@@ -106,7 +112,9 @@ export async function solveOpenTask(page: Page, opts: { respectMinTime?: boolean
         const id = ans.order[target];
         for (let k = 0; k < 4; k++) {
           const order: string[] = await page.evaluate(() =>
-            [...document.querySelectorAll('[data-testid^="up-"]')].map((b) => (b as HTMLElement).dataset.testid!.slice(3)),
+            [...document.querySelectorAll('[data-testid^="up-"]')].map((b) =>
+              (b as HTMLElement).dataset.testid!.slice(3),
+            ),
           );
           const at = order.indexOf(id);
           if (at <= target) break;

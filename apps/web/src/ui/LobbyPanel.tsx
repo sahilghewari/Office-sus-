@@ -40,7 +40,11 @@ export function LobbyPanel() {
     const url = inviteLink(s.code);
     if (navigator.share) {
       try {
-        await navigator.share({ title: 'Corporate Sus', text: `Join my office in Corporate Sus! Code ${s.code}`, url });
+        await navigator.share({
+          title: 'Corporate Sus',
+          text: `Join my office in Corporate Sus! Code ${s.code}`,
+          url,
+        });
         return;
       } catch {}
     }
@@ -50,16 +54,30 @@ export function LobbyPanel() {
   return (
     <>
       {/* left column: room + players */}
-      <aside className="panel absolute top-4 left-4 z-30 flex max-h-[calc(100%-9rem)] w-[340px] flex-col p-4" data-testid="lobby-panel">
+      <aside
+        className="panel absolute top-4 left-4 z-30 flex max-h-[calc(100%-9rem)] w-[340px] flex-col p-4"
+        data-testid="lobby-panel"
+      >
         <div className="mb-3 flex items-start justify-between">
           <div>
-            <div className="text-[11px] font-bold tracking-widest text-mist/70 uppercase">{s.isPublic ? 'Public office' : 'Private office'} code</div>
-            <button className="font-mono text-3xl font-bold tracking-[0.25em] text-corp-yellow hover:text-white" onClick={() => copy('code')} title="Copy code" data-testid="room-code">
+            <div className="text-[11px] font-bold tracking-widest text-mist/70 uppercase">
+              {s.isPublic ? 'Public office' : 'Private office'} code
+            </div>
+            <button
+              className="font-mono text-3xl font-bold tracking-[0.25em] text-corp-yellow hover:text-white"
+              onClick={() => copy('code')}
+              title="Copy code"
+              data-testid="room-code"
+            >
               {s.code}
             </button>
           </div>
           <div className="flex flex-col items-end gap-1 text-xs">
-            <span className={`chip ${ping < 120 ? 'bg-corp-mint/20 text-corp-mint' : ping < 250 ? 'bg-corp-yellow/20 text-corp-yellow' : 'bg-corp-red/20 text-red-300'}`}>● {ping} ms</span>
+            <span
+              className={`chip ${ping < 120 ? 'bg-corp-mint/20 text-corp-mint' : ping < 250 ? 'bg-corp-yellow/20 text-corp-yellow' : 'bg-corp-red/20 text-red-300'}`}
+            >
+              ● {ping} ms
+            </span>
             <span className="text-mist/60">
               {connected.length}/{s.settings.maxPlayers} players
             </span>
@@ -76,25 +94,36 @@ export function LobbyPanel() {
 
         <div className="mb-2 flex gap-1 rounded-xl bg-black/20 p-1">
           {(['players', 'settings'] as const).map((t) => (
-            <button key={t} className={`font-display flex-1 rounded-lg py-1.5 text-sm font-semibold ${tab === t ? 'bg-white/15' : 'text-mist/70 hover:bg-white/5'}`} onClick={() => setTab(t)}>
+            <button
+              key={t}
+              className={`font-display flex-1 rounded-lg py-1.5 text-sm font-semibold ${tab === t ? 'bg-white/15' : 'text-mist/70 hover:bg-white/5'}`}
+              onClick={() => setTab(t)}
+            >
               {t === 'players' ? `Players (${connected.length})` : isHost ? 'Match settings' : 'Settings'}
             </button>
           ))}
         </div>
 
         {tab === 'players' ? (
-          <ul className="scroll-thin -mr-2 min-h-0 flex-1 space-y-1.5 overflow-y-auto pr-2" data-testid="player-list">
+          <ul
+            className="scroll-thin -mr-2 min-h-0 flex-1 space-y-1.5 overflow-y-auto pr-2"
+            data-testid="player-list"
+          >
             {s.players.map((p) => (
               <PlayerRow key={p.id} p={p} me={p.id === s.you.id} host={isHost} />
             ))}
             {s.spectators.map((sp) => (
-              <li key={sp.id} className="flex items-center gap-2 rounded-xl bg-white/5 px-3 py-2 text-sm text-mist/70">
+              <li
+                key={sp.id}
+                className="flex items-center gap-2 rounded-xl bg-white/5 px-3 py-2 text-sm text-mist/70"
+              >
                 👀 {sp.name} <span className="text-xs">(spectating)</span>
               </li>
             ))}
             {connected.length < MIN_PLAYERS && (
               <li className="rounded-xl border border-dashed border-white/15 px-3 py-3 text-center text-sm text-mist/60">
-                Waiting for {MIN_PLAYERS - connected.length} more coworker{MIN_PLAYERS - connected.length > 1 ? 's' : ''}…
+                Waiting for {MIN_PLAYERS - connected.length} more coworker
+                {MIN_PLAYERS - connected.length > 1 ? 's' : ''}…
               </li>
             )}
           </ul>
@@ -103,7 +132,11 @@ export function LobbyPanel() {
         )}
 
         <div className="mt-3 flex gap-2 border-t border-white/10 pt-3">
-          <button className="btn btn-ghost btn-sm" onClick={() => set({ customizeOpen: true })} data-testid="lobby-customize">
+          <button
+            className="btn btn-ghost btn-sm"
+            onClick={() => set({ customizeOpen: true })}
+            data-testid="lobby-customize"
+          >
             👔 Outfit
           </button>
           <button
@@ -121,10 +154,19 @@ export function LobbyPanel() {
 
       {/* bottom centre: ready / start */}
       <div className="absolute bottom-6 left-1/2 z-30 flex -translate-x-1/2 flex-col items-center gap-2">
-        {s.autoStartAt && <div className="font-display anim-pop rounded-full bg-corp-mint px-4 py-1 font-bold text-ink">Public match starting in {secondsLeft(s.autoStartAt, now)}…</div>}
+        {s.autoStartAt && (
+          <div className="font-display anim-pop rounded-full bg-corp-mint px-4 py-1 font-bold text-ink">
+            Public match starting in {secondsLeft(s.autoStartAt, now)}…
+          </div>
+        )}
         <div className="hud flex items-center gap-3 p-2">
           {isHost ? (
-            <button className="btn btn-yellow btn-lg" disabled={!canStart} onClick={() => send({ t: 'start' })} data-testid="start-game">
+            <button
+              className="btn btn-yellow btn-lg"
+              disabled={!canStart}
+              onClick={() => send({ t: 'start' })}
+              data-testid="start-game"
+            >
               ▶ START MATCH
             </button>
           ) : (
@@ -175,7 +217,9 @@ function PlayerRow({ p, me, host }: { p: PublicPlayer; me: boolean; host: boolea
   const key = muteKey(p.name, p.appearance.color);
   const isMuted = muted.includes(key);
   return (
-    <li className={`relative flex items-center gap-2 rounded-xl px-2 py-1.5 ${me ? 'bg-corp-blue/20 ring-1 ring-corp-blue/50' : 'bg-white/5'} ${p.connected ? '' : 'opacity-50'}`}>
+    <li
+      className={`relative flex items-center gap-2 rounded-xl px-2 py-1.5 ${me ? 'bg-corp-blue/20 ring-1 ring-corp-blue/50' : 'bg-white/5'} ${p.connected ? '' : 'opacity-50'}`}
+    >
       <div className="h-11 w-9 overflow-hidden">
         <Avatar appearance={p.appearance} size={34} />
       </div>
@@ -184,24 +228,45 @@ function PlayerRow({ p, me, host }: { p: PublicPlayer; me: boolean; host: boolea
           {p.isHost && <span title="Host">👑</span>}
           <span className="truncate">{p.name}</span>
           {me && <span className="text-xs text-corp-cyan">(you)</span>}
-          {p.registered && <span title="Registered account" className="text-xs">✔︎</span>}
+          {p.registered && (
+            <span title="Registered account" className="text-xs">
+              ✔︎
+            </span>
+          )}
         </div>
-        <div className="text-[11px] text-mist/60">{p.connected ? `${p.ping || '–'} ms` : 'reconnecting…'}</div>
+        <div className="text-[11px] text-mist/60">
+          {p.connected ? `${p.ping || '–'} ms` : 'reconnecting…'}
+        </div>
       </div>
-      <span className={`chip ${p.ready ? 'bg-corp-mint/20 text-corp-mint' : 'bg-white/10 text-mist/60'}`}>{p.isHost ? 'host' : p.ready ? 'ready' : 'not ready'}</span>
+      <span className={`chip ${p.ready ? 'bg-corp-mint/20 text-corp-mint' : 'bg-white/10 text-mist/60'}`}>
+        {p.isHost ? 'host' : p.ready ? 'ready' : 'not ready'}
+      </span>
       {!me && (
-        <button className="rounded-lg px-1.5 py-1 text-mist hover:bg-white/10" aria-label={`Options for ${p.name}`} onClick={() => setMenu((m) => !m)}>
+        <button
+          className="rounded-lg px-1.5 py-1 text-mist hover:bg-white/10"
+          aria-label={`Options for ${p.name}`}
+          onClick={() => setMenu((m) => !m)}
+        >
           ⋯
         </button>
       )}
       {menu && !me && (
-        <div className="panel anim-pop absolute top-full right-0 z-40 mt-1 flex w-44 flex-col p-1 text-sm" onMouseLeave={() => setMenu(false)}>
-          <button className="rounded-lg px-3 py-2 text-left hover:bg-white/10" onClick={() => setS({ mutedPlayers: isMuted ? muted.filter((m) => m !== key) : [...muted, key] })}>
+        <div
+          className="panel anim-pop absolute top-full right-0 z-40 mt-1 flex w-44 flex-col p-1 text-sm"
+          onMouseLeave={() => setMenu(false)}
+        >
+          <button
+            className="rounded-lg px-3 py-2 text-left hover:bg-white/10"
+            onClick={() => setS({ mutedPlayers: isMuted ? muted.filter((m) => m !== key) : [...muted, key] })}
+          >
             {isMuted ? '🔈 Unmute' : '🔇 Mute (chat + voice)'}
           </button>
           <ReportButton p={p} onDone={() => setMenu(false)} />
           {host && (
-            <button className="rounded-lg px-3 py-2 text-left text-red-300 hover:bg-white/10" onClick={() => send({ t: 'kick', target: p.id })}>
+            <button
+              className="rounded-lg px-3 py-2 text-left text-red-300 hover:bg-white/10"
+              onClick={() => send({ t: 'kick', target: p.id })}
+            >
               🥾 Remove from lobby
             </button>
           )}
@@ -237,17 +302,42 @@ export function ReportButton({ p, onDone }: { p: { id: string; name: string }; o
   );
 }
 
-function SettingsForm({ settings, editable, players }: { settings: GameSettings; editable: boolean; players: number }) {
+function SettingsForm({
+  settings,
+  editable,
+  players,
+}: {
+  settings: GameSettings;
+  editable: boolean;
+  players: number;
+}) {
   const upd = (p: Partial<GameSettings>) => editable && send({ t: 'settings', settings: p });
-  const num = (label: string, key: keyof GameSettings, min: number, max: number, step: number, fmt: (v: number) => string = String) => (
+  const num = (
+    label: string,
+    key: keyof GameSettings,
+    min: number,
+    max: number,
+    step: number,
+    fmt: (v: number) => string = String,
+  ) => (
     <label className="flex items-center justify-between gap-3 py-1 text-sm">
       <span className="text-mist">{label}</span>
       <span className="flex items-center gap-1">
-        <button className="h-7 w-7 rounded-lg bg-white/10 hover:bg-white/20 disabled:opacity-30" disabled={!editable || (settings[key] as number) <= min} onClick={() => upd({ [key]: Math.round(((settings[key] as number) - step) * 100) / 100 })} aria-label={`Decrease ${label}`}>
+        <button
+          className="h-7 w-7 rounded-lg bg-white/10 hover:bg-white/20 disabled:opacity-30"
+          disabled={!editable || (settings[key] as number) <= min}
+          onClick={() => upd({ [key]: Math.round(((settings[key] as number) - step) * 100) / 100 })}
+          aria-label={`Decrease ${label}`}
+        >
           −
         </button>
         <span className="font-mono w-16 text-center font-bold">{fmt(settings[key] as number)}</span>
-        <button className="h-7 w-7 rounded-lg bg-white/10 hover:bg-white/20 disabled:opacity-30" disabled={!editable || (settings[key] as number) >= max} onClick={() => upd({ [key]: Math.round(((settings[key] as number) + step) * 100) / 100 })} aria-label={`Increase ${label}`}>
+        <button
+          className="h-7 w-7 rounded-lg bg-white/10 hover:bg-white/20 disabled:opacity-30"
+          disabled={!editable || (settings[key] as number) >= max}
+          onClick={() => upd({ [key]: Math.round(((settings[key] as number) + step) * 100) / 100 })}
+          aria-label={`Increase ${label}`}
+        >
           +
         </button>
       </span>
@@ -256,20 +346,33 @@ function SettingsForm({ settings, editable, players }: { settings: GameSettings;
   const toggle = (label: string, key: keyof GameSettings) => (
     <label className="flex items-center justify-between py-1 text-sm">
       <span className="text-mist">{label}</span>
-      <input type="checkbox" className="h-5 w-5 accent-[#2ee6f0]" disabled={!editable} checked={settings[key] as boolean} onChange={(e) => upd({ [key]: e.target.checked })} />
+      <input
+        type="checkbox"
+        className="h-5 w-5 accent-[#2ee6f0]"
+        disabled={!editable}
+        checked={settings[key] as boolean}
+        onChange={(e) => upd({ [key]: e.target.checked })}
+      />
     </label>
   );
   const eff = effectiveManagerCount(settings, Math.max(4, players));
   return (
     <div className="scroll-thin -mr-2 min-h-0 flex-1 overflow-y-auto pr-2" data-testid="settings-form">
-      {!editable && <p className="mb-2 rounded-lg bg-white/5 p-2 text-xs text-mist/70">Only the host can change these.</p>}
+      {!editable && (
+        <p className="mb-2 rounded-lg bg-white/5 p-2 text-xs text-mist/70">Only the host can change these.</p>
+      )}
       {num('Max players', 'maxPlayers', 4, 10, 1)}
       {num('Toxic Managers', 'managers', 0, 3, 1, (v) => (v === 0 ? `auto (${eff})` : String(v)))}
       {num('Tasks per player', 'tasksPerPlayer', 1, 6, 1)}
       {num('Elimination cooldown', 'killCooldown', 10, 60, 5, (v) => `${v}s`)}
       <label className="flex items-center justify-between py-1 text-sm">
         <span className="text-mist">Elimination range</span>
-        <select className="rounded-lg bg-white/10 px-2 py-1 text-sm" disabled={!editable} value={settings.killRange} onChange={(e) => upd({ killRange: e.target.value as GameSettings['killRange'] })}>
+        <select
+          className="rounded-lg bg-white/10 px-2 py-1 text-sm"
+          disabled={!editable}
+          value={settings.killRange}
+          onChange={(e) => upd({ killRange: e.target.value as GameSettings['killRange'] })}
+        >
           <option value="short">Short</option>
           <option value="normal">Normal</option>
           <option value="long">Long</option>

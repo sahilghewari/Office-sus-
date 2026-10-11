@@ -30,7 +30,19 @@ export type RoomId =
   | 'hallN'
   | 'hallS';
 
-export type FloorStyle = 'concrete' | 'carpetBlue' | 'marble' | 'carpetPurple' | 'carpetDark' | 'wood' | 'carpetConf' | 'carpetNeon' | 'tile' | 'checker' | 'hazard' | 'hall';
+export type FloorStyle =
+  | 'concrete'
+  | 'carpetBlue'
+  | 'marble'
+  | 'carpetPurple'
+  | 'carpetDark'
+  | 'wood'
+  | 'carpetConf'
+  | 'carpetNeon'
+  | 'tile'
+  | 'checker'
+  | 'hazard'
+  | 'hall';
 
 export interface RoomDef {
   id: RoomId;
@@ -78,24 +90,153 @@ export interface DoorDef {
 }
 
 export const DOORS: DoorDef[] = [
-  { id: 'd-server', tiles: [[4, 10], [5, 10]], orient: 'h' },
-  { id: 'd-it', tiles: [[15, 10], [16, 10]], orient: 'h' },
-  { id: 'd-ceo', tiles: [[25, 10], [26, 10]], orient: 'h' },
-  { id: 'd-hr', tiles: [[36, 10], [37, 10]], orient: 'h' },
-  { id: 'd-sec', tiles: [[45, 10], [46, 10]], orient: 'h' },
-  { id: 'd-ws-n1', tiles: [[6, 13], [7, 13]], orient: 'h' },
-  { id: 'd-ws-n2', tiles: [[18, 13], [19, 13]], orient: 'h' },
-  { id: 'd-conf-n', tiles: [[31, 13], [32, 13]], orient: 'h', lockable: true },
-  { id: 'd-game-n', tiles: [[43, 13], [44, 13]], orient: 'h' },
-  { id: 'd-conf-w', tiles: [[25, 19], [25, 20]], orient: 'v', lockable: true },
-  { id: 'd-ws-s', tiles: [[10, 25], [11, 25]], orient: 'h' },
-  { id: 'd-conf-s', tiles: [[31, 25], [32, 25]], orient: 'h', lockable: true },
-  { id: 'd-game-s', tiles: [[43, 25], [44, 25]], orient: 'h' },
-  { id: 'd-print', tiles: [[5, 28], [6, 28]], orient: 'h' },
-  { id: 'd-recep', tiles: [[18, 28], [19, 28]], orient: 'h' },
-  { id: 'd-cafe', tiles: [[32, 28], [33, 28]], orient: 'h' },
-  { id: 'd-maint', tiles: [[44, 28], [45, 28]], orient: 'h' },
-  { id: 'd-recep-cafe', tiles: [[26, 33], [26, 34]], orient: 'v' },
+  {
+    id: 'd-server',
+    tiles: [
+      [4, 10],
+      [5, 10],
+    ],
+    orient: 'h',
+  },
+  {
+    id: 'd-it',
+    tiles: [
+      [15, 10],
+      [16, 10],
+    ],
+    orient: 'h',
+  },
+  {
+    id: 'd-ceo',
+    tiles: [
+      [25, 10],
+      [26, 10],
+    ],
+    orient: 'h',
+  },
+  {
+    id: 'd-hr',
+    tiles: [
+      [36, 10],
+      [37, 10],
+    ],
+    orient: 'h',
+  },
+  {
+    id: 'd-sec',
+    tiles: [
+      [45, 10],
+      [46, 10],
+    ],
+    orient: 'h',
+  },
+  {
+    id: 'd-ws-n1',
+    tiles: [
+      [6, 13],
+      [7, 13],
+    ],
+    orient: 'h',
+  },
+  {
+    id: 'd-ws-n2',
+    tiles: [
+      [18, 13],
+      [19, 13],
+    ],
+    orient: 'h',
+  },
+  {
+    id: 'd-conf-n',
+    tiles: [
+      [31, 13],
+      [32, 13],
+    ],
+    orient: 'h',
+    lockable: true,
+  },
+  {
+    id: 'd-game-n',
+    tiles: [
+      [43, 13],
+      [44, 13],
+    ],
+    orient: 'h',
+  },
+  {
+    id: 'd-conf-w',
+    tiles: [
+      [25, 19],
+      [25, 20],
+    ],
+    orient: 'v',
+    lockable: true,
+  },
+  {
+    id: 'd-ws-s',
+    tiles: [
+      [10, 25],
+      [11, 25],
+    ],
+    orient: 'h',
+  },
+  {
+    id: 'd-conf-s',
+    tiles: [
+      [31, 25],
+      [32, 25],
+    ],
+    orient: 'h',
+    lockable: true,
+  },
+  {
+    id: 'd-game-s',
+    tiles: [
+      [43, 25],
+      [44, 25],
+    ],
+    orient: 'h',
+  },
+  {
+    id: 'd-print',
+    tiles: [
+      [5, 28],
+      [6, 28],
+    ],
+    orient: 'h',
+  },
+  {
+    id: 'd-recep',
+    tiles: [
+      [18, 28],
+      [19, 28],
+    ],
+    orient: 'h',
+  },
+  {
+    id: 'd-cafe',
+    tiles: [
+      [32, 28],
+      [33, 28],
+    ],
+    orient: 'h',
+  },
+  {
+    id: 'd-maint',
+    tiles: [
+      [44, 28],
+      [45, 28],
+    ],
+    orient: 'h',
+  },
+  {
+    id: 'd-recep-cafe',
+    tiles: [
+      [26, 33],
+      [26, 34],
+    ],
+    orient: 'v',
+  },
 ];
 
 /** Tile kinds in the generated grid. */
@@ -185,7 +326,14 @@ export interface Furniture {
 }
 
 let fid = 0;
-function f(kind: FurnitureKind, x: number, y: number, w: number, h: number, extra: Partial<Furniture> = {}): Furniture {
+function f(
+  kind: FurnitureKind,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+  extra: Partial<Furniture> = {},
+): Furniture {
   return { id: `f${fid++}`, kind, x, y, w, h, ...extra };
 }
 
@@ -390,12 +538,7 @@ export const FURNITURE: Furniture[] = [
 // Interactive stations
 // ---------------------------------------------------------------------------
 
-export type StationKind =
-  | 'task'
-  | 'emergency'
-  | 'fix'
-  | 'cctv'
-  | 'vent';
+export type StationKind = 'task' | 'emergency' | 'fix' | 'cctv' | 'vent';
 
 export type FixTarget =
   | 'wifi'
@@ -428,39 +571,226 @@ export interface Station {
 
 export const STATIONS: Station[] = [
   // tasks
-  { id: 't-wifi', kind: 'task', taskType: 'wifi', name: 'Network Switch', room: 'it', x: 13.45, y: 2.55, electronic: true },
-  { id: 't-expense', kind: 'task', taskType: 'expense', name: 'Accounting Desk', room: 'workspace', x: 3.25, y: 15.35, electronic: true, network: true },
-  { id: 't-coffee', kind: 'task', taskType: 'coffee', name: 'Coffee Machine', room: 'cafeteria', x: 28.9, y: 30.6 },
-  { id: 't-printer', kind: 'task', taskType: 'printer', name: 'Office Printer', room: 'printer', x: 4.35, y: 30.75, electronic: true },
-  { id: 't-meeting', kind: 'task', taskType: 'meeting', name: 'Meeting Laptop', room: 'conference', x: 28.1, y: 19.0, electronic: true, network: true },
-  { id: 't-files', kind: 'task', taskType: 'files', name: 'Filing Cabinets', room: 'workspace', x: 21.6, y: 15.5 },
-  { id: 't-emails', kind: 'task', taskType: 'emails', name: "CEO's Computer", room: 'ceo', x: 25.4, y: 4.35, electronic: true, network: true },
-  { id: 't-server', kind: 'task', taskType: 'server', name: 'Server Terminal', room: 'server', x: 5.0, y: 2.5, electronic: true },
-  { id: 't-excel', kind: 'task', taskType: 'excel', name: 'Finance Workstation', room: 'workspace', x: 9.55, y: 23.6, electronic: true, network: true },
-  { id: 't-idscan', kind: 'task', taskType: 'idscan', name: 'ID Scanner', room: 'reception', x: 13.4, y: 30.7, electronic: true },
-  { id: 't-idscan2', kind: 'task', taskType: 'idscan', name: 'Security ID Scanner', room: 'security', x: 43.4, y: 5.5, electronic: true },
-  { id: 't-expense2', kind: 'task', taskType: 'expense', name: 'HR Reimbursements', room: 'hr', x: 33.75, y: 6.6, electronic: true, network: true },
-  { id: 't-emails2', kind: 'task', taskType: 'emails', name: 'Help Desk Inbox', room: 'it', x: 12.95, y: 7.4, electronic: true, network: true },
-  { id: 't-excel2', kind: 'task', taskType: 'excel', name: 'Budget Spreadsheet', room: 'workspace', x: 15.0, y: 15.35, electronic: true, network: true },
+  {
+    id: 't-wifi',
+    kind: 'task',
+    taskType: 'wifi',
+    name: 'Network Switch',
+    room: 'it',
+    x: 13.45,
+    y: 2.55,
+    electronic: true,
+  },
+  {
+    id: 't-expense',
+    kind: 'task',
+    taskType: 'expense',
+    name: 'Accounting Desk',
+    room: 'workspace',
+    x: 3.25,
+    y: 15.35,
+    electronic: true,
+    network: true,
+  },
+  {
+    id: 't-coffee',
+    kind: 'task',
+    taskType: 'coffee',
+    name: 'Coffee Machine',
+    room: 'cafeteria',
+    x: 28.9,
+    y: 30.6,
+  },
+  {
+    id: 't-printer',
+    kind: 'task',
+    taskType: 'printer',
+    name: 'Office Printer',
+    room: 'printer',
+    x: 4.35,
+    y: 30.75,
+    electronic: true,
+  },
+  {
+    id: 't-meeting',
+    kind: 'task',
+    taskType: 'meeting',
+    name: 'Meeting Laptop',
+    room: 'conference',
+    x: 28.1,
+    y: 19.0,
+    electronic: true,
+    network: true,
+  },
+  {
+    id: 't-files',
+    kind: 'task',
+    taskType: 'files',
+    name: 'Filing Cabinets',
+    room: 'workspace',
+    x: 21.6,
+    y: 15.5,
+  },
+  {
+    id: 't-emails',
+    kind: 'task',
+    taskType: 'emails',
+    name: "CEO's Computer",
+    room: 'ceo',
+    x: 25.4,
+    y: 4.35,
+    electronic: true,
+    network: true,
+  },
+  {
+    id: 't-server',
+    kind: 'task',
+    taskType: 'server',
+    name: 'Server Terminal',
+    room: 'server',
+    x: 5.0,
+    y: 2.5,
+    electronic: true,
+  },
+  {
+    id: 't-excel',
+    kind: 'task',
+    taskType: 'excel',
+    name: 'Finance Workstation',
+    room: 'workspace',
+    x: 9.55,
+    y: 23.6,
+    electronic: true,
+    network: true,
+  },
+  {
+    id: 't-idscan',
+    kind: 'task',
+    taskType: 'idscan',
+    name: 'ID Scanner',
+    room: 'reception',
+    x: 13.4,
+    y: 30.7,
+    electronic: true,
+  },
+  {
+    id: 't-idscan2',
+    kind: 'task',
+    taskType: 'idscan',
+    name: 'Security ID Scanner',
+    room: 'security',
+    x: 43.4,
+    y: 5.5,
+    electronic: true,
+  },
+  {
+    id: 't-expense2',
+    kind: 'task',
+    taskType: 'expense',
+    name: 'HR Reimbursements',
+    room: 'hr',
+    x: 33.75,
+    y: 6.6,
+    electronic: true,
+    network: true,
+  },
+  {
+    id: 't-emails2',
+    kind: 'task',
+    taskType: 'emails',
+    name: 'Help Desk Inbox',
+    room: 'it',
+    x: 12.95,
+    y: 7.4,
+    electronic: true,
+    network: true,
+  },
+  {
+    id: 't-excel2',
+    kind: 'task',
+    taskType: 'excel',
+    name: 'Budget Spreadsheet',
+    room: 'workspace',
+    x: 15.0,
+    y: 15.35,
+    electronic: true,
+    network: true,
+  },
 
   // emergency button on the conference table
   { id: 'emergency', kind: 'emergency', name: 'Emergency HR Button', room: 'conference', x: 32.0, y: 19.0 },
 
   // sabotage repair stations
   { id: 'fix-wifi', kind: 'fix', fix: 'wifi', name: 'Network Terminal', room: 'it', x: 18.5, y: 4.6 },
-  { id: 'fix-fireA', kind: 'fix', fix: 'fireA', name: 'Fire Panel (Reception)', room: 'reception', x: 24.6, y: 30.45 },
-  { id: 'fix-fireB', kind: 'fix', fix: 'fireB', name: 'Fire Panel (Cafeteria)', room: 'cafeteria', x: 37.8, y: 37.05 },
-  { id: 'fix-power', kind: 'fix', fix: 'power', name: 'Electrical Panel', room: 'maintenance', x: 47.1, y: 30.45 },
-  { id: 'fix-doors', kind: 'fix', fix: 'doorsOverride', name: 'Door Override', room: 'security', x: 47.4, y: 7.15 },
+  {
+    id: 'fix-fireA',
+    kind: 'fix',
+    fix: 'fireA',
+    name: 'Fire Panel (Reception)',
+    room: 'reception',
+    x: 24.6,
+    y: 30.45,
+  },
+  {
+    id: 'fix-fireB',
+    kind: 'fix',
+    fix: 'fireB',
+    name: 'Fire Panel (Cafeteria)',
+    room: 'cafeteria',
+    x: 37.8,
+    y: 37.05,
+  },
+  {
+    id: 'fix-power',
+    kind: 'fix',
+    fix: 'power',
+    name: 'Electrical Panel',
+    room: 'maintenance',
+    x: 47.1,
+    y: 30.45,
+  },
+  {
+    id: 'fix-doors',
+    kind: 'fix',
+    fix: 'doorsOverride',
+    name: 'Door Override',
+    room: 'security',
+    x: 47.4,
+    y: 7.15,
+  },
   { id: 'fix-serverA', kind: 'fix', fix: 'serverA', name: 'Server Core A', room: 'server', x: 2.4, y: 7.0 },
   { id: 'fix-serverB', kind: 'fix', fix: 'serverB', name: 'Server Core B', room: 'server', x: 8.6, y: 7.0 },
   { id: 'fix-cctv', kind: 'fix', fix: 'cctv', name: 'Security Control', room: 'security', x: 47.4, y: 4.55 },
-  { id: 'fix-outageA', kind: 'fix', fix: 'outageA', name: 'Workspace Systems', room: 'workspace', x: 2.25, y: 23.6 },
+  {
+    id: 'fix-outageA',
+    kind: 'fix',
+    fix: 'outageA',
+    name: 'Workspace Systems',
+    room: 'workspace',
+    x: 2.25,
+    y: 23.6,
+  },
   { id: 'fix-outageB', kind: 'fix', fix: 'outageB', name: 'HR Systems', room: 'hr', x: 39.6, y: 2.4 },
-  { id: 'fix-outageC', kind: 'fix', fix: 'outageC', name: 'Reception Systems', room: 'reception', x: 13.4, y: 37.4 },
+  {
+    id: 'fix-outageC',
+    kind: 'fix',
+    fix: 'outageC',
+    name: 'Reception Systems',
+    room: 'reception',
+    x: 13.4,
+    y: 37.4,
+  },
 
   // security monitors
-  { id: 'cctv', kind: 'cctv', name: 'Security Monitors', room: 'security', x: 44.85, y: 4.55, electronic: true },
+  {
+    id: 'cctv',
+    kind: 'cctv',
+    name: 'Security Monitors',
+    room: 'security',
+    x: 44.85,
+    y: 4.55,
+    electronic: true,
+  },
 ];
 
 export const STATION_BY_ID: Record<string, Station> = Object.fromEntries(STATIONS.map((s) => [s.id, s]));
@@ -576,18 +906,25 @@ function buildMap(): MapData {
   for (const d of DOORS) {
     for (const [x, y] of d.tiles) {
       const n =
-        d.orient === 'h' ? [roomGrid[idx(x, y + 1)], roomGrid[idx(x, y - 1)]] : [roomGrid[idx(x - 1, y)], roomGrid[idx(x + 1, y)]];
+        d.orient === 'h'
+          ? [roomGrid[idx(x, y + 1)], roomGrid[idx(x, y - 1)]]
+          : [roomGrid[idx(x - 1, y)], roomGrid[idx(x + 1, y)]];
       roomGrid[idx(x, y)] = n.find((r) => r && ROOM_BY_ID[r].isHall) ?? n.find(Boolean) ?? null;
     }
   }
   // Walls with no walkable neighbour (8-neighbourhood) are void.
   const walkable = (x: number, y: number) =>
-    x >= 0 && y >= 0 && x < MAP_W && y < MAP_H && (grid[idx(x, y)] === Tile.Floor || grid[idx(x, y)] === Tile.Door);
+    x >= 0 &&
+    y >= 0 &&
+    x < MAP_W &&
+    y < MAP_H &&
+    (grid[idx(x, y)] === Tile.Floor || grid[idx(x, y)] === Tile.Door);
   for (let y = 0; y < MAP_H; y++)
     for (let x = 0; x < MAP_W; x++) {
       if (grid[idx(x, y)] !== Tile.Wall) continue;
       let any = false;
-      for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) if (walkable(x + dx, y + dy)) any = true;
+      for (let dy = -1; dy <= 1; dy++)
+        for (let dx = -1; dx <= 1; dx++) if (walkable(x + dx, y + dy)) any = true;
       if (!any) grid[idx(x, y)] = Tile.Void;
     }
   // Conference room walls are glass.
@@ -603,7 +940,8 @@ function buildMap(): MapData {
     const t = grid[idx(x, y)];
     return t === Tile.Wall || t === Tile.Glass;
   };
-  const isWallOrDoor = (x: number, y: number) => isWall(x, y) || (x >= 0 && y >= 0 && x < MAP_W && y < MAP_H && grid[idx(x, y)] === Tile.Door);
+  const isWallOrDoor = (x: number, y: number) =>
+    isWall(x, y) || (x >= 0 && y >= 0 && x < MAP_W && y < MAP_H && grid[idx(x, y)] === Tile.Door);
 
   const T0 = 0.32;
   const T1 = 0.68;
@@ -618,7 +956,16 @@ function buildMap(): MapData {
       const s = isWallOrDoor(x, y + 1);
       const horiz = e || w;
       const vert = n || s;
-      if (horiz) walls.push({ tx: x, ty: y, glass, x0: x + (w ? 0 : T0), x1: x + (e ? 1 : T1), y0: y + T0, y1: y + T1 });
+      if (horiz)
+        walls.push({
+          tx: x,
+          ty: y,
+          glass,
+          x0: x + (w ? 0 : T0),
+          x1: x + (e ? 1 : T1),
+          y0: y + T0,
+          y1: y + T1,
+        });
       if (vert) {
         // Avoid double-covering the centre square when both exist.
         const y0 = y + (n ? 0 : T0);
@@ -628,7 +975,8 @@ function buildMap(): MapData {
           if (s) walls.push({ tx: x, ty: y, glass, x0: x + T0, x1: x + T1, y0: y + T1, y1 });
         } else walls.push({ tx: x, ty: y, glass, x0: x + T0, x1: x + T1, y0, y1 });
       }
-      if (!horiz && !vert) walls.push({ tx: x, ty: y, glass, x0: x + T0, x1: x + T1, y0: y + T0, y1: y + T1 });
+      if (!horiz && !vert)
+        walls.push({ tx: x, ty: y, glass, x0: x + T0, x1: x + T1, y0: y + T0, y1: y + T1 });
     }
 
   const staticColliders: Box[] = walls.map((w) => ({ x0: w.x0, y0: w.y0, x1: w.x1, y1: w.y1 }));
@@ -648,7 +996,9 @@ function buildMap(): MapData {
     lockColliders.set(
       d.id,
       d.tiles.map(([x, y]) =>
-        d.orient === 'h' ? { x0: x, x1: x + 1, y0: y + T0, y1: y + T1 } : { x0: x + T0, x1: x + T1, y0: y, y1: y + 1 },
+        d.orient === 'h'
+          ? { x0: x, x1: x + 1, y0: y + T0, y1: y + T1 }
+          : { x0: x + T0, x1: x + T1, y0: y, y1: y + 1 },
       ),
     );
   }

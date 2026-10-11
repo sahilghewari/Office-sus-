@@ -1,7 +1,12 @@
 import { randomBytes, scrypt as scryptCb, timingSafeEqual } from 'node:crypto';
 import { promisify } from 'node:util';
 
-const scrypt = promisify(scryptCb) as (pw: string, salt: Buffer, len: number, opts: object) => Promise<Buffer>;
+const scrypt = promisify(scryptCb) as (
+  pw: string,
+  salt: Buffer,
+  len: number,
+  opts: object,
+) => Promise<Buffer>;
 
 // scrypt with N=2^15, r=8, p=1 (OWASP-recommended baseline). Format: scrypt$N$r$p$salt$hash
 const N = 32768;

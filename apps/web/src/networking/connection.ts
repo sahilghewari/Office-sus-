@@ -39,7 +39,14 @@ export class GameConnection {
     this.ws = ws;
     ws.onopen = () => {
       const s = useSession.getState();
-      this.raw({ t: 'hello', v: PROTOCOL_VERSION, token: s.token!, code: this.code, name: s.name, appearance: s.appearance });
+      this.raw({
+        t: 'hello',
+        v: PROTOCOL_VERSION,
+        token: s.token!,
+        code: this.code,
+        name: s.name,
+        appearance: s.appearance,
+      });
     };
     ws.onmessage = (ev) => {
       let msg: ServerMessage;
@@ -75,7 +82,14 @@ export class GameConnection {
       case 'welcome':
         this.attempts = 0;
         this.welcomed = true;
-        g.set({ status: 'connected', myId: msg.you, code: msg.code, testHooks: msg.testHooks, statusMessage: null, clockOffset: msg.serverTime - Date.now() });
+        g.set({
+          status: 'connected',
+          myId: msg.you,
+          code: msg.code,
+          testHooks: msg.testHooks,
+          statusMessage: null,
+          clockOffset: msg.serverTime - Date.now(),
+        });
         sessionStorage.setItem('cs_room', JSON.stringify({ code: msg.code, base: this.baseUrl }));
         this.startPing();
         if (msg.reconnected) g.toast('success', 'Reconnected. Your desk was kept warm.');
@@ -102,7 +116,19 @@ export class GameConnection {
         break;
       case 'error':
         g.set({ lastError: msg });
-        if (['ROOM_NOT_FOUND', 'ROOM_FULL', 'AUTH', 'VERSION', 'KICKED', 'ROOM_CLOSED', 'TIMEOUT', 'RATE_LIMIT'].includes(msg.code) && !this.welcomed) {
+        if (
+          [
+            'ROOM_NOT_FOUND',
+            'ROOM_FULL',
+            'AUTH',
+            'VERSION',
+            'KICKED',
+            'ROOM_CLOSED',
+            'TIMEOUT',
+            'RATE_LIMIT',
+          ].includes(msg.code) &&
+          !this.welcomed
+        ) {
           g.set({ status: 'failed', statusMessage: msg.message });
           this.close(false);
         } else {
@@ -111,12 +137,22 @@ export class GameConnection {
         }
         break;
       case 'taskOpen':
-        g.set({ task: { session: msg.session, taskType: msg.taskType, station: msg.station, data: msg.data, fake: msg.fake, result: null } });
+        g.set({
+          task: {
+            session: msg.session,
+            taskType: msg.taskType,
+            station: msg.station,
+            data: msg.data,
+            fake: msg.fake,
+            result: null,
+          },
+        });
         sfx('open');
         break;
       case 'taskResult': {
         const t = g.task;
-        if (t && t.session === msg.session) g.set({ task: { ...t, result: { ok: msg.ok, line: msg.line, n: (t.result?.n ?? 0) + 1 } } });
+        if (t && t.session === msg.session)
+          g.set({ task: { ...t, result: { ok: msg.ok, line: msg.line, n: (t.result?.n ?? 0) + 1 } } });
         sfx(msg.ok ? 'taskDone' : 'error');
         break;
       }

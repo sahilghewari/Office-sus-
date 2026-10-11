@@ -28,7 +28,11 @@ export function clientIp(req: IncomingMessage): string {
 }
 
 export function attachGateway(o: GatewayOptions) {
-  const wss = new WebSocketServer({ noServer: true, maxPayload: MAX_MESSAGE_BYTES, perMessageDeflate: false });
+  const wss = new WebSocketServer({
+    noServer: true,
+    maxPayload: MAX_MESSAGE_BYTES,
+    perMessageDeflate: false,
+  });
   const k = o.rateLimitScale ?? 1;
   const connectLimiter = new KeyedLimiter(30 * k, 0.5 * k); // per IP
   // Failed joins per IP (wrong/full codes) — makes brute-forcing private room codes impractical.
@@ -120,20 +124,31 @@ export function attachGateway(o: GatewayOptions) {
 
       if (!player) {
         if (msg.t !== 'hello') return fail('NO_HELLO', 'Say hello first.');
-        if (msg.v !== PROTOCOL_VERSION) return fail('VERSION', 'Your game client is out of date. Please refresh the page.');
+        if (msg.v !== PROTOCOL_VERSION)
+          return fail('VERSION', 'Your game client is out of date. Please refresh the page.');
         const tok = o.tokens.verify(msg.token);
         if (!tok) return fail('AUTH', 'Your session has expired. Please refresh.');
         if (tok.kind === 'user') {
-          const ok = tok.sid ? await o.store.sessionValid(tok.sid, tok.sub.slice(2)).catch(() => false) : false;
+          const ok = tok.sid
+            ? await o.store.sessionValid(tok.sid, tok.sub.slice(2)).catch(() => false)
+            : false;
           if (!ok) return fail('AUTH', 'Please log in again.');
         }
         const code = msg.code.toUpperCase();
-        if (!failedJoins.allowed(ip)) return fail('RATE_LIMIT', 'Too many failed join attempts. Take a coffee break and try again.');
+        if (!failedJoins.allowed(ip))
+          return fail('RATE_LIMIT', 'Too many failed join attempts. Take a coffee break and try again.');
         if (!ROOM_CODE_RE.test(code)) {
           failedJoins.take(ip);
           return fail('ROOM_NOT_FOUND', 'That is not a valid office code.');
         }
-        const res = o.manager.join(code, tok.sub, sanitizeName(msg.name), msg.appearance, tok.kind === 'user', conn);
+        const res = o.manager.join(
+          code,
+          tok.sub,
+          sanitizeName(msg.name),
+          msg.appearance,
+          tok.kind === 'user',
+          conn,
+        );
         if ('error' in res) {
           if (res.error === 'ROOM_NOT_FOUND') failedJoins.take(ip);
           return fail(res.error!, res.message!);

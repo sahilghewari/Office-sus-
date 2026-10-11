@@ -50,7 +50,11 @@ export class Bot {
   }
 
   static async createRoom(baseUrl: string, token: string, isPublic = false): Promise<string> {
-    const r = await fetch(`${baseUrl}/api/rooms`, { method: 'POST', headers: { Authorization: `Bearer ${token}`, 'content-type': 'application/json' }, body: JSON.stringify({ isPublic }) });
+    const r = await fetch(`${baseUrl}/api/rooms`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}`, 'content-type': 'application/json' },
+      body: JSON.stringify({ isPublic }),
+    });
     return ((await r.json()) as { code: string }).code;
   }
 
@@ -71,8 +75,7 @@ export class Bot {
         this.snap = m;
         // one-way delay from server send → client receive (same-machine clocks in load tests)
         if (this.snapDelays.length < 4000) this.snapDelays.push(Date.now() - m.serverTime);
-      }
-      else {
+      } else {
         if (m.t === 'state') this.state = m;
         if (m.t === 'welcome') this.id = m.you;
         if (m.t === 'error') this.errors.push(m);
@@ -87,7 +90,10 @@ export class Bot {
       }
     });
     this.ws.on('close', () => (this.closed = true));
-    const appearance = { ...DEFAULT_APPEARANCE, color: CHARACTER_COLORS[this.colorIndex % CHARACTER_COLORS.length].id };
+    const appearance = {
+      ...DEFAULT_APPEARANCE,
+      color: CHARACTER_COLORS[this.colorIndex % CHARACTER_COLORS.length].id,
+    };
     this.send({ t: 'hello', v: PROTOCOL_VERSION, token: tok, code, name: this.name, appearance });
     const first = await this.waitFor((m) => m.t === 'welcome' || m.t === 'error', 5000);
     if (first.t === 'error') throw new Error(`${first.code}: ${first.message}`);
@@ -99,7 +105,10 @@ export class Bot {
     if (this.ws.readyState === WebSocket.OPEN) this.ws.send(JSON.stringify(m));
   }
 
-  waitFor<T extends ServerMessage = ServerMessage>(pred: (m: ServerMessage) => boolean, timeout = 10_000): Promise<T> {
+  waitFor<T extends ServerMessage = ServerMessage>(
+    pred: (m: ServerMessage) => boolean,
+    timeout = 10_000,
+  ): Promise<T> {
     return new Promise((res, rej) => {
       const w = { pred, res: res as (m: ServerMessage) => void };
       this.waiters.push(w);
@@ -114,7 +123,10 @@ export class Bot {
   }
 
   /** Like waitFor, but also matches messages that already arrived. */
-  expectMsg<T extends ServerMessage = ServerMessage>(pred: (m: ServerMessage) => boolean, timeout = 5000): Promise<T> {
+  expectMsg<T extends ServerMessage = ServerMessage>(
+    pred: (m: ServerMessage) => boolean,
+    timeout = 5000,
+  ): Promise<T> {
     const hit = this.msgs.find(pred);
     return hit ? Promise.resolve(hit as T) : this.waitFor<T>(pred, timeout);
   }
@@ -167,11 +179,17 @@ export class Bot {
     const st = STATION_BY_ID[stationId];
     await this.walkTo(st.x, st.y);
     this.send({ t: 'interact', station: stationId });
-    const open = await this.waitFor<ServerMessageOf<'taskOpen'>>((m) => m.t === 'taskOpen' || m.t === 'error', 3000).catch(() => null);
+    const open = await this.waitFor<ServerMessageOf<'taskOpen'>>(
+      (m) => m.t === 'taskOpen' || m.t === 'error',
+      3000,
+    ).catch(() => null);
     if (!open || open.t !== 'taskOpen') return false;
     await sleep(TASK_INFO[open.taskType].minMs + 150);
     this.send({ t: 'taskSubmit', session: open.session, answer: solveFromData(open.taskType, open.data) });
-    const res = await this.waitFor<ServerMessageOf<'taskResult'>>((m) => m.t === 'taskResult' || m.t === 'taskClosed', 3000).catch(() => null);
+    const res = await this.waitFor<ServerMessageOf<'taskResult'>>(
+      (m) => m.t === 'taskResult' || m.t === 'taskClosed',
+      3000,
+    ).catch(() => null);
     return !!res && res.t === 'taskResult' && res.ok;
   }
 

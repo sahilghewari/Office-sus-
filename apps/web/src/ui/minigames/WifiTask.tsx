@@ -2,7 +2,14 @@ import { useEffect, useRef, useState } from 'react';
 import { sfx } from '../../audio/audio';
 import type { MinigameProps } from './common';
 
-const HEX: Record<string, string> = { red: '#ef3e4a', blue: '#3d7bff', yellow: '#ffd23f', green: '#3ddc97', purple: '#8a5cf6', orange: '#ff8a3d' };
+const HEX: Record<string, string> = {
+  red: '#ef3e4a',
+  blue: '#3d7bff',
+  yellow: '#ffd23f',
+  green: '#3ddc97',
+  purple: '#8a5cf6',
+  orange: '#ff8a3d',
+};
 
 /** Drag each loose cable to the matching port. Correct links light up. */
 export function WifiTask({ data, submit }: MinigameProps<{ left: string[]; right: string[] }>) {
@@ -50,7 +57,10 @@ export function WifiTask({ data, submit }: MinigameProps<{ left: string[]; right
       <div className="flex gap-2 text-xs text-mist">
         Network status:
         {data.left.map((_, i) => (
-          <span key={i} className={`h-3 w-3 rounded-full ${links[i] !== undefined ? 'bg-corp-mint shadow-[0_0_8px_#3ddc97]' : 'bg-corp-red/60'}`} />
+          <span
+            key={i}
+            className={`h-3 w-3 rounded-full ${links[i] !== undefined ? 'bg-corp-mint shadow-[0_0_8px_#3ddc97]' : 'bg-corp-red/60'}`}
+          />
         ))}
       </div>
       <div
@@ -68,9 +78,24 @@ export function WifiTask({ data, submit }: MinigameProps<{ left: string[]; right
           </text>
           {data.right.map((c, i) => (
             <g key={c}>
-              <rect x={W - 82} y={rowY(i) - 16} width={44} height={32} rx={6} fill={bad === i ? '#ef3e4a' : '#151a2a'} stroke={HEX[c]} strokeWidth={3} data-testid={`port-${c}`} />
+              <rect
+                x={W - 82}
+                y={rowY(i) - 16}
+                width={44}
+                height={32}
+                rx={6}
+                fill={bad === i ? '#ef3e4a' : '#151a2a'}
+                stroke={HEX[c]}
+                strokeWidth={3}
+                data-testid={`port-${c}`}
+              />
               <rect x={W - 70} y={rowY(i) - 6} width={20} height={12} rx={2} fill="#000" />
-              <circle cx={W - 24} cy={rowY(i)} r={5} fill={Object.values(links).includes(i) ? '#3ddc97' : '#3a3f55'} />
+              <circle
+                cx={W - 24}
+                cy={rowY(i)}
+                r={5}
+                fill={Object.values(links).includes(i) ? '#3ddc97' : '#3a3f55'}
+              />
             </g>
           ))}
           {data.left.map((c, i) => {
@@ -81,9 +106,30 @@ export function WifiTask({ data, submit }: MinigameProps<{ left: string[]; right
             const ey = to !== undefined ? rowY(to) : drag?.from === i ? drag.y : sy;
             return (
               <g key={c}>
-                <path d={`M ${sx} ${sy} C ${sx + 120} ${sy}, ${ex - 120} ${ey}, ${ex} ${ey}`} stroke={HEX[c]} strokeWidth={10} fill="none" strokeLinecap="round" />
-                <path d={`M ${sx} ${sy} C ${sx + 120} ${sy}, ${ex - 120} ${ey}, ${ex} ${ey}`} stroke="rgba(255,255,255,0.3)" strokeWidth={3} fill="none" strokeLinecap="round" />
-                <rect x={sx - 50} y={sy - 14} width={50} height={28} rx={6} fill="#2b2f3f" stroke={HEX[c]} strokeWidth={3} />
+                <path
+                  d={`M ${sx} ${sy} C ${sx + 120} ${sy}, ${ex - 120} ${ey}, ${ex} ${ey}`}
+                  stroke={HEX[c]}
+                  strokeWidth={10}
+                  fill="none"
+                  strokeLinecap="round"
+                />
+                <path
+                  d={`M ${sx} ${sy} C ${sx + 120} ${sy}, ${ex - 120} ${ey}, ${ex} ${ey}`}
+                  stroke="rgba(255,255,255,0.3)"
+                  strokeWidth={3}
+                  fill="none"
+                  strokeLinecap="round"
+                />
+                <rect
+                  x={sx - 50}
+                  y={sy - 14}
+                  width={50}
+                  height={28}
+                  rx={6}
+                  fill="#2b2f3f"
+                  stroke={HEX[c]}
+                  strokeWidth={3}
+                />
                 <rect
                   x={ex - 12}
                   y={ey - 10}

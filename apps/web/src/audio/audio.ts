@@ -113,7 +113,16 @@ class Engine {
   tone(
     freq: number,
     dur: number,
-    opts: { type?: OscillatorType; vol?: number; at?: number; slideTo?: number; attack?: number; bus?: AudioNode; detune?: number; release?: number } = {},
+    opts: {
+      type?: OscillatorType;
+      vol?: number;
+      at?: number;
+      slideTo?: number;
+      attack?: number;
+      bus?: AudioNode;
+      detune?: number;
+      release?: number;
+    } = {},
   ) {
     const ctx = this.ctx!;
     const t0 = (opts.at ?? ctx.currentTime) + 0.001;
@@ -133,7 +142,18 @@ class Engine {
     o.stop(t0 + dur + (opts.release ?? 0) + 0.05);
   }
 
-  noiseBurst(dur: number, opts: { freq?: number; q?: number; type?: BiquadFilterType; vol?: number; at?: number; bus?: AudioNode; slideTo?: number } = {}) {
+  noiseBurst(
+    dur: number,
+    opts: {
+      freq?: number;
+      q?: number;
+      type?: BiquadFilterType;
+      vol?: number;
+      at?: number;
+      bus?: AudioNode;
+      slideTo?: number;
+    } = {},
+  ) {
     const ctx = this.ctx!;
     const t0 = (opts.at ?? ctx.currentTime) + 0.001;
     const src = ctx.createBufferSource();
@@ -148,7 +168,10 @@ class Engine {
     g.gain.setValueAtTime(0.0001, t0);
     g.gain.exponentialRampToValueAtTime(opts.vol ?? 0.2, t0 + 0.005);
     g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
-    src.connect(f).connect(g).connect(opts.bus ?? this.sfxBus);
+    src
+      .connect(f)
+      .connect(g)
+      .connect(opts.bus ?? this.sfxBus);
     src.start(t0, Math.random());
     src.stop(t0 + dur + 0.05);
   }
@@ -174,7 +197,9 @@ class Engine {
         this.noiseBurst(0.12, { freq: 3000, vol: 0.04 });
         break;
       case 'taskDone':
-        [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => this.tone(f, 0.22, { type: 'triangle', at: t + i * 0.07, vol: 0.16 }));
+        [523.25, 659.25, 783.99, 1046.5].forEach((f, i) =>
+          this.tone(f, 0.22, { type: 'triangle', at: t + i * 0.07, vol: 0.16 }),
+        );
         this.tone(1568, 0.5, { type: 'sine', at: t + 0.3, vol: 0.06 });
         break;
       case 'error':
@@ -188,7 +213,13 @@ class Engine {
         this.noiseBurst(0.05, { freq: 260 + Math.random() * 120, q: 2.5, vol: 0.06, type: 'lowpass' });
         break;
       case 'computer':
-        for (let i = 0; i < 4; i++) this.noiseBurst(0.025, { freq: 3500 + Math.random() * 1500, q: 4, vol: 0.05, at: t + i * 0.06 + Math.random() * 0.02 });
+        for (let i = 0; i < 4; i++)
+          this.noiseBurst(0.025, {
+            freq: 3500 + Math.random() * 1500,
+            q: 4,
+            vol: 0.05,
+            at: t + i * 0.06 + Math.random() * 0.02,
+          });
         break;
       case 'cable':
         this.tone(300, 0.05, { type: 'square', vol: 0.06 });
@@ -214,12 +245,14 @@ class Engine {
         this.tone(660, 0.12, { type: 'square', at: t + 0.3, vol: 0.06 });
         break;
       case 'printer':
-        for (let i = 0; i < 6; i++) this.noiseBurst(0.06, { freq: 900 + (i % 2) * 300, q: 6, vol: 0.1, at: t + i * 0.09 });
+        for (let i = 0; i < 6; i++)
+          this.noiseBurst(0.06, { freq: 900 + (i % 2) * 300, q: 6, vol: 0.1, at: t + i * 0.09 });
         this.tone(70, 0.6, { type: 'sawtooth', vol: 0.05 });
         break;
       case 'coffee':
         this.noiseBurst(1.1, { freq: 4500, q: 0.5, vol: 0.07, type: 'highpass' });
-        for (let i = 0; i < 8; i++) this.tone(300 + Math.random() * 300, 0.05, { at: t + 0.2 + i * 0.1, vol: 0.05, slideTo: 600 });
+        for (let i = 0; i < 8; i++)
+          this.tone(300 + Math.random() * 300, 0.05, { at: t + 0.2 + i * 0.1, vol: 0.05, slideTo: 600 });
         break;
       case 'alarm':
         for (let i = 0; i < 4; i++) {
@@ -228,7 +261,9 @@ class Engine {
         }
         break;
       case 'serverFail':
-        [800, 600, 420, 260, 140].forEach((f, i) => this.tone(f, 0.12, { type: 'sawtooth', at: t + i * 0.09, vol: 0.08 }));
+        [800, 600, 420, 260, 140].forEach((f, i) =>
+          this.tone(f, 0.12, { type: 'sawtooth', at: t + i * 0.09, vol: 0.08 }),
+        );
         this.noiseBurst(0.5, { freq: 200, vol: 0.12, at: t + 0.4, type: 'lowpass' });
         break;
       case 'powerDown':
@@ -250,14 +285,24 @@ class Engine {
         break;
       case 'terminate':
         // sad trombone
-        [392, 370, 349, 330].forEach((f, i) => this.tone(f, i === 3 ? 0.9 : 0.32, { type: 'sawtooth', at: t + i * 0.36, vol: 0.12, attack: 0.04, detune: i === 3 ? 0 : 0 }));
+        [392, 370, 349, 330].forEach((f, i) =>
+          this.tone(f, i === 3 ? 0.9 : 0.32, {
+            type: 'sawtooth',
+            at: t + i * 0.36,
+            vol: 0.12,
+            attack: 0.04,
+            detune: i === 3 ? 0 : 0,
+          }),
+        );
         break;
       case 'elim':
         this.noiseBurst(0.25, { freq: 400, slideTo: 3000, vol: 0.15 });
         this.tone(220, 0.15, { type: 'square', slideTo: 90, at: t + 0.25, vol: 0.12 });
         break;
       case 'winEmployees':
-        [523, 659, 784, 1047].forEach((f, i) => this.tone(f, 0.18, { type: 'square', at: t + i * 0.12, vol: 0.08 }));
+        [523, 659, 784, 1047].forEach((f, i) =>
+          this.tone(f, 0.18, { type: 'square', at: t + i * 0.12, vol: 0.08 }),
+        );
         this.chord([523, 659, 784, 1047], 1.2, { type: 'triangle', at: t + 0.5, vol: 0.25 });
         break;
       case 'winManagers':
@@ -362,20 +407,40 @@ class Engine {
     const pos = b % 8;
     if (pos === 0 || pos === 3 || pos === 6) {
       prog[bar].forEach((f) => {
-        this.tone(f * 2, step * (pos === 0 ? 3 : 1.6), { type: 'sine', vol: 0.05, at, bus, attack: 0.01, release: 0.2 });
+        this.tone(f * 2, step * (pos === 0 ? 3 : 1.6), {
+          type: 'sine',
+          vol: 0.05,
+          at,
+          bus,
+          attack: 0.01,
+          release: 0.2,
+        });
         this.tone(f * 4, step * 0.8, { type: 'triangle', vol: 0.008, at, bus });
       });
     }
     if (pos % 2 === 0) {
       const walk = [1, 1.5, 1.25, 1.125][(pos / 2) % 4];
-      this.tone(bass[bar] * (pos === 0 ? 1 : walk), step * 1.6, { type: 'triangle', vol: 0.14, at, bus, attack: 0.01 });
+      this.tone(bass[bar] * (pos === 0 ? 1 : walk), step * 1.6, {
+        type: 'triangle',
+        vol: 0.14,
+        at,
+        bus,
+        attack: 0.01,
+      });
     }
     // brushes
     this.noiseBurst(0.06, { freq: 7000, type: 'highpass', vol: pos % 2 ? 0.012 : 0.02, at, bus });
     // occasional vibraphone melody
     if ((b % 32 === 4 || b % 32 === 20) && Math.random() < 0.8) {
       const scale = [523.3, 587.3, 659.3, 784, 880];
-      for (let i = 0; i < 4; i++) this.tone(scale[Math.floor(Math.random() * scale.length)], 0.5, { type: 'sine', vol: 0.035, at: at + i * step, bus, release: 0.4 });
+      for (let i = 0; i < 4; i++)
+        this.tone(scale[Math.floor(Math.random() * scale.length)], 0.5, {
+          type: 'sine',
+          vol: 0.035,
+          at: at + i * step,
+          bus,
+          release: 0.4,
+        });
     }
   }
 
@@ -384,14 +449,27 @@ class Engine {
     const bar = Math.floor(b / 16) % 4;
     const roots = [110, 87.3, 98, 82.4];
     if (b % 16 === 0) {
-      this.tone(roots[bar] / 2, step * 16, { type: 'sawtooth', vol: 0.035, at, bus, attack: 1.2, release: 1 });
+      this.tone(roots[bar] / 2, step * 16, {
+        type: 'sawtooth',
+        vol: 0.035,
+        at,
+        bus,
+        attack: 1.2,
+        release: 1,
+      });
       this.tone(roots[bar], step * 16, { type: 'triangle', vol: 0.04, at, bus, attack: 1.5, release: 1 });
       this.tone(roots[bar] * 1.5, step * 16, { type: 'sine', vol: 0.025, at, bus, attack: 2, release: 1 });
     }
     if (b % 2 === 0) this.tone(b % 4 === 0 ? 2400 : 2000, 0.02, { type: 'square', vol: 0.006, at, bus });
     if (b % 8 === 5 && Math.random() < 0.6) {
       const pent = [220, 261.6, 293.7, 329.6, 392, 440];
-      this.tone(pent[Math.floor(Math.random() * pent.length)], 0.4, { type: 'triangle', vol: 0.04, at, bus, release: 0.5 });
+      this.tone(pent[Math.floor(Math.random() * pent.length)], 0.4, {
+        type: 'triangle',
+        vol: 0.04,
+        at,
+        bus,
+        release: 0.5,
+      });
     }
   }
 
@@ -400,7 +478,8 @@ class Engine {
     const bar = Math.floor(b / 8) % 4;
     const roots = [73.4, 73.4, 65.4, 82.4];
     this.tone(roots[bar], step * 0.7, { type: 'sawtooth', vol: 0.07, at, bus });
-    if (b % 8 === 0) this.tone(roots[bar] / 2, 0.6, { type: 'sine', vol: 0.25, at, bus, slideTo: roots[bar] / 2.6 });
+    if (b % 8 === 0)
+      this.tone(roots[bar] / 2, 0.6, { type: 'sine', vol: 0.25, at, bus, slideTo: roots[bar] / 2.6 });
     if (b % 8 === 3 || b % 8 === 6) {
       const stab = bar === 2 ? [261.6, 311.1, 392] : bar === 3 ? [329.6, 415.3, 493.9] : [293.7, 349.2, 440];
       stab.forEach((f) => this.tone(f, step * 0.5, { type: 'sawtooth', vol: 0.025, at, bus }));
@@ -417,7 +496,16 @@ class Engine {
     if (this.amb) {
       const old = this.amb;
       old.gain.gain.setTargetAtTime(0.0001, ctx.currentTime, 0.5);
-      setTimeout(() => old.nodes.forEach((n) => { try { (n as any).stop?.(); n.disconnect(); } catch {} }), 2500);
+      setTimeout(
+        () =>
+          old.nodes.forEach((n) => {
+            try {
+              (n as any).stop?.();
+              n.disconnect();
+            } catch {}
+          }),
+        2500,
+      );
     }
     this.amb = null;
     if (kind === 'none') return;
@@ -426,7 +514,13 @@ class Engine {
     gain.gain.setTargetAtTime(1, ctx.currentTime, 0.8);
     gain.connect(this.ambBus);
     const nodes: AudioNode[] = [gain];
-    const noise = (freq: number, q: number, vol: number, type: BiquadFilterType = 'bandpass', lfoRate = 0) => {
+    const noise = (
+      freq: number,
+      q: number,
+      vol: number,
+      type: BiquadFilterType = 'bandpass',
+      lfoRate = 0,
+    ) => {
       const src = ctx.createBufferSource();
       src.buffer = this.noise();
       src.loop = true;
@@ -478,7 +572,11 @@ class Engine {
           const id = window.setInterval(() => {
             if (this.amb?.kind !== 'gaming') return clearInterval(id);
             const n = [523, 659, 784, 988, 1175];
-            this.tone(n[Math.floor(Math.random() * n.length)], 0.07, { type: 'square', vol: 0.012, bus: gain });
+            this.tone(n[Math.floor(Math.random() * n.length)], 0.07, {
+              type: 'square',
+              vol: 0.012,
+              bus: gain,
+            });
           }, 260);
         }
         break;

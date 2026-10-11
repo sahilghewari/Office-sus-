@@ -6,7 +6,10 @@ import { Bot, sleep } from './bot';
  * play-testing and load tests: ready up, do tasks, wander, fix sabotage,
  * vote (mostly skip), and — as a manager — occasionally sabotage/eliminate.
  */
-export async function runBrain(bot: Bot, opts: { aggressive?: boolean; chatty?: boolean; seed?: number } = {}) {
+export async function runBrain(
+  bot: Bot,
+  opts: { aggressive?: boolean; chatty?: boolean; seed?: number } = {},
+) {
   const rng = createRng(opts.seed ?? Math.floor(Math.random() * 1e9));
   let votedMeeting = '';
   while (!bot.closed) {
@@ -36,7 +39,16 @@ export async function runBrain(bot: Bot, opts: { aggressive?: boolean; chatty?: 
         continue;
       }
       if (s.phase === 'DISCUSSION' && opts.chatty && s.you.alive && rng() < 0.012) {
-        bot.send({ t: 'chat', text: pick(rng, ['I was in the cafeteria.', 'Not me, I was fixing the printer!', 'Skip?', 'That is exactly what a Toxic Manager would say.', 'Who called this meeting?']) });
+        bot.send({
+          t: 'chat',
+          text: pick(rng, [
+            'I was in the cafeteria.',
+            'Not me, I was fixing the printer!',
+            'Skip?',
+            'That is exactly what a Toxic Manager would say.',
+            'Who called this meeting?',
+          ]),
+        });
       }
       if (s.phase !== 'ACTIVE') {
         await sleep(300);
@@ -62,7 +74,9 @@ export async function runBrain(bot: Bot, opts: { aggressive?: boolean; chatty?: 
         }
         if (opts.aggressive && s.you.killReadyAt < now && bot.snap) {
           const [x, y] = bot.me;
-          const target = bot.snap.p.find((p) => p.a !== 2 && !s.you.teammates.includes(p.i) && Math.hypot(p.x - x, p.y - y) < 1.4);
+          const target = bot.snap.p.find(
+            (p) => p.a !== 2 && !s.you.teammates.includes(p.i) && Math.hypot(p.x - x, p.y - y) < 1.4,
+          );
           if (target) bot.send({ t: 'kill', target: target.i });
           else if (rng() < 0.4) {
             const near = bot.snap.p.filter((p) => p.a !== 2 && !s.you.teammates.includes(p.i));

@@ -49,10 +49,10 @@ export function closeTopOverlay(): boolean {
     g.set({ cctv: null });
     return true;
   }
-  if (g.sabotageOpen) return g.set({ sabotageOpen: false }), true;
-  if (g.mapOpen) return g.set({ mapOpen: false }), true;
-  if (g.customizeOpen) return g.set({ customizeOpen: false }), true;
-  if (g.settingsOpen) return g.set({ settingsOpen: false }), true;
+  if (g.sabotageOpen) return (g.set({ sabotageOpen: false }), true);
+  if (g.mapOpen) return (g.set({ mapOpen: false }), true);
+  if (g.customizeOpen) return (g.set({ customizeOpen: false }), true);
+  if (g.settingsOpen) return (g.set({ settingsOpen: false }), true);
   return false;
 }
 
@@ -79,7 +79,13 @@ export function useGameKeys() {
       if (isAction('interact', e.code)) performUse();
       else if (isAction('report', e.code)) performReport();
       else if (isAction('kill', e.code)) performKill();
-      else if (isAction('sabotage', e.code) && s.you.role === 'manager' && s.you.alive && s.phase === 'ACTIVE') g.set({ sabotageOpen: !g.sabotageOpen });
+      else if (
+        isAction('sabotage', e.code) &&
+        s.you.role === 'manager' &&
+        s.you.alive &&
+        s.phase === 'ACTIVE'
+      )
+        g.set({ sabotageOpen: !g.sabotageOpen });
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);

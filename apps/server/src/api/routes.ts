@@ -1,6 +1,12 @@
 import type { FastifyInstance, FastifyRequest } from 'fastify';
 import { z } from 'zod';
-import { AppearanceSchema, DEFAULT_APPEARANCE, NameSchema, PROTOCOL_VERSION, ROOM_CODE_RE } from '@corp/shared';
+import {
+  AppearanceSchema,
+  DEFAULT_APPEARANCE,
+  NameSchema,
+  PROTOCOL_VERSION,
+  ROOM_CODE_RE,
+} from '@corp/shared';
 import { hashPassword, validatePasswordStrength, verifyPassword } from '../authentication/password';
 import { newSessionSecret, type TokenPayload, type TokenService } from '../authentication/tokens';
 import type { Store } from '../database/store';
@@ -68,7 +74,11 @@ export function registerRoutes(app: FastifyInstance, d: ApiDeps) {
       dbHealthy: await d.store.health(),
       directory: d.directory.kind,
       voice: d.voice.enabled,
-      tick: { count: s.ticks, avgMs: s.ticks ? +(s.tickMsTotal / s.ticks).toFixed(3) : 0, maxMs: +s.tickMsMax.toFixed(2) },
+      tick: {
+        count: s.ticks,
+        avgMs: s.ticks ? +(s.tickMsTotal / s.ticks).toFixed(3) : 0,
+        maxMs: +s.tickMsMax.toFixed(2),
+      },
       memoryMb: Math.round(process.memoryUsage().rss / 1024 / 1024),
     };
   });
@@ -91,10 +101,15 @@ export function registerRoutes(app: FastifyInstance, d: ApiDeps) {
     const weak = validatePasswordStrength(body.data.password);
     if (weak) return reply.code(400).send({ error: weak });
     try {
-      const u = await d.store.createUser(body.data.username, await hashPassword(body.data.password), body.data.appearance ?? DEFAULT_APPEARANCE);
+      const u = await d.store.createUser(
+        body.data.username,
+        await hashPassword(body.data.password),
+        body.data.appearance ?? DEFAULT_APPEARANCE,
+      );
       return { token: await issueUserToken(u.id), user: await userView(u.id) };
     } catch (e) {
-      if ((e as Error).message === 'USERNAME_TAKEN') return reply.code(409).send({ error: 'That username is taken.' });
+      if ((e as Error).message === 'USERNAME_TAKEN')
+        return reply.code(409).send({ error: 'That username is taken.' });
       throw e;
     }
   });
@@ -104,7 +119,11 @@ export function registerRoutes(app: FastifyInstance, d: ApiDeps) {
     if (!body.success) return reply.code(400).send({ error: 'Invalid username or password.' });
     const u = await d.store.findUserByName(body.data.username);
     // Always run a hash comparison to avoid user-enumeration timing differences.
-    const ok = await verifyPassword(body.data.password, u?.passwordHash ?? 'scrypt$32768$8$1$AAAAAAAAAAAAAAAAAAAAAA==$AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=');
+    const ok = await verifyPassword(
+      body.data.password,
+      u?.passwordHash ??
+        'scrypt$32768$8$1$AAAAAAAAAAAAAAAAAAAAAA==$AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=',
+    );
     if (!u || !ok) return reply.code(401).send({ error: 'Invalid username or password.' });
     return { token: await issueUserToken(u.id), user: await userView(u.id) };
   });
@@ -138,7 +157,8 @@ export function registerRoutes(app: FastifyInstance, d: ApiDeps) {
     try {
       await d.store.renameUser(u.userId, n.data);
     } catch (e) {
-      if ((e as Error).message === 'USERNAME_TAKEN') return reply.code(409).send({ error: 'That username is taken.' });
+      if ((e as Error).message === 'USERNAME_TAKEN')
+        return reply.code(409).send({ error: 'That username is taken.' });
       throw e;
     }
     return { user: await userView(u.userId) };
@@ -150,7 +170,8 @@ export function registerRoutes(app: FastifyInstance, d: ApiDeps) {
     if (!u) return reply.code(401).send({ error: 'Not logged in.' });
     const pw = (req.body as any)?.password;
     const rec = await d.store.findUserById(u.userId);
-    if (!rec || typeof pw !== 'string' || !(await verifyPassword(pw, rec.passwordHash))) return reply.code(403).send({ error: 'Password incorrect.' });
+    if (!rec || typeof pw !== 'string' || !(await verifyPassword(pw, rec.passwordHash)))
+      return reply.code(403).send({ error: 'Password incorrect.' });
     await d.store.deleteUser(u.userId);
     return { ok: true };
   });
@@ -166,7 +187,14 @@ export function registerRoutes(app: FastifyInstance, d: ApiDeps) {
     const code = req.params.code.toUpperCase();
     if (!ROOM_CODE_RE.test(code)) return reply.code(404).send({ error: 'Invalid code.' });
     const local = d.manager.get(code);
-    if (local) return { code, phase: local.phase, players: local.playerCount, capacity: local.settings.maxPlayers, instanceUrl: null };
+    if (local)
+      return {
+        code,
+        phase: local.phase,
+        players: local.playerCount,
+        capacity: local.settings.maxPlayers,
+        instanceUrl: null,
+      };
     const l = await d.directory.get(code);
     if (!l) return reply.code(404).send({ error: 'No office found with that code.' });
     return { code, phase: l.phase, players: l.players, capacity: l.capacity, instanceUrl: l.instanceUrl };
@@ -179,6 +207,9 @@ export function registerRoutes(app: FastifyInstance, d: ApiDeps) {
 
   app.get('/api/public-rooms', async () => {
     const open = await d.directory.listPublicOpen();
-    return { rooms: open.map((r) => ({ players: r.players, capacity: r.capacity })), waiting: open.reduce((a, r) => a + r.players, 0) };
+    return {
+      rooms: open.map((r) => ({ players: r.players, capacity: r.capacity })),
+      waiting: open.reduce((a, r) => a + r.players, 0),
+    };
   });
 }

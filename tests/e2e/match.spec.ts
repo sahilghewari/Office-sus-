@@ -68,11 +68,15 @@ test('landing → room → 4-player match → task → meeting → vote → game
   await page.getByTestId('confirm-vote').click();
   marcus.send({ t: 'vote', target: chen.id });
   chen.send({ t: 'vote', target: marcus.id });
-  await expect(page.getByTestId('ejection-title')).toHaveText('CHEN HAS BEEN TERMINATED.', { timeout: 10_000 });
+  await expect(page.getByTestId('ejection-title')).toHaveText('CHEN HAS BEEN TERMINATED.', {
+    timeout: 10_000,
+  });
   await expect(page.getByText('They were a Toxic Manager.')).toBeVisible();
 
   // employees win
-  await expect(page.getByTestId('winner-headline')).toHaveText('THE EMPLOYEES SURVIVED MONDAY!', { timeout: 15_000 });
+  await expect(page.getByTestId('winner-headline')).toHaveText('THE EMPLOYEES SURVIVED MONDAY!', {
+    timeout: 15_000,
+  });
   await expect(page.getByTestId('final-roles')).toContainText('Toxic Manager');
 
   // rematch: back to the lobby with clean state

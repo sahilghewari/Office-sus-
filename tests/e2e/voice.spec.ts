@@ -9,7 +9,11 @@ import { SERVER, createRoom, onboard, sendRaw, store } from './helpers';
  * eliminated player is removed from the living room and moved to the ghost room.
  */
 const LK_URL = process.env.E2E_LIVEKIT_URL ?? 'ws://127.0.0.1:7880';
-const lk = new RoomServiceClient(LK_URL.replace(/^ws/, 'http'), process.env.E2E_LIVEKIT_KEY ?? 'devkey', process.env.E2E_LIVEKIT_SECRET ?? 'secret');
+const lk = new RoomServiceClient(
+  LK_URL.replace(/^ws/, 'http'),
+  process.env.E2E_LIVEKIT_KEY ?? 'devkey',
+  process.env.E2E_LIVEKIT_SECRET ?? 'secret',
+);
 
 test.skip(!!process.env.E2E_NO_VOICE, 'voice server not available');
 
@@ -47,9 +51,13 @@ test('proximity voice + ghost isolation enforced by the server', async ({ browse
   // proximity: far apart → silent, close → audible (gains computed by the server)
   await sendRaw(a, { t: 'test', cmd: 'teleport', args: { x: 5, y: 11.6 } });
   await sendRaw(b, { t: 'test', cmd: 'teleport', args: { x: 40, y: 11.6 } });
-  await expect.poll(() => a.evaluate((id) => (window as any).__voiceGains?.[id] ?? null, benId), { timeout: 5000 }).toBe(0);
+  await expect
+    .poll(() => a.evaluate((id) => (window as any).__voiceGains?.[id] ?? null, benId), { timeout: 5000 })
+    .toBe(0);
   await sendRaw(b, { t: 'test', cmd: 'teleport', args: { x: 6, y: 11.6 } });
-  await expect.poll(() => a.evaluate((id) => (window as any).__voiceGains?.[id] ?? null, benId), { timeout: 5000 }).toBe(1);
+  await expect
+    .poll(() => a.evaluate((id) => (window as any).__voiceGains?.[id] ?? null, benId), { timeout: 5000 })
+    .toBe(1);
 
   // Ben (manager) eliminates Ana → Ana is kicked from the living room by the server
   await sendRaw(b, { t: 'test', cmd: 'fastForward', args: { ms: 60_000 } });
@@ -59,7 +67,11 @@ test('proximity voice + ghost isolation enforced by the server', async ({ browse
   await expect
     .poll(async () => (await lk.listParticipants(main)).map((p) => p.identity), { timeout: 15_000 })
     .not.toContain(anaId);
-  await expect.poll(async () => (await lk.listParticipants(`${code}-ghost`)).map((p) => p.identity), { timeout: 20_000 }).toContain(anaId);
+  await expect
+    .poll(async () => (await lk.listParticipants(`${code}-ghost`)).map((p) => p.identity), {
+      timeout: 20_000,
+    })
+    .toContain(anaId);
   await expect.poll(() => store(a, 'g.voice.mode'), { timeout: 10_000 }).toBe('ghost');
   bots.forEach((x) => x.close());
   await ctxA.close();

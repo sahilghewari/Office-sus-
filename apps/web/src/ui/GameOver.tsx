@@ -44,16 +44,34 @@ export function GameOver() {
   const secs = Math.floor((go.durationMs % 60000) / 1000);
 
   return (
-    <div className={`absolute inset-0 z-40 flex flex-col items-center overflow-auto p-6 ${employeesWon ? 'bg-[radial-gradient(circle_at_50%_20%,#1f6b5a,#0b0f2b_70%)]' : 'bg-[radial-gradient(circle_at_50%_20%,#6b1020,#0b0510_70%)]'}`} data-testid="game-over">
+    <div
+      className={`absolute inset-0 z-40 flex flex-col items-center overflow-auto p-6 ${employeesWon ? 'bg-[radial-gradient(circle_at_50%_20%,#1f6b5a,#0b0f2b_70%)]' : 'bg-[radial-gradient(circle_at_50%_20%,#6b1020,#0b0510_70%)]'}`}
+      data-testid="game-over"
+    >
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         {confetti.map((c, i) => (
-          <span key={i} className="absolute top-0 text-2xl" style={{ left: `${c.left}%`, animation: `fall ${c.dur}s linear ${c.delay}s infinite`, ['--rot' as string]: `${c.rot}deg`, ['--dx' as string]: `${c.dx}px` }}>
+          <span
+            key={i}
+            className="absolute top-0 text-2xl"
+            style={{
+              left: `${c.left}%`,
+              animation: `fall ${c.dur}s linear ${c.delay}s infinite`,
+              ['--rot' as string]: `${c.rot}deg`,
+              ['--dx' as string]: `${c.dx}px`,
+            }}
+          >
             {c.emoji}
           </span>
         ))}
       </div>
-      <p className="font-display relative mt-4 tracking-[0.35em] uppercase text-white/70">{me ? (me.won ? 'Victory' : 'Defeat') : 'Match over'}</p>
-      <h1 className={`font-display text-shadow-hard relative text-center text-5xl font-bold sm:text-7xl ${employeesWon ? 'text-corp-mint' : 'text-corp-red'}`} style={{ animation: 'stamp 0.7s both' }} data-testid="winner-headline">
+      <p className="font-display relative mt-4 tracking-[0.35em] uppercase text-white/70">
+        {me ? (me.won ? 'Victory' : 'Defeat') : 'Match over'}
+      </p>
+      <h1
+        className={`font-display text-shadow-hard relative text-center text-5xl font-bold sm:text-7xl ${employeesWon ? 'text-corp-mint' : 'text-corp-red'}`}
+        style={{ animation: 'slam 0.7s both' }}
+        data-testid="winner-headline"
+      >
         {go.headline}
       </h1>
       <p className="relative mt-2 text-lg text-mist">{REASONS[go.reason]}</p>
@@ -62,7 +80,7 @@ export function GameOver() {
         {winners.map((p, i) => (
           <div key={p.id} className="flex flex-col items-center">
             <div className="anim-jump" style={{ animationDelay: `${i * 0.12}s` }}>
-              <Avatar appearance={p.appearance} size={96} expression="happy" />
+              <Avatar appearance={p.appearance} size={120} expression="happy" />
             </div>
             <span className="font-display font-semibold">{p.name}</span>
           </div>
@@ -72,7 +90,7 @@ export function GameOver() {
         {losers.map((p) => (
           <div key={p.id} className="flex flex-col items-center">
             <div className="anim-slump">
-              <Avatar appearance={p.appearance} size={64} expression="sad" />
+              <Avatar appearance={p.appearance} size={76} expression="sad" />
             </div>
             <span className="text-sm text-mist">{p.name}</span>
           </div>
@@ -98,8 +116,14 @@ export function GameOver() {
               {go.players.map((p) => (
                 <tr key={p.id} className="border-b border-white/5">
                   <td className="py-1.5 font-semibold">{p.name}</td>
-                  <td className={p.role === 'manager' ? 'text-red-300' : 'text-corp-mint'}>{p.role === 'manager' ? 'Toxic Manager' : 'Employee'}</td>
-                  <td className="text-mist">{p.role === 'manager' ? `${p.eliminations} terminations` : `${p.tasksDone}/${p.tasksTotal} tasks`}</td>
+                  <td className={p.role === 'manager' ? 'text-red-300' : 'text-corp-mint'}>
+                    {p.role === 'manager' ? 'Toxic Manager' : 'Employee'}
+                  </td>
+                  <td className="text-mist">
+                    {p.role === 'manager'
+                      ? `${p.eliminations} terminations`
+                      : `${p.tasksDone}/${p.tasksTotal} tasks`}
+                  </td>
                   <td>{p.alive ? '🟢' : '👻'}</td>
                 </tr>
               ))}
@@ -111,7 +135,11 @@ export function GameOver() {
       <div className="relative mt-6 mb-4 flex flex-wrap justify-center gap-3">
         {s.you.isHost ? (
           <>
-            <button className="btn btn-yellow btn-lg" onClick={() => send({ t: 'returnToLobby' })} data-testid="play-again">
+            <button
+              className="btn btn-yellow btn-lg"
+              onClick={() => send({ t: 'returnToLobby' })}
+              data-testid="play-again"
+            >
               🔁 Play Again
             </button>
             <button className="btn btn-lg" onClick={() => send({ t: 'returnToLobby' })}>
@@ -119,7 +147,9 @@ export function GameOver() {
             </button>
           </>
         ) : (
-          <div className="hud px-4 py-3 text-mist">Waiting for the host to start the next shift… (auto-return in 60 s)</div>
+          <div className="hud px-4 py-3 text-mist">
+            Waiting for the host to start the next shift… (auto-return in 60 s)
+          </div>
         )}
         <button
           className="btn btn-ghost btn-lg"

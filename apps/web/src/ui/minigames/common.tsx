@@ -19,7 +19,21 @@ export function useSorter<K extends string>(ids: string[]) {
   return { assign, setAssign, held, setHeld, place, unassigned, complete: unassigned.length === 0 };
 }
 
-export function Bin({ label, icon, onDrop, active, children, testId }: { label: string; icon?: string; onDrop: (id: string) => void; active: boolean; children?: React.ReactNode; testId?: string }) {
+export function Bin({
+  label,
+  icon,
+  onDrop,
+  active,
+  children,
+  testId,
+}: {
+  label: string;
+  icon?: string;
+  onDrop: (id: string) => void;
+  active: boolean;
+  children?: React.ReactNode;
+  testId?: string;
+}) {
   const [over, setOver] = useState(false);
   return (
     <div
@@ -50,7 +64,21 @@ export function Bin({ label, icon, onDrop, active, children, testId }: { label: 
   );
 }
 
-export function Draggable({ id, held, onPick, children, className = '', testId }: { id: string; held: boolean; onPick: () => void; children: React.ReactNode; className?: string; testId?: string }) {
+export function Draggable({
+  id,
+  held,
+  onPick,
+  children,
+  className = '',
+  testId,
+}: {
+  id: string;
+  held: boolean;
+  onPick: () => void;
+  children: React.ReactNode;
+  className?: string;
+  testId?: string;
+}) {
   return (
     <div
       draggable

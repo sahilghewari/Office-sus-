@@ -1,7 +1,8 @@
 import { create } from 'zustand';
 
 export type Screen = 'landing' | 'customize' | 'play' | 'game';
-export type Intent = { kind: 'create'; isPublic: boolean } | { kind: 'join'; code: string } | { kind: 'quick' } | null;
+export type Intent =
+  { kind: 'create'; isPublic: boolean } | { kind: 'join'; code: string } | { kind: 'quick' } | null;
 
 export interface AppState {
   screen: Screen;

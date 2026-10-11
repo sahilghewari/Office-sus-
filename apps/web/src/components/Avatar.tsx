@@ -23,5 +23,13 @@ export function Avatar({
     if (ref.current) renderAvatar(ref.current, appearance, { expression, ghost });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key]);
-  return <canvas ref={ref} style={{ width: size, height: size * 1.3 }} className={className} aria-label={title} role="img" />;
+  return (
+    <canvas
+      ref={ref}
+      style={{ width: size, height: size * 1.3 }}
+      className={className}
+      aria-label={title}
+      role="img"
+    />
+  );
 }

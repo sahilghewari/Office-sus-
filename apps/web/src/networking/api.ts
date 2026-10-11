@@ -38,17 +38,34 @@ export const api = {
   config: () => call<{ protocol: number; voice: boolean; persistentAccounts: boolean }>('/api/config'),
   guest: () => call<{ token: string }>('/api/auth/guest', { method: 'POST' }),
   register: (username: string, password: string, appearance: Appearance) =>
-    call<{ token: string; user: UserView }>('/api/auth/register', { method: 'POST', body: JSON.stringify({ username, password, appearance }) }),
+    call<{ token: string; user: UserView }>('/api/auth/register', {
+      method: 'POST',
+      body: JSON.stringify({ username, password, appearance }),
+    }),
   login: (username: string, password: string) =>
-    call<{ token: string; user: UserView }>('/api/auth/login', { method: 'POST', body: JSON.stringify({ username, password }) }),
+    call<{ token: string; user: UserView }>('/api/auth/login', {
+      method: 'POST',
+      body: JSON.stringify({ username, password }),
+    }),
   logout: () => call<{ ok: true }>('/api/auth/logout', { method: 'POST', body: '{}' }),
   me: () => call<{ user: UserView }>('/api/me'),
-  saveAppearance: (appearance: Appearance) => call('/api/me/appearance', { method: 'PUT', body: JSON.stringify({ appearance }) }),
-  deleteAccount: (password: string) => call('/api/me', { method: 'DELETE', body: JSON.stringify({ password }) }),
-  createRoom: (isPublic: boolean) => call<{ code: string }>('/api/rooms', { method: 'POST', body: JSON.stringify({ isPublic }) }),
-  roomInfo: (code: string) => call<{ code: string; phase: string; players: number; capacity: number; instanceUrl: string | null }>(`/api/rooms/${encodeURIComponent(code)}`),
-  matchmake: () => call<{ code: string; instanceUrl: string | null; created: boolean }>('/api/matchmake', { method: 'POST', body: '{}' }),
-  publicRooms: () => call<{ rooms: { players: number; capacity: number }[]; waiting: number }>('/api/public-rooms'),
+  saveAppearance: (appearance: Appearance) =>
+    call('/api/me/appearance', { method: 'PUT', body: JSON.stringify({ appearance }) }),
+  deleteAccount: (password: string) =>
+    call('/api/me', { method: 'DELETE', body: JSON.stringify({ password }) }),
+  createRoom: (isPublic: boolean) =>
+    call<{ code: string }>('/api/rooms', { method: 'POST', body: JSON.stringify({ isPublic }) }),
+  roomInfo: (code: string) =>
+    call<{ code: string; phase: string; players: number; capacity: number; instanceUrl: string | null }>(
+      `/api/rooms/${encodeURIComponent(code)}`,
+    ),
+  matchmake: () =>
+    call<{ code: string; instanceUrl: string | null; created: boolean }>('/api/matchmake', {
+      method: 'POST',
+      body: '{}',
+    }),
+  publicRooms: () =>
+    call<{ rooms: { players: number; capacity: number }[]; waiting: number }>('/api/public-rooms'),
 };
 
 /** Make sure we have some identity (guest by default — no forced registration). */

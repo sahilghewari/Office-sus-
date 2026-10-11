@@ -68,7 +68,8 @@ export class OfficeScene extends Phaser.Scene {
   private err = { x: 0, y: 0 };
   private renderPos = { x: 16, y: 34 };
   // world objects
-  private pieces: { img: Phaser.GameObjects.Image; piece: Piece; cx: number; cy: number; depth: number }[] = [];
+  private pieces: { img: Phaser.GameObjects.Image; piece: Piece; cx: number; cy: number; depth: number }[] =
+    [];
   private bodies = new Map<string, Phaser.GameObjects.Container>();
   private bodyData = new Map<string, BodyView>();
   private markers: Phaser.GameObjects.GameObject[] = [];
@@ -104,7 +105,8 @@ export class OfficeScene extends Phaser.Scene {
   create() {
     const quality = useSettings.getState().quality;
     // --- textures
-    for (const [k, cv] of Object.entries(makeFxTextures())) if (!this.textures.exists(`fx-${k}`)) this.textures.addCanvas(`fx-${k}`, cv);
+    for (const [k, cv] of Object.entries(makeFxTextures()))
+      if (!this.textures.exists(`fx-${k}`)) this.textures.addCanvas(`fx-${k}`, cv);
     makeEffectTextures(this);
     if (!this.textures.exists('floor')) this.textures.addCanvas('floor', drawFloor(quality));
     this.add.image(0, 0, 'floor').setOrigin(0, 0).setDepth(-1_000_000);
@@ -128,7 +130,11 @@ export class OfficeScene extends Phaser.Scene {
       void doorId;
       for (const b of boxes) {
         const [sx, sy] = iso((b.x0 + b.x1) / 2, (b.y0 + b.y1) / 2, 0);
-        const img = this.add.image(sx, sy, 'fx-lockBar').setOrigin(0.5, 0.85).setDepth(depthOf((b.x0 + b.x1) / 2, (b.y0 + b.y1) / 2) + 1).setVisible(false);
+        const img = this.add
+          .image(sx, sy, 'fx-lockBar')
+          .setOrigin(0.5, 0.85)
+          .setDepth(depthOf((b.x0 + b.x1) / 2, (b.y0 + b.y1) / 2) + 1)
+          .setVisible(false);
         img.setScale(b.x1 - b.x0 > b.y1 - b.y0 ? 1 : -1, 1);
         this.lockBars.push(img);
       }
@@ -137,10 +143,25 @@ export class OfficeScene extends Phaser.Scene {
     // --- darkness / vision
     this.makeVisionTexture();
     this.darkness = this.add.image(0, 0, 'vision').setDepth(8_800_000).setOrigin(0.5);
-    for (let i = 0; i < 4; i++) this.darkRects.push(this.add.rectangle(0, 0, 10, 10, 0x05061a, 0.93).setOrigin(0, 0).setDepth(8_800_000));
-    this.redTint = this.add.rectangle(0, 0, 4000, 3000, 0xff2030, 0).setScrollFactor(0).setDepth(8_850_000).setOrigin(0, 0);
+    for (let i = 0; i < 4; i++)
+      this.darkRects.push(
+        this.add.rectangle(0, 0, 10, 10, 0x05061a, 0.93).setOrigin(0, 0).setDepth(8_800_000),
+      );
+    this.redTint = this.add
+      .rectangle(0, 0, 4000, 3000, 0xff2030, 0)
+      .setScrollFactor(0)
+      .setDepth(8_850_000)
+      .setOrigin(0, 0);
     this.prompt = this.add
-      .text(0, 0, '', { fontFamily: 'Fredoka', fontSize: '13px', fontStyle: '700', color: '#141a3d', backgroundColor: '#ffd23f', padding: { x: 8, y: 4 }, resolution: 2 })
+      .text(0, 0, '', {
+        fontFamily: 'Fredoka',
+        fontSize: '13px',
+        fontStyle: '700',
+        color: '#141a3d',
+        backgroundColor: '#ffd23f',
+        padding: { x: 8, y: 4 },
+        resolution: 2,
+      })
       .setOrigin(0.5, 1)
       .setDepth(9_100_000)
       .setVisible(false);
@@ -169,7 +190,11 @@ export class OfficeScene extends Phaser.Scene {
     this.onState(useGame.getState().state);
     this.events.once('shutdown', () => this.cleanup());
     this.events.once('destroy', () => this.cleanup());
-    if (useSettings.getState().showFps) this.fpsText = this.add.text(8, 8, '', { fontFamily: 'monospace', fontSize: '12px', color: '#3ddc97' }).setScrollFactor(0).setDepth(9_999_999);
+    if (useSettings.getState().showFps)
+      this.fpsText = this.add
+        .text(8, 8, '', { fontFamily: 'monospace', fontSize: '12px', color: '#3ddc97' })
+        .setScrollFactor(0)
+        .setDepth(9_999_999);
   }
 
   private cleanup() {
@@ -194,17 +219,39 @@ export class OfficeScene extends Phaser.Scene {
           const u = 0.15 + ((i * 37) % 70) / 100;
           const v = 0.15 + ((i * 53) % 75) / 100;
           const [sx, sy] = iso(f.x + u * f.w, f.y + f.h, z * (1 - v));
-          const img = this.add.image(sx, sy, 'fx-led').setDepth(depthOf(f.x + f.w / 2, f.y + f.h / 2) + 2).setTint([0x3ddc97, 0x2ee6f0, 0xffd23f][i % 3]);
+          const img = this.add
+            .image(sx, sy, 'fx-led')
+            .setDepth(depthOf(f.x + f.w / 2, f.y + f.h / 2) + 2)
+            .setTint([0x3ddc97, 0x2ee6f0, 0xffd23f][i % 3]);
           this.leds.push({ img, base: [0x3ddc97, 0x2ee6f0, 0xffd23f][i % 3] });
-          this.tweens.add({ targets: img, alpha: 0.15, duration: 200 + ((i * 97) % 900), yoyo: true, repeat: -1, delay: (i * 131) % 700 });
+          this.tweens.add({
+            targets: img,
+            alpha: 0.15,
+            duration: 200 + ((i * 97) % 900),
+            yoyo: true,
+            repeat: -1,
+            delay: (i * 131) % 700,
+          });
         }
       }
-      if (high && (f.kind === 'desk' && f.variant?.endsWith('-s'))) {
+      if (high && f.kind === 'desk' && f.variant?.endsWith('-s')) {
         for (const off of [0.41, 1.07]) {
           const [sx, sy] = iso(f.x + off, f.y + 0.24, 0.85);
-          const g = this.add.image(sx, sy, 'fx-glow').setTint(0x2ee6f0).setBlendMode(Phaser.BlendModes.ADD).setAlpha(0.22).setScale(0.55, 0.4).setDepth(depthOf(f.x + f.w / 2, f.y + f.h / 2) + 3);
+          const g = this.add
+            .image(sx, sy, 'fx-glow')
+            .setTint(0x2ee6f0)
+            .setBlendMode(Phaser.BlendModes.ADD)
+            .setAlpha(0.22)
+            .setScale(0.55, 0.4)
+            .setDepth(depthOf(f.x + f.w / 2, f.y + f.h / 2) + 3);
           this.glows.push(g);
-          this.tweens.add({ targets: g, alpha: 0.1, duration: 1800 + Math.random() * 1200, yoyo: true, repeat: -1 });
+          this.tweens.add({
+            targets: g,
+            alpha: 0.1,
+            duration: 1800 + Math.random() * 1200,
+            yoyo: true,
+            repeat: -1,
+          });
         }
       }
       if (f.kind === 'coffeeMachine' && high) {
@@ -213,28 +260,85 @@ export class OfficeScene extends Phaser.Scene {
           delay: 450,
           loop: true,
           callback: () => {
-            const s = this.add.image(sx + Phaser.Math.Between(-3, 3), sy, 'fx-steam').setDepth(depthOf(f.x + 1, f.y + 1) + 5).setAlpha(0.6).setScale(0.6);
-            this.tweens.add({ targets: s, y: sy - 40, x: s.x + Phaser.Math.Between(-8, 8), alpha: 0, scale: 1.4, duration: 1600, onComplete: () => s.destroy() });
+            const s = this.add
+              .image(sx + Phaser.Math.Between(-3, 3), sy, 'fx-steam')
+              .setDepth(depthOf(f.x + 1, f.y + 1) + 5)
+              .setAlpha(0.6)
+              .setScale(0.6);
+            this.tweens.add({
+              targets: s,
+              y: sy - 40,
+              x: s.x + Phaser.Math.Between(-8, 8),
+              alpha: 0,
+              scale: 1.4,
+              duration: 1600,
+              onComplete: () => s.destroy(),
+            });
           },
         });
       }
-      if ((f.kind === 'neonSign' || f.kind === 'logoWall' || f.kind === 'tv' || f.kind === 'bigScreen' || f.kind === 'arcade' || f.kind === 'monitorWall') && high) {
+      if (
+        (f.kind === 'neonSign' ||
+          f.kind === 'logoWall' ||
+          f.kind === 'tv' ||
+          f.kind === 'bigScreen' ||
+          f.kind === 'arcade' ||
+          f.kind === 'monitorWall') &&
+        high
+      ) {
         const [sx, sy] = iso(f.x + f.w / 2, f.y + f.h, z * 0.6);
-        const tint = f.kind === 'neonSign' || f.kind === 'arcade' ? 0xff6fb5 : f.kind === 'logoWall' ? 0x2ee6f0 : 0x6c8cff;
-        const g = this.add.image(sx, sy, 'fx-glow').setTint(tint).setBlendMode(Phaser.BlendModes.ADD).setAlpha(0.16).setScale(Math.min(3, f.w * 0.55), 0.8).setDepth(depthOf(f.x + f.w / 2, f.y + f.h / 2) + 2);
+        const tint =
+          f.kind === 'neonSign' || f.kind === 'arcade'
+            ? 0xff6fb5
+            : f.kind === 'logoWall'
+              ? 0x2ee6f0
+              : 0x6c8cff;
+        const g = this.add
+          .image(sx, sy, 'fx-glow')
+          .setTint(tint)
+          .setBlendMode(Phaser.BlendModes.ADD)
+          .setAlpha(0.16)
+          .setScale(Math.min(3, f.w * 0.55), 0.8)
+          .setDepth(depthOf(f.x + f.w / 2, f.y + f.h / 2) + 2);
         this.glows.push(g);
-        this.tweens.add({ targets: g, alpha: 0.12, duration: f.kind === 'neonSign' ? 90 : 2200, yoyo: true, repeat: -1, repeatDelay: f.kind === 'neonSign' ? 3000 : 0 });
+        this.tweens.add({
+          targets: g,
+          alpha: 0.12,
+          duration: f.kind === 'neonSign' ? 90 : 2200,
+          yoyo: true,
+          repeat: -1,
+          repeatDelay: f.kind === 'neonSign' ? 3000 : 0,
+        });
       }
     }
     // Emergency button on the conference table
     const [ex, ey] = iso(32, 19, 0.56);
-    this.emergencyBtn = this.add.image(ex, ey, 'fx-emergency').setOrigin(0.5, 0.8).setDepth(depthOf(32, 19) + 5);
-    const eg = this.add.image(ex, ey - 6, 'fx-glow').setTint(0xff3040).setBlendMode(Phaser.BlendModes.ADD).setAlpha(0.4).setDepth(depthOf(32, 19) + 6);
+    this.emergencyBtn = this.add
+      .image(ex, ey, 'fx-emergency')
+      .setOrigin(0.5, 0.8)
+      .setDepth(depthOf(32, 19) + 5);
+    const eg = this.add
+      .image(ex, ey - 6, 'fx-glow')
+      .setTint(0xff3040)
+      .setBlendMode(Phaser.BlendModes.ADD)
+      .setAlpha(0.4)
+      .setDepth(depthOf(32, 19) + 6);
     this.tweens.add({ targets: eg, alpha: 0.1, scale: 1.4, duration: 900, yoyo: true, repeat: -1 });
     // Alarm beacons (shown during critical sabotage)
-    for (const st of STATIONS.filter((s) => s.kind === 'fix' && (s.fix === 'fireA' || s.fix === 'fireB' || s.fix === 'serverA' || s.fix === 'serverB'))) {
+    for (const st of STATIONS.filter(
+      (s) =>
+        s.kind === 'fix' &&
+        (s.fix === 'fireA' || s.fix === 'fireB' || s.fix === 'serverA' || s.fix === 'serverB'),
+    )) {
       const [bx, by] = iso(st.x, st.y, 1.7);
-      this.beacons.push(this.add.image(bx, by, 'fx-beacon').setDepth(8_700_000).setBlendMode(Phaser.BlendModes.ADD).setVisible(false).setScale(2));
+      this.beacons.push(
+        this.add
+          .image(bx, by, 'fx-beacon')
+          .setDepth(8_700_000)
+          .setBlendMode(Phaser.BlendModes.ADD)
+          .setVisible(false)
+          .setScale(2),
+      );
     }
   }
 
@@ -289,7 +393,9 @@ export class OfficeScene extends Phaser.Scene {
         this.chars.set(p.id, c);
         if (p.id !== s.you.id) c.container.setAlpha(0);
       } else c.setAppearance(p.appearance, p.name);
-      c.setTeammateMarker(p.id !== s.you.id && p.role === 'manager' && s.you.role === 'manager' && s.phase !== 'GAME_OVER');
+      c.setTeammateMarker(
+        p.id !== s.you.id && p.role === 'manager' && s.you.role === 'manager' && s.phase !== 'GAME_OVER',
+      );
       c.setSpeaking(!!useGame.getState().voice.speaking.includes(p.id));
     }
     for (const [id, c] of this.chars) {
@@ -334,7 +440,14 @@ export class OfficeScene extends Phaser.Scene {
         const victim = this.chars.get(m.victimId);
         this.elimPlaying.add(m.victimId);
         sfx('elim');
-        void playElimination(this, sx, sy, m.variant, victim?.container ?? null, useSettings.getState().reducedMotion).then(() => {
+        void playElimination(
+          this,
+          sx,
+          sy,
+          m.variant,
+          victim?.container ?? null,
+          useSettings.getState().reducedMotion,
+        ).then(() => {
           this.elimPlaying.delete(m.victimId);
           if (victim) victim.container.setAlpha(m.victimId === this.myId() ? 1 : 0);
         });
@@ -385,7 +498,15 @@ export class OfficeScene extends Phaser.Scene {
         const victim = s?.players.find((p) => p.id === b.victimId);
         const [sx, sy] = iso(b.x, b.y);
         const delay = this.elimPlaying.has(b.victimId) ? 900 : 0;
-        const c = createIncident(this, sx, sy, depthOf(b.x, b.y) - 1, b.variant, victim?.appearance ?? null, victim?.name ?? '???');
+        const c = createIncident(
+          this,
+          sx,
+          sy,
+          depthOf(b.x, b.y) - 1,
+          b.variant,
+          victim?.appearance ?? null,
+          victim?.name ?? '???',
+        );
         c.setAlpha(0);
         this.tweens.add({ targets: c, alpha: 1, delay, duration: 300 });
         this.bodies.set(b.id, c);
@@ -440,7 +561,8 @@ export class OfficeScene extends Phaser.Scene {
     if (!s || s.you.spectator) return false;
     if (!(s.phase === 'WAITING' || s.phase === 'ACTIVE' || s.phase === 'GAME_OVER')) return false;
     if (s.you.inVent) return false;
-    if (g.task || g.fix || g.cctv || g.mapOpen || g.settingsOpen || g.customizeOpen || g.sabotageOpen) return false;
+    if (g.task || g.fix || g.cctv || g.mapOpen || g.settingsOpen || g.customizeOpen || g.sabotageOpen)
+      return false;
     if (g.died && Date.now() - g.died.at < 2500) return false;
     return true;
   }
@@ -482,7 +604,15 @@ export class OfficeScene extends Phaser.Scene {
           continue;
         }
         const [sx, sy] = iso(this.renderPos.x, this.renderPos.y);
-        c.mode = over ? (winners.has(id) ? 'cheer' : 'sad') : this.amGhost() ? 'ghost' : g.task || g.fix?.station ? 'working' : 'normal';
+        c.mode = over
+          ? winners.has(id)
+            ? 'cheer'
+            : 'sad'
+          : this.amGhost()
+            ? 'ghost'
+            : g.task || g.fix?.station
+              ? 'working'
+              : 'normal';
         c.visibleTarget = !s.you.inVent;
         c.update(sx, sy, depthOf(this.renderPos.x, this.renderPos.y) + 1, dt);
         continue;
@@ -511,7 +641,15 @@ export class OfficeScene extends Phaser.Scene {
           y = b0.y;
         }
       }
-      c.mode = over ? (winners.has(id) ? 'cheer' : 'sad') : a === 2 ? 'ghost' : a === 1 ? 'working' : 'normal';
+      c.mode = over
+        ? winners.has(id)
+          ? 'cheer'
+          : 'sad'
+        : a === 2
+          ? 'ghost'
+          : a === 1
+            ? 'working'
+            : 'normal';
       c.visibleTarget = this.visibleIds.has(id);
       const [sx, sy] = iso(x, y);
       c.update(sx, sy, depthOf(x, y) + 1, dt, c.visibleTarget);
@@ -556,7 +694,17 @@ export class OfficeScene extends Phaser.Scene {
     if (performance.now() - this.lastAmbienceAt > 600) {
       this.lastAmbienceAt = performance.now();
       const r = roomAt(this.renderPos.x, this.renderPos.y);
-      const amb: Ambience = isMeetingPhase(s.phase) ? 'none' : r === 'server' || r === 'it' ? 'server' : r === 'cafeteria' ? 'cafeteria' : r === 'gaming' ? 'gaming' : r === 'maintenance' ? 'maintenance' : 'office';
+      const amb: Ambience = isMeetingPhase(s.phase)
+        ? 'none'
+        : r === 'server' || r === 'it'
+          ? 'server'
+          : r === 'cafeteria'
+            ? 'cafeteria'
+            : r === 'gaming'
+              ? 'gaming'
+              : r === 'maintenance'
+                ? 'maintenance'
+                : 'office';
       audio.setAmbience(amb);
     }
     if (this.fpsText) this.fpsText.setText(`${Math.round(this.game.loop.actualFps)} fps`);
@@ -577,7 +725,12 @@ export class OfficeScene extends Phaser.Scene {
     this.pred = stepMovement(this.pred, mx, my, this.mySpeed(), TICK_DT, this.cols, this.amGhost());
     this.pending.push({ seq: this.seq, mx, my });
     if (this.pending.length > 60) this.pending.shift();
-    this.conn.send({ t: 'input', seq: this.seq, mx: Math.round(mx * 1000) / 1000, my: Math.round(my * 1000) / 1000 });
+    this.conn.send({
+      t: 'input',
+      seq: this.seq,
+      mx: Math.round(mx * 1000) / 1000,
+      my: Math.round(my * 1000) / 1000,
+    });
   }
 
   /** Walls and tall furniture fade when they hide the local player. */
@@ -602,21 +755,35 @@ export class OfficeScene extends Phaser.Scene {
   }
 
   private updateVision(s: StateMsg, cam: Phaser.Cameras.Scene2D.Camera) {
-    const dark = isInMatch(s.phase) && !isMeetingPhase(s.phase) && s.you.alive && !s.you.spectator && s.phase !== 'ROLE_REVEAL';
+    const dark =
+      isInMatch(s.phase) &&
+      !isMeetingPhase(s.phase) &&
+      s.you.alive &&
+      !s.you.spectator &&
+      s.phase !== 'ROLE_REVEAL';
     this.darkness.setVisible(dark);
     this.darkRects.forEach((r) => r.setVisible(dark));
     const power = s.sabotage?.kind === 'power' && s.phase === 'ACTIVE';
     const lightsOut = power && s.you.role !== 'manager';
     const reduced = useSettings.getState().reducedMotion;
-    this.redTint.setFillStyle(0xff2030, power ? (reduced ? 0.06 : 0.05 + Math.sin(performance.now() / 600) * 0.03) : 0);
+    this.redTint.setFillStyle(
+      0xff2030,
+      power ? (reduced ? 0.06 : 0.05 + Math.sin(performance.now() / 600) * 0.03) : 0,
+    );
     if (!dark) return;
-    const base = BASE_VISION * (s.you.role === 'manager' ? s.settings.managerVision : s.settings.employeeVision) * (lightsOut ? LIGHTS_OUT_VISION_FACTOR : 1);
+    const base =
+      BASE_VISION *
+      (s.you.role === 'manager' ? s.settings.managerVision : s.settings.employeeVision) *
+      (lightsOut ? LIGHTS_OUT_VISION_FACTOR : 1);
     // iso circle of radius r → ellipse half-width r·HW·√2; the texture's clear core is 72% of its half-width
     const halfW = (base * HW * Math.SQRT2) / 0.86;
     const [sx, sy] = iso(this.renderPos.x, this.renderPos.y);
     const w = halfW * 2;
     const h = w / 2;
-    this.darkness.setPosition(sx, sy - 10).setDisplaySize(w, h).setAlpha(1);
+    this.darkness
+      .setPosition(sx, sy - 10)
+      .setDisplaySize(w, h)
+      .setAlpha(1);
     const view = cam.worldView;
     const pad = 400;
     const L = sx - w / 2;
@@ -641,7 +808,8 @@ export class OfficeScene extends Phaser.Scene {
     const tasks = active ? s.you.tasks.filter((t) => !t.done).map((t) => t.stationId) : [];
     const fixes: string[] = [];
     if (active && s.sabotage && s.you.alive) {
-      for (const st of STATIONS) if (st.kind === 'fix' && st.fix && s.sabotage.pending.includes(st.fix)) fixes.push(st.id);
+      for (const st of STATIONS)
+        if (st.kind === 'fix' && st.fix && s.sabotage.pending.includes(st.fix)) fixes.push(st.id);
     }
     if (active && s.doorsLockedUntil && s.you.alive) fixes.push('fix-doors');
     const key = `${tasks.join(',')}|${fixes.join(',')}`;
@@ -651,10 +819,25 @@ export class OfficeScene extends Phaser.Scene {
     this.markers = [];
     const mk = (st: Station, tint: number) => {
       const [sx, sy] = iso(st.x, st.y);
-      const ring = this.add.image(sx, sy, 'fx-ring').setTint(tint).setDepth(depthOf(st.x, st.y) - 50).setScale(0.55);
+      const ring = this.add
+        .image(sx, sy, 'fx-ring')
+        .setTint(tint)
+        .setDepth(depthOf(st.x, st.y) - 50)
+        .setScale(0.55);
       this.tweens.add({ targets: ring, scale: 0.7, alpha: 0.4, duration: 900, yoyo: true, repeat: -1 });
-      const chev = this.add.image(sx, sy - 76, 'fx-chevron').setTint(tint).setDepth(8_700_000).setScale(0.8);
-      this.tweens.add({ targets: chev, y: sy - 86, duration: 600, yoyo: true, repeat: -1, ease: 'Sine.inOut' });
+      const chev = this.add
+        .image(sx, sy - 76, 'fx-chevron')
+        .setTint(tint)
+        .setDepth(8_700_000)
+        .setScale(0.8);
+      this.tweens.add({
+        targets: chev,
+        y: sy - 86,
+        duration: 600,
+        yoyo: true,
+        repeat: -1,
+        ease: 'Sine.inOut',
+      });
       this.markers.push(ring, chev);
     };
     for (const id of new Set(tasks)) mk(STATION_BY_ID[id], 0xffd23f);
@@ -692,29 +875,59 @@ export class OfficeScene extends Phaser.Scene {
         if (!s.you.alive && s.you.role === 'manager') continue;
         const st = STATION_BY_ID[t.stationId];
         const d = dist(x, y, st.x, st.y);
-        if (d <= INTERACT_RANGE) consider({ kind: 'task', id: st.id, label: TASK_INFO[t.type].title, disabled: this.disabledReason(s, st) }, d);
+        if (d <= INTERACT_RANGE)
+          consider(
+            { kind: 'task', id: st.id, label: TASK_INFO[t.type].title, disabled: this.disabledReason(s, st) },
+            d,
+          );
       }
       if (s.you.alive) {
         for (const st of STATIONS) {
           if (st.kind === 'fix' && st.fix) {
-            const relevant = st.fix === 'doorsOverride' ? !!s.doorsLockedUntil : !!s.sabotage?.pending.includes(st.fix);
+            const relevant =
+              st.fix === 'doorsOverride' ? !!s.doorsLockedUntil : !!s.sabotage?.pending.includes(st.fix);
             if (!relevant) continue;
             const d = dist(x, y, st.x, st.y);
-            if (d <= INTERACT_RANGE) consider({ kind: 'fix', id: st.id, label: `Repair: ${st.name}` }, d - 0.5);
+            if (d <= INTERACT_RANGE)
+              consider({ kind: 'fix', id: st.id, label: `Repair: ${st.name}` }, d - 0.5);
           }
           if (st.kind === 'emergency') {
             const d = dist(x, y, st.x, st.y);
-            if (d <= EMERGENCY_RANGE) consider({ kind: 'emergency', id: st.id, label: 'Emergency HR Meeting', disabled: s.you.emergencyLeft <= 0 ? 'No meetings left' : s.sabotage?.critical ? 'Fix the emergency first' : undefined }, d + 0.6);
+            if (d <= EMERGENCY_RANGE)
+              consider(
+                {
+                  kind: 'emergency',
+                  id: st.id,
+                  label: 'Emergency HR Meeting',
+                  disabled:
+                    s.you.emergencyLeft <= 0
+                      ? 'No meetings left'
+                      : s.sabotage?.critical
+                        ? 'Fix the emergency first'
+                        : undefined,
+                },
+                d + 0.6,
+              );
           }
         }
       }
       const cctv = STATION_BY_ID.cctv;
       const dc = dist(x, y, cctv.x, cctv.y);
-      if (dc <= INTERACT_RANGE) consider({ kind: 'cctv', id: 'cctv', label: 'Security Cameras', disabled: s.cctvOnline ? undefined : 'Cameras offline' }, dc + 0.2);
+      if (dc <= INTERACT_RANGE)
+        consider(
+          {
+            kind: 'cctv',
+            id: 'cctv',
+            label: 'Security Cameras',
+            disabled: s.cctvOnline ? undefined : 'Cameras offline',
+          },
+          dc + 0.2,
+        );
       if (s.you.role === 'manager' && s.you.alive) {
         for (const v of VENTS) {
           const d = dist(x, y, v.x, v.y);
-          if (d <= VENT_RANGE + 0.3) consider({ kind: 'vent', id: v.id, label: 'Maintenance Passage' }, d + 0.1);
+          if (d <= VENT_RANGE + 0.3)
+            consider({ kind: 'vent', id: v.id, label: 'Maintenance Passage' }, d + 0.1);
         }
       }
       if (s.you.alive) {
@@ -748,8 +961,13 @@ export class OfficeScene extends Phaser.Scene {
     if (u && !useGame.getState().task && !useGame.getState().fix) {
       const st = u.kind === 'vent' ? VENT_BY_ID[u.id] : STATION_BY_ID[u.id];
       const [sx, sy] = iso(st.x, st.y, 1.9);
-      this.prompt.setText(u.disabled ? `⛔ ${u.disabled}` : `E · ${u.label}`).setPosition(sx, sy).setVisible(true);
-      this.prompt.setBackgroundColor(u.disabled ? '#ef3e4a' : u.kind === 'fix' || u.kind === 'emergency' ? '#ff8a3d' : '#ffd23f');
+      this.prompt
+        .setText(u.disabled ? `⛔ ${u.disabled}` : `E · ${u.label}`)
+        .setPosition(sx, sy)
+        .setVisible(true);
+      this.prompt.setBackgroundColor(
+        u.disabled ? '#ef3e4a' : u.kind === 'fix' || u.kind === 'emergency' ? '#ff8a3d' : '#ffd23f',
+      );
     } else this.prompt.setVisible(false);
   }
 }

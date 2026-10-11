@@ -69,7 +69,9 @@ export function Game() {
       <GameCanvas />
       {!hasState && (
         <div className="absolute inset-0 z-50 flex items-center justify-center bg-navy-950/90">
-          <p className="font-display anim-blink text-2xl text-corp-cyan">{status === 'reconnecting' ? 'Reconnecting to the office…' : 'Badging in…'}</p>
+          <p className="font-display anim-blink text-2xl text-corp-cyan">
+            {status === 'reconnecting' ? 'Reconnecting to the office…' : 'Badging in…'}
+          </p>
         </div>
       )}
       {hasState && (
@@ -95,7 +97,9 @@ export function Game() {
         </>
       )}
       {status === 'reconnecting' && hasState && (
-        <div className="absolute top-0 left-0 z-[70] w-full bg-corp-orange py-1 text-center text-sm font-bold text-ink">Connection lost — reconnecting… your desk is being held for 45 s.</div>
+        <div className="absolute top-0 left-0 z-[70] w-full bg-corp-orange py-1 text-center text-sm font-bold text-ink">
+          Connection lost — reconnecting… your desk is being held for 45 s.
+        </div>
       )}
       <Toasts />
     </div>

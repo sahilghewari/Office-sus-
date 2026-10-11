@@ -41,7 +41,15 @@ export async function createGameServer(opts: CreateOptions = {}): Promise<GameSe
   const directory = await createDirectory(config.redisUrl, log);
   const voice = opts.voice ?? (await createVoice(config.livekit, log));
   const tokens = new TokenService(config.sessionSecret);
-  const manager = new RoomManager({ directory, store, voice, instanceUrl: config.instanceUrl, testHooks: config.testHooks, log, manualTick: opts.manualTick });
+  const manager = new RoomManager({
+    directory,
+    store,
+    voice,
+    instanceUrl: config.instanceUrl,
+    testHooks: config.testHooks,
+    log,
+    manualTick: opts.manualTick,
+  });
   if (config.testHooks) log('⚠ Test hooks are ENABLED. Never use this configuration in production.');
 
   const app = Fastify({ logger: false, bodyLimit: 16 * 1024, trustProxy: true });
@@ -54,16 +62,34 @@ export async function createGameServer(opts: CreateOptions = {}): Promise<GameSe
     reply.header('X-Frame-Options', 'DENY');
     return payload;
   });
-  registerRoutes(app, { tokens, store, manager, voice, directory, startedAt: Date.now(), rateLimitScale: config.rateLimitScale });
+  registerRoutes(app, {
+    tokens,
+    store,
+    manager,
+    voice,
+    directory,
+    startedAt: Date.now(),
+    rateLimitScale: config.rateLimitScale,
+  });
 
   if (config.serveWeb) {
     const here = dirname(fileURLToPath(import.meta.url));
-    const candidates = [resolve(here, '../../web/dist'), resolve(here, '../web'), resolve(process.cwd(), 'apps/web/dist'), resolve(process.cwd(), 'web')];
+    const candidates = [
+      resolve(here, '../../web/dist'),
+      resolve(here, '../web'),
+      resolve(process.cwd(), 'apps/web/dist'),
+      resolve(process.cwd(), 'web'),
+    ];
     const root = candidates.find((c) => existsSync(resolve(c, 'index.html')));
     if (root) {
-      await app.register(fastifyStatic, { root, prefix: '/', maxAge: '1h', setHeaders: (res, path) => {
-        if (path.endsWith('index.html')) res.setHeader('Cache-Control', 'no-cache');
-      } });
+      await app.register(fastifyStatic, {
+        root,
+        prefix: '/',
+        maxAge: '1h',
+        setHeaders: (res, path) => {
+          if (path.endsWith('index.html')) res.setHeader('Cache-Control', 'no-cache');
+        },
+      });
       app.setNotFoundHandler((req, reply) => {
         if (req.url.startsWith('/api/')) return reply.code(404).send({ error: 'Not found' });
         return reply.sendFile('index.html');
@@ -86,7 +112,9 @@ export async function createGameServer(opts: CreateOptions = {}): Promise<GameSe
   await app.listen({ port: config.port, host: config.host });
   const addr = app.server.address();
   const port = typeof addr === 'object' && addr ? addr.port : config.port;
-  log(`Listening on http://localhost:${port} (ws path /ws) — store=${store.kind}, directory=${directory.kind}, voice=${voice.enabled}`);
+  log(
+    `Listening on http://localhost:${port} (ws path /ws) — store=${store.kind}, directory=${directory.kind}, voice=${voice.enabled}`,
+  );
 
   return {
     config,

@@ -46,7 +46,13 @@ export interface GameStore {
   sabotageOpen: boolean;
   customizeOpen: boolean;
   chatOpen: boolean;
-  voice: { status: 'off' | 'connecting' | 'on' | 'unavailable' | 'denied' | 'error'; mode?: string; detail?: string; speaking: string[]; transmitting: boolean };
+  voice: {
+    status: 'off' | 'connecting' | 'on' | 'unavailable' | 'denied' | 'error';
+    mode?: string;
+    detail?: string;
+    speaking: string[];
+    transmitting: boolean;
+  };
   spectateTarget: string | null;
   lastError: ServerMessageOf<'error'> | null;
   set(p: Partial<GameStore>): void;
@@ -87,7 +93,10 @@ export const useGame = create<GameStore>((set, get) => ({
   toast(kind, text) {
     const t: Toast = { id: ++toastId, kind, text, at: Date.now() };
     set({ toasts: [...get().toasts.slice(-4), t] });
-    setTimeout(() => set({ toasts: get().toasts.filter((x) => x.id !== t.id) }), kind === 'danger' ? 6000 : 4200);
+    setTimeout(
+      () => set({ toasts: get().toasts.filter((x) => x.id !== t.id) }),
+      kind === 'danger' ? 6000 : 4200,
+    );
   },
   reset: () => set({ ...initial, toasts: get().toasts }),
 }));

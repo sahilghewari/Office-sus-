@@ -40,41 +40,91 @@ describe('vote tally', () => {
   const voters = new Set(['a', 'b', 'c', 'd', 'e']);
   const targets = new Set(['a', 'b', 'c', 'd', 'e']);
   it('ejects a unique plurality', () => {
-    const r = tallyVotes(new Map([['a', 'c'], ['b', 'c'], ['d', 'a']]), voters, targets);
+    const r = tallyVotes(
+      new Map([
+        ['a', 'c'],
+        ['b', 'c'],
+        ['d', 'a'],
+      ]),
+      voters,
+      targets,
+    );
     expect(r.ejected).toBe('c');
   });
   it('tie → nobody', () => {
-    const r = tallyVotes(new Map([['a', 'c'], ['b', 'd']]), voters, targets);
+    const r = tallyVotes(
+      new Map([
+        ['a', 'c'],
+        ['b', 'd'],
+      ]),
+      voters,
+      targets,
+    );
     expect(r.ejected).toBeNull();
     expect(r.tie).toBe(true);
   });
   it('leading skip → nobody', () => {
-    const r = tallyVotes(new Map([['a', SKIP], ['b', SKIP], ['c', 'd']]), voters, targets);
+    const r = tallyVotes(
+      new Map([
+        ['a', SKIP],
+        ['b', SKIP],
+        ['c', 'd'],
+      ]),
+      voters,
+      targets,
+    );
     expect(r.ejected).toBeNull();
     expect(r.skipped).toBe(true);
   });
   it('tie with skip → nobody', () => {
-    const r = tallyVotes(new Map([['a', SKIP], ['c', 'd']]), voters, targets);
+    const r = tallyVotes(
+      new Map([
+        ['a', SKIP],
+        ['c', 'd'],
+      ]),
+      voters,
+      targets,
+    );
     expect(r.ejected).toBeNull();
   });
   it('no votes → nobody', () => {
     expect(tallyVotes(new Map(), voters, targets).ejected).toBeNull();
   });
   it('ignores ineligible voters and targets', () => {
-    const r = tallyVotes(new Map([['ghost', 'a'], ['zed', 'a'], ['b', 'e'], ['c', 'ghost']]), voters, targets);
+    const r = tallyVotes(
+      new Map([
+        ['ghost', 'a'],
+        ['zed', 'a'],
+        ['b', 'e'],
+        ['c', 'ghost'],
+      ]),
+      voters,
+      targets,
+    );
     expect(r.counts).toEqual({ e: 1 });
     expect(r.ejected).toBe('e');
   });
 });
 
 describe('win conditions', () => {
-  const base = { started: true, aliveEmployees: 4, aliveManagers: 1, tasksDone: 0, tasksTotal: 12, criticalExpired: false };
+  const base = {
+    started: true,
+    aliveEmployees: 4,
+    aliveManagers: 1,
+    tasksDone: 0,
+    tasksTotal: 12,
+    criticalExpired: false,
+  };
   it('nothing during normal play', () => expect(evaluateWin(base)).toBeNull());
   it('never in lobby', () => expect(evaluateWin({ ...base, started: false, aliveManagers: 0 })).toBeNull());
-  it('employees win on tasks', () => expect(evaluateWin({ ...base, tasksDone: 12 })?.winner).toBe('employees'));
-  it('employees win when managers gone', () => expect(evaluateWin({ ...base, aliveManagers: 0 })?.reason).toBe('managers_voted_out'));
-  it('managers win on parity', () => expect(evaluateWin({ ...base, aliveEmployees: 1 })?.reason).toBe('parity'));
-  it('managers win on critical sabotage', () => expect(evaluateWin({ ...base, criticalExpired: true })?.reason).toBe('critical_sabotage'));
+  it('employees win on tasks', () =>
+    expect(evaluateWin({ ...base, tasksDone: 12 })?.winner).toBe('employees'));
+  it('employees win when managers gone', () =>
+    expect(evaluateWin({ ...base, aliveManagers: 0 })?.reason).toBe('managers_voted_out'));
+  it('managers win on parity', () =>
+    expect(evaluateWin({ ...base, aliveEmployees: 1 })?.reason).toBe('parity'));
+  it('managers win on critical sabotage', () =>
+    expect(evaluateWin({ ...base, criticalExpired: true })?.reason).toBe('critical_sabotage'));
   it('simultaneous conditions resolve deterministically', () => {
     // tasks done AND parity in the same tick → parity has priority
     expect(evaluateWin({ ...base, aliveEmployees: 1, tasksDone: 12 })?.winner).toBe('managers');
@@ -85,7 +135,13 @@ describe('win conditions', () => {
 
 describe('settings + state machine', () => {
   it('rejects invalid values', () => {
-    const s = sanitizeSettings({ killCooldown: -5, playerSpeed: 99, maxPlayers: 50, votingTime: NaN as any, killRange: 'huge' as any });
+    const s = sanitizeSettings({
+      killCooldown: -5,
+      playerSpeed: 99,
+      maxPlayers: 50,
+      votingTime: NaN as any,
+      killRange: 'huge' as any,
+    });
     expect(s.killCooldown).toBe(10);
     expect(s.playerSpeed).toBe(1.5);
     expect(s.maxPlayers).toBe(10);

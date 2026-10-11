@@ -11,12 +11,18 @@ export type VoiceMode = 'lobby' | 'alive' | 'ghost' | 'spectator';
 export interface VoiceService {
   readonly enabled: boolean;
   readonly url: string | null;
-  token(roomCode: string, identity: string, name: string, mode: VoiceMode): Promise<{ token: string; room: string }>;
+  token(
+    roomCode: string,
+    identity: string,
+    name: string,
+    mode: VoiceMode,
+  ): Promise<{ token: string; room: string }>;
   removeFromMain(roomCode: string, identity: string): Promise<void>;
   closeRoom(roomCode: string): Promise<void>;
 }
 
-export const voiceRoomName = (code: string, mode: VoiceMode) => (mode === 'ghost' || mode === 'spectator' ? `${code}-ghost` : `${code}-main`);
+export const voiceRoomName = (code: string, mode: VoiceMode) =>
+  mode === 'ghost' || mode === 'spectator' ? `${code}-ghost` : `${code}-main`;
 
 export class DisabledVoice implements VoiceService {
   readonly enabled = false;
@@ -77,7 +83,10 @@ export class LiveKitVoice implements VoiceService {
   }
 }
 
-export async function createVoice(cfg: { url: string; apiKey: string; apiSecret: string } | null, log: (m: string) => void): Promise<VoiceService> {
+export async function createVoice(
+  cfg: { url: string; apiKey: string; apiSecret: string } | null,
+  log: (m: string) => void,
+): Promise<VoiceService> {
   if (!cfg) {
     log('LiveKit not configured — proximity voice disabled (text chat still works).');
     return new DisabledVoice();

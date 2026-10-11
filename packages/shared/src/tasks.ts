@@ -7,18 +7,20 @@ import { pick, randInt, sample, shuffle, type Rng } from './rng';
  */
 
 export type TaskType =
-  | 'wifi'
-  | 'expense'
-  | 'coffee'
-  | 'printer'
-  | 'meeting'
-  | 'files'
-  | 'emails'
-  | 'server'
-  | 'excel'
-  | 'idscan';
+  'wifi' | 'expense' | 'coffee' | 'printer' | 'meeting' | 'files' | 'emails' | 'server' | 'excel' | 'idscan';
 
-export const TASK_TYPES: TaskType[] = ['wifi', 'expense', 'coffee', 'printer', 'meeting', 'files', 'emails', 'server', 'excel', 'idscan'];
+export const TASK_TYPES: TaskType[] = [
+  'wifi',
+  'expense',
+  'coffee',
+  'printer',
+  'meeting',
+  'files',
+  'emails',
+  'server',
+  'excel',
+  'idscan',
+];
 
 export interface TaskInfo {
   type: TaskType;
@@ -29,16 +31,66 @@ export interface TaskInfo {
 }
 
 export const TASK_INFO: Record<TaskType, TaskInfo> = {
-  wifi: { type: 'wifi', title: 'Fix the Wi-Fi', instructions: 'Drag each cable to the port of the same colour.', minMs: 2500 },
-  expense: { type: 'expense', title: 'Submit Expense Reports', instructions: 'File every receipt under the right expense category.', minMs: 3000 },
-  coffee: { type: 'coffee', title: 'Make Coffee', instructions: 'Read the order ticket, check the recipe card and brew it exactly.', minMs: 3500 },
-  printer: { type: 'printer', title: 'Fix the Printer', instructions: 'Open the panel, clear every jam, replace the cartridge if needed, close and restart.', minMs: 3000 },
-  meeting: { type: 'meeting', title: 'Attend a Meeting', instructions: 'Mark attendance, pick the agenda, sort action items and assign an owner.', minMs: 3500 },
-  files: { type: 'files', title: 'Organize Files', instructions: 'Drag every document into the folder that matches its file type.', minMs: 2500 },
-  emails: { type: 'emails', title: 'Respond to Emails', instructions: 'Sort each email into Urgent, Reply, Archive or Spam.', minMs: 3000 },
-  server: { type: 'server', title: 'Fix the Server', instructions: 'Boot the modules in the order on the sticky note. Wrong order = reboot.', minMs: 2500 },
-  excel: { type: 'excel', title: 'Complete Excel Sheets', instructions: 'Fill the empty cells so every row adds up to its total.', minMs: 3000 },
-  idscan: { type: 'idscan', title: 'Scan Employee ID', instructions: 'Drag your badge onto the scanner, hold it steady, then type the employee number.', minMs: 3000 },
+  wifi: {
+    type: 'wifi',
+    title: 'Fix the Wi-Fi',
+    instructions: 'Drag each cable to the port of the same colour.',
+    minMs: 2500,
+  },
+  expense: {
+    type: 'expense',
+    title: 'Submit Expense Reports',
+    instructions: 'File every receipt under the right expense category.',
+    minMs: 3000,
+  },
+  coffee: {
+    type: 'coffee',
+    title: 'Make Coffee',
+    instructions: 'Read the order ticket, check the recipe card and brew it exactly.',
+    minMs: 3500,
+  },
+  printer: {
+    type: 'printer',
+    title: 'Fix the Printer',
+    instructions: 'Open the panel, clear every jam, replace the cartridge if needed, close and restart.',
+    minMs: 3000,
+  },
+  meeting: {
+    type: 'meeting',
+    title: 'Attend a Meeting',
+    instructions: 'Mark attendance, pick the agenda, sort action items and assign an owner.',
+    minMs: 3500,
+  },
+  files: {
+    type: 'files',
+    title: 'Organize Files',
+    instructions: 'Drag every document into the folder that matches its file type.',
+    minMs: 2500,
+  },
+  emails: {
+    type: 'emails',
+    title: 'Respond to Emails',
+    instructions: 'Sort each email into Urgent, Reply, Archive or Spam.',
+    minMs: 3000,
+  },
+  server: {
+    type: 'server',
+    title: 'Fix the Server',
+    instructions: 'Boot the modules in the order on the sticky note. Wrong order = reboot.',
+    minMs: 2500,
+  },
+  excel: {
+    type: 'excel',
+    title: 'Complete Excel Sheets',
+    instructions: 'Fill the empty cells so every row adds up to its total.',
+    minMs: 3000,
+  },
+  idscan: {
+    type: 'idscan',
+    title: 'Scan Employee ID',
+    instructions: 'Drag your badge onto the scanner, hold it steady, then type the employee number.',
+    minMs: 3000,
+  },
 };
 
 export interface Puzzle {
@@ -84,15 +136,38 @@ const RECIPES: { name: string; base: Partial<Record<Ingredient, number>> }[] = [
   { name: 'Flat White', base: { espresso: 2, milk: 1 } },
   { name: 'Iced Americano', base: { espresso: 1, water: 1, ice: 2 } },
 ];
-const COFFEE_CUSTOMERS = ['Your Manager', 'The Intern', 'Legal', 'The CEO', 'Brenda from Accounts', 'A Visiting Investor', 'Facilities'];
+const COFFEE_CUSTOMERS = [
+  'Your Manager',
+  'The Intern',
+  'Legal',
+  'The CEO',
+  'Brenda from Accounts',
+  'A Visiting Investor',
+  'Facilities',
+];
 
 const ATTENDEES = ['Priya', 'Marcus', 'Chen', 'Olu', 'Sofia', 'Dmitri', 'Aisha', 'Tomás', 'Hana', 'Rahul'];
 const MEETINGS: { title: string; agendas: [string, string, string] }[] = [
-  { title: 'Q3 Synergy Sync', agendas: ['Synergy roadmap & KPIs', 'Office plant watering rota', 'Fantasy football draft'] },
-  { title: 'Pre-Meeting Planning Meeting', agendas: ['Plan the meeting about the meeting', 'Approve snack budget', 'Rename the Slack channel again'] },
-  { title: 'Culture Deck Review', agendas: ['Values slide font size', 'Server migration', 'Parking lot repainting'] },
-  { title: 'Retro of the Retro', agendas: ['What went wrong in the last retro', 'New coffee beans', 'Holiday party venue'] },
-  { title: 'All-Hands Rehearsal', agendas: ['Practise clapping on cue', 'Fix the printer', 'Expense policy updates'] },
+  {
+    title: 'Q3 Synergy Sync',
+    agendas: ['Synergy roadmap & KPIs', 'Office plant watering rota', 'Fantasy football draft'],
+  },
+  {
+    title: 'Pre-Meeting Planning Meeting',
+    agendas: ['Plan the meeting about the meeting', 'Approve snack budget', 'Rename the Slack channel again'],
+  },
+  {
+    title: 'Culture Deck Review',
+    agendas: ['Values slide font size', 'Server migration', 'Parking lot repainting'],
+  },
+  {
+    title: 'Retro of the Retro',
+    agendas: ['What went wrong in the last retro', 'New coffee beans', 'Holiday party venue'],
+  },
+  {
+    title: 'All-Hands Rehearsal',
+    agendas: ['Practise clapping on cue', 'Fix the printer', 'Expense policy updates'],
+  },
 ];
 const ACTION_ITEMS = [
   'Circle back on the circle-back',
@@ -133,23 +208,108 @@ const FILE_STEMS = [
 ];
 export const FILE_FOLDERS = ['Documents', 'Spreadsheets', 'Images', 'Slides'] as const;
 
-const EMAILS: { from: string; subject: string; body: string; cat: 'urgent' | 'reply' | 'archive' | 'spam' }[] = [
-  { from: 'CEO', subject: 'URGENT: Server is on fire (literally)', body: 'Someone please find the extinguisher. And a new server.', cat: 'urgent' },
-  { from: 'Legal', subject: 'Contract expires in 2 hours', body: 'Sign before 5pm or we lose the client.', cat: 'urgent' },
-  { from: 'IT Security', subject: 'Your password was leaked', body: 'Reset it now. Yes, "password123" counts.', cat: 'urgent' },
-  { from: 'Payroll', subject: 'Salary run failed!!', body: 'Nobody gets paid unless this is fixed today.', cat: 'urgent' },
-  { from: 'Marcus (Design)', subject: 'Quick question about the logo', body: 'Is it the blue blue or the other blue?', cat: 'reply' },
-  { from: 'Your Manager', subject: 'Can you join a call?', body: 'Just 5 minutes (it will be 90 minutes).', cat: 'reply' },
-  { from: 'Recruiting', subject: 'Interview feedback needed', body: 'How did the candidate do? Be honest-ish.', cat: 'reply' },
-  { from: 'Priya (Sales)', subject: 'Client wants a demo Thursday', body: 'Are you free? Please say yes.', cat: 'reply' },
-  { from: 'Facilities', subject: 'Newsletter: The Plant Edition', body: 'Meet Gerald, our new ficus.', cat: 'archive' },
-  { from: 'HR', subject: 'Reminder: Mandatory Fun Friday', body: 'Attendance is optional. Attendance is tracked.', cat: 'archive' },
-  { from: 'Calendar', subject: 'Accepted: Sync about syncing', body: 'Your meeting has been accepted by everyone except you.', cat: 'archive' },
-  { from: 'Office Bot', subject: 'Weekly digest', body: '47 messages in #random you will never read.', cat: 'archive' },
-  { from: 'Prince of Synergia', subject: 'You won 1,000,000 equity points!!', body: 'Send your badge number to claim.', cat: 'spam' },
-  { from: 'NotABank', subject: 'Verify your acount immediatly', body: 'Click here for free crypto and a pony.', cat: 'spam' },
-  { from: 'WebinarBlaster', subject: 'Last chance: 10x your 10x', body: 'Thought-leader masterclass, only $999.', cat: 'spam' },
-  { from: 'Mystery Vendor', subject: 'Re: Re: Fwd: Re: your invoice', body: 'Open attachment invoice.pdf.exe', cat: 'spam' },
+const EMAILS: {
+  from: string;
+  subject: string;
+  body: string;
+  cat: 'urgent' | 'reply' | 'archive' | 'spam';
+}[] = [
+  {
+    from: 'CEO',
+    subject: 'URGENT: Server is on fire (literally)',
+    body: 'Someone please find the extinguisher. And a new server.',
+    cat: 'urgent',
+  },
+  {
+    from: 'Legal',
+    subject: 'Contract expires in 2 hours',
+    body: 'Sign before 5pm or we lose the client.',
+    cat: 'urgent',
+  },
+  {
+    from: 'IT Security',
+    subject: 'Your password was leaked',
+    body: 'Reset it now. Yes, "password123" counts.',
+    cat: 'urgent',
+  },
+  {
+    from: 'Payroll',
+    subject: 'Salary run failed!!',
+    body: 'Nobody gets paid unless this is fixed today.',
+    cat: 'urgent',
+  },
+  {
+    from: 'Marcus (Design)',
+    subject: 'Quick question about the logo',
+    body: 'Is it the blue blue or the other blue?',
+    cat: 'reply',
+  },
+  {
+    from: 'Your Manager',
+    subject: 'Can you join a call?',
+    body: 'Just 5 minutes (it will be 90 minutes).',
+    cat: 'reply',
+  },
+  {
+    from: 'Recruiting',
+    subject: 'Interview feedback needed',
+    body: 'How did the candidate do? Be honest-ish.',
+    cat: 'reply',
+  },
+  {
+    from: 'Priya (Sales)',
+    subject: 'Client wants a demo Thursday',
+    body: 'Are you free? Please say yes.',
+    cat: 'reply',
+  },
+  {
+    from: 'Facilities',
+    subject: 'Newsletter: The Plant Edition',
+    body: 'Meet Gerald, our new ficus.',
+    cat: 'archive',
+  },
+  {
+    from: 'HR',
+    subject: 'Reminder: Mandatory Fun Friday',
+    body: 'Attendance is optional. Attendance is tracked.',
+    cat: 'archive',
+  },
+  {
+    from: 'Calendar',
+    subject: 'Accepted: Sync about syncing',
+    body: 'Your meeting has been accepted by everyone except you.',
+    cat: 'archive',
+  },
+  {
+    from: 'Office Bot',
+    subject: 'Weekly digest',
+    body: '47 messages in #random you will never read.',
+    cat: 'archive',
+  },
+  {
+    from: 'Prince of Synergia',
+    subject: 'You won 1,000,000 equity points!!',
+    body: 'Send your badge number to claim.',
+    cat: 'spam',
+  },
+  {
+    from: 'NotABank',
+    subject: 'Verify your acount immediatly',
+    body: 'Click here for free crypto and a pony.',
+    cat: 'spam',
+  },
+  {
+    from: 'WebinarBlaster',
+    subject: 'Last chance: 10x your 10x',
+    body: 'Thought-leader masterclass, only $999.',
+    cat: 'spam',
+  },
+  {
+    from: 'Mystery Vendor',
+    subject: 'Re: Re: Fwd: Re: your invoice',
+    body: 'Open attachment invoice.pdf.exe',
+    cat: 'spam',
+  },
 ];
 export const EMAIL_FOLDERS = ['urgent', 'reply', 'archive', 'spam'] as const;
 
@@ -161,10 +321,32 @@ const SERVER_MODULES = [
   { id: 'app', label: 'APP' },
 ];
 
-const EXCEL_ROWS = ['Coffee', 'Snacks', 'Consultants', 'Bean bags', 'Team "building"', 'Neon signs', 'Ping-pong balls'];
+const EXCEL_ROWS = [
+  'Coffee',
+  'Snacks',
+  'Consultants',
+  'Bean bags',
+  'Team "building"',
+  'Neon signs',
+  'Ping-pong balls',
+];
 
-const BADGE_NAMES = ['Alex Morgan', 'Sam Rivera', 'Jordan Lee', 'Taylor Okafor', 'Casey Nguyen', 'Riley Patel'];
-const BADGE_TITLES = ['Chief Vibes Officer', 'Junior Senior Analyst', 'Head of Heads', 'Synergy Lead', 'Intern (Eternal)', 'VP of Slides'];
+const BADGE_NAMES = [
+  'Alex Morgan',
+  'Sam Rivera',
+  'Jordan Lee',
+  'Taylor Okafor',
+  'Casey Nguyen',
+  'Riley Patel',
+];
+const BADGE_TITLES = [
+  'Chief Vibes Officer',
+  'Junior Senior Analyst',
+  'Head of Heads',
+  'Synergy Lead',
+  'Intern (Eternal)',
+  'VP of Slides',
+];
 
 // ---------------------------------------------------------------------------
 // Generation
@@ -181,7 +363,10 @@ export function generatePuzzle(type: TaskType, rng: Rng): Puzzle {
     case 'expense': {
       // guarantee at least 3 categories present
       const byCat = EXPENSE_CATEGORIES.map((c) => RECEIPTS.filter((r) => r.cat === c));
-      const chosen = shuffle(rng, byCat.map((list) => pick(rng, list))).slice(0, 3);
+      const chosen = shuffle(
+        rng,
+        byCat.map((list) => pick(rng, list)),
+      ).slice(0, 3);
       const rest = sample(
         rng,
         RECEIPTS.filter((r) => !chosen.includes(r)),
@@ -238,14 +423,21 @@ export function generatePuzzle(type: TaskType, rng: Rng): Puzzle {
       const m = pick(rng, MEETINGS);
       const people = sample(rng, ATTENDEES, 5).map((name) => ({ name, cameraOn: rng() < 0.55 }));
       if (!people.some((p) => p.cameraOn)) people[0].cameraOn = true;
-      const items = sample(rng, ACTION_ITEMS, 3).map((text, i) => ({ id: `a${i}`, text, due: randInt(rng, 1, 28) }));
+      const items = sample(rng, ACTION_ITEMS, 3).map((text, i) => ({
+        id: `a${i}`,
+        text,
+        due: randInt(rng, 1, 28),
+      }));
       // distinct due dates
       const used = new Set<number>();
       for (const it of items) {
         while (used.has(it.due)) it.due = (it.due % 28) + 1;
         used.add(it.due);
       }
-      const volunteer = pick(rng, people.filter((p) => p.cameraOn)).name;
+      const volunteer = pick(
+        rng,
+        people.filter((p) => p.cameraOn),
+      ).name;
       const transcript = [
         `${pick(rng, people).name}: Can everyone see my screen?`,
         `${volunteer}: Sure, I'll own the follow-ups. Again.`,
@@ -256,9 +448,15 @@ export function generatePuzzle(type: TaskType, rng: Rng): Puzzle {
         type,
         data: { title: m.title, people, agendas, items: shuffle(rng, items), transcript },
         key: {
-          present: people.filter((p) => p.cameraOn).map((p) => p.name).sort(),
+          present: people
+            .filter((p) => p.cameraOn)
+            .map((p) => p.name)
+            .sort(),
           agenda: m.agendas[0],
-          order: items.slice().sort((a, b) => a.due - b.due).map((i) => i.id),
+          order: items
+            .slice()
+            .sort((a, b) => a.due - b.due)
+            .map((i) => i.id),
           owner: volunteer,
         },
       };
@@ -290,7 +488,11 @@ export function generatePuzzle(type: TaskType, rng: Rng): Puzzle {
         SERVER_MODULES.map((m) => m.id),
       );
       const layout = shuffle(rng, SERVER_MODULES);
-      return { type, data: { modules: layout, note: order.map((id) => SERVER_MODULES.find((m) => m.id === id)!.label) }, key: { order } };
+      return {
+        type,
+        data: { modules: layout, note: order.map((id) => SERVER_MODULES.find((m) => m.id === id)!.label) },
+        key: { order },
+      };
     }
     case 'excel': {
       const rows = sample(rng, EXCEL_ROWS, 4).map((label) => {
@@ -330,7 +532,8 @@ export function generatePuzzle(type: TaskType, rng: Rng): Puzzle {
 // Verification (never trust the client)
 // ---------------------------------------------------------------------------
 
-const isObj = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null && !Array.isArray(v);
+const isObj = (v: unknown): v is Record<string, unknown> =>
+  typeof v === 'object' && v !== null && !Array.isArray(v);
 
 function matchMap(answer: unknown, key: Record<string, unknown>): boolean {
   if (!isObj(answer)) return false;
@@ -364,12 +567,15 @@ export function verifyAnswer(p: Puzzle, answer: unknown): boolean {
         return matchMap(answer, p.key);
       case 'coffee': {
         if (!isObj(answer)) return false;
-        return COFFEE_INGREDIENTS.every((ing) => (Number(answer[ing]) || 0) === p.key[ing]) &&
-          Object.keys(answer).every((k) => (COFFEE_INGREDIENTS as readonly string[]).includes(k));
+        return (
+          COFFEE_INGREDIENTS.every((ing) => (Number(answer[ing]) || 0) === p.key[ing]) &&
+          Object.keys(answer).every((k) => (COFFEE_INGREDIENTS as readonly string[]).includes(k))
+        );
       }
       case 'printer': {
         // answer: ordered action list
-        if (!Array.isArray(answer) || answer.length > 20 || !answer.every((a) => typeof a === 'string')) return false;
+        if (!Array.isArray(answer) || answer.length > 20 || !answer.every((a) => typeof a === 'string'))
+          return false;
         const acts = answer as string[];
         if (acts[0] !== 'open') return false;
         if (acts[acts.length - 1] !== 'restart' || acts[acts.length - 2] !== 'close') return false;
@@ -420,7 +626,13 @@ export function solvePuzzle(p: Puzzle): unknown {
     case 'coffee':
       return { ...p.key };
     case 'printer':
-      return ['open', ...p.key.jams.map((j: string) => `remove:${j}`), ...(p.key.cartridge ? [`cartridge:${p.key.cartridge}`] : []), 'close', 'restart'];
+      return [
+        'open',
+        ...p.key.jams.map((j: string) => `remove:${j}`),
+        ...(p.key.cartridge ? [`cartridge:${p.key.cartridge}`] : []),
+        'close',
+        'restart',
+      ];
     case 'meeting':
       return { present: p.key.present, agenda: p.key.agenda, order: p.key.order, owner: p.key.owner };
     case 'server':
@@ -472,7 +684,13 @@ export function solveFromData(type: TaskType, data: any): unknown {
       return out;
     }
     case 'printer':
-      return ['open', ...data.jams.map((j: string) => `remove:${j}`), ...(data.cartridge ? [`cartridge:${data.cartridge}`] : []), 'close', 'restart'];
+      return [
+        'open',
+        ...data.jams.map((j: string) => `remove:${j}`),
+        ...(data.cartridge ? [`cartridge:${data.cartridge}`] : []),
+        'close',
+        'restart',
+      ];
     case 'meeting': {
       const m = MEETINGS.find((x) => x.title === data.title)!;
       const volunteer = (data.transcript as string[]).find((l) => l.includes("I'll own"))!.split(':')[0];

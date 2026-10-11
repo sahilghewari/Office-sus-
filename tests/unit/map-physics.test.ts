@@ -21,13 +21,30 @@ const cols = createColliders();
 describe('NEXUS HQ map', () => {
   it('has all 12 required areas', () => {
     const ids = ROOMS.map((r) => r.id);
-    for (const r of ['reception', 'workspace', 'conference', 'hr', 'ceo', 'cafeteria', 'gaming', 'server', 'it', 'printer', 'security', 'hallN', 'hallS', 'maintenance'])
+    for (const r of [
+      'reception',
+      'workspace',
+      'conference',
+      'hr',
+      'ceo',
+      'cafeteria',
+      'gaming',
+      'server',
+      'it',
+      'printer',
+      'security',
+      'hallN',
+      'hallS',
+      'maintenance',
+    ])
       expect(ids).toContain(r);
   });
 
   it('every interaction point / vent / spawn is on free floor', () => {
     const pts: [string, number, number][] = [
-      ...STATIONS.filter((s) => s.kind !== 'emergency').map((s) => [s.id, s.x, s.y] as [string, number, number]),
+      ...STATIONS.filter((s) => s.kind !== 'emergency').map(
+        (s) => [s.id, s.x, s.y] as [string, number, number],
+      ),
       ...VENTS.map((v) => [v.id, v.x, v.y] as [string, number, number]),
       ...MEETING_SPAWNS.map((p, i) => [`ms${i}`, p[0], p[1]] as [string, number, number]),
       ...LOBBY_SPAWNS.map((p, i) => [`ls${i}`, p[0], p[1]] as [string, number, number]),

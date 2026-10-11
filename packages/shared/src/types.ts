@@ -219,9 +219,4 @@ export type SabotageKind = 'wifi' | 'fire' | 'power' | 'doors' | 'server' | 'cct
 export type ChatChannel = 'lobby' | 'meeting' | 'ghost';
 
 export type GameOverReason =
-  | 'tasks'
-  | 'managers_voted_out'
-  | 'parity'
-  | 'critical_sabotage'
-  | 'managers_left'
-  | 'employees_left';
+  'tasks' | 'managers_voted_out' | 'parity' | 'critical_sabotage' | 'managers_left' | 'employees_left';

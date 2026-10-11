@@ -16,10 +16,12 @@ export function VoiceBridge() {
     });
     const down = (e: KeyboardEvent) => {
       if (e.repeat || typingInField()) return;
-      if (isAction('ptt', e.code) && useSettings.getState().voiceMode === 'ptt') void voice.setTransmitting(true);
+      if (isAction('ptt', e.code) && useSettings.getState().voiceMode === 'ptt')
+        void voice.setTransmitting(true);
     };
     const up = (e: KeyboardEvent) => {
-      if (isAction('ptt', e.code) && useSettings.getState().voiceMode === 'ptt') void voice.setTransmitting(false);
+      if (isAction('ptt', e.code) && useSettings.getState().voiceMode === 'ptt')
+        void voice.setTransmitting(false);
     };
     window.addEventListener('keydown', down);
     window.addEventListener('keyup', up);

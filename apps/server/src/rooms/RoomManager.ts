@@ -76,10 +76,14 @@ export class RoomManager {
       log: this.o.log,
       onChange: (r) => this.publish(r),
       onMatchEnd: (m) => {
-        this.o.store.recordMatch(m).catch((e) => this.o.log(`Failed to record match: ${(e as Error).message}`));
+        this.o.store
+          .recordMatch(m)
+          .catch((e) => this.o.log(`Failed to record match: ${(e as Error).message}`));
       },
       onReport: (r) => {
-        this.o.store.createReport(r).catch((e) => this.o.log(`Failed to store report: ${(e as Error).message}`));
+        this.o.store
+          .createReport(r)
+          .catch((e) => this.o.log(`Failed to store report: ${(e as Error).message}`));
       },
     });
     this.rooms.set(code, room);
@@ -123,19 +127,35 @@ export class RoomManager {
     for (const l of open) {
       const local = this.rooms.get(l.code);
       if (local) {
-        if (local.phase === 'WAITING' && local.playerCount < local.settings.maxPlayers && local.settings.isPublic)
+        if (
+          local.phase === 'WAITING' &&
+          local.playerCount < local.settings.maxPlayers &&
+          local.settings.isPublic
+        )
           return { code: l.code, instanceUrl: null, created: false };
         continue;
       }
-      if (l.instanceUrl && l.instanceUrl !== this.o.instanceUrl) return { code: l.code, instanceUrl: l.instanceUrl, created: false };
+      if (l.instanceUrl && l.instanceUrl !== this.o.instanceUrl)
+        return { code: l.code, instanceUrl: l.instanceUrl, created: false };
     }
     const room = await this.createRoom(true);
     return { code: room.code, instanceUrl: null, created: true };
   }
 
-  join(code: string, identity: string, name: string, appearance: Appearance, registered: boolean, conn: Conn) {
+  join(
+    code: string,
+    identity: string,
+    name: string,
+    appearance: Appearance,
+    registered: boolean,
+    conn: Conn,
+  ) {
     const room = this.get(code);
-    if (!room) return { error: 'ROOM_NOT_FOUND', message: 'No office found with that code. Check for typos.' } as const;
+    if (!room)
+      return {
+        error: 'ROOM_NOT_FOUND',
+        message: 'No office found with that code. Check for typos.',
+      } as const;
     const res = room.join(identity, name, appearance, registered, conn);
     if ('player' in res) {
       this.emptySince.delete(room.code);

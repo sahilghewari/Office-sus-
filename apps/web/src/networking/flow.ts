@@ -11,7 +11,15 @@ export async function runIntent(intent: Intent) {
     app.set({ screen: 'customize', intent });
     return;
   }
-  app.set({ busy: intent.kind === 'quick' ? 'Finding a public office…' : intent.kind === 'join' ? 'Badging in…' : 'Setting up your office…', error: null });
+  app.set({
+    busy:
+      intent.kind === 'quick'
+        ? 'Finding a public office…'
+        : intent.kind === 'join'
+          ? 'Badging in…'
+          : 'Setting up your office…',
+    error: null,
+  });
   try {
     await ensureSession();
     let code: string;

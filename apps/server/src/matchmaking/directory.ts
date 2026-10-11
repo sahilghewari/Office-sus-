@@ -58,7 +58,9 @@ export class MemoryDirectory implements RoomDirectory {
     return this.rooms.get(code) ?? null;
   }
   async listPublicOpen() {
-    return [...this.rooms.values()].filter((r) => r.isPublic && r.phase === 'WAITING' && r.players < r.capacity);
+    return [...this.rooms.values()].filter(
+      (r) => r.isPublic && r.phase === 'WAITING' && r.players < r.capacity,
+    );
   }
   async close() {}
 }
@@ -84,7 +86,8 @@ export class RedisDirectory implements RoomDirectory {
   }
   async upsert(l: RoomListing) {
     await this.redis.set(`cs:room:${l.code}`, JSON.stringify(l), 'EX', 120);
-    if (l.isPublic && l.phase === 'WAITING' && l.players < l.capacity) await this.redis.zadd('cs:public', l.players, l.code);
+    if (l.isPublic && l.phase === 'WAITING' && l.players < l.capacity)
+      await this.redis.zadd('cs:public', l.players, l.code);
     else await this.redis.zrem('cs:public', l.code);
   }
   async remove(code: string) {

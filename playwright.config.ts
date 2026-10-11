@@ -20,10 +20,18 @@ export default defineConfig({
     baseURL: `http://localhost:${WEB_PORT}`,
     viewport: { width: 1366, height: 820 },
     trace: 'retain-on-failure',
-    launchOptions: { args: ['--use-fake-ui-for-media-stream', '--use-fake-device-for-media-stream', '--autoplay-policy=no-user-gesture-required'] },
+    launchOptions: {
+      args: [
+        '--use-fake-ui-for-media-stream',
+        '--use-fake-device-for-media-stream',
+        '--autoplay-policy=no-user-gesture-required',
+      ],
+    },
     permissions: ['microphone'],
   },
-  projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'], viewport: { width: 1366, height: 820 } } }],
+  projects: [
+    { name: 'chromium', use: { ...devices['Desktop Chrome'], viewport: { width: 1366, height: 820 } } },
+  ],
   webServer: [
     {
       command: 'npm run dev -w @corp/server',

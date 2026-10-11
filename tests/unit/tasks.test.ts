@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { TASK_TYPES, createRng, generatePuzzle, solveFromData, solvePuzzle, verifyAnswer } from '@corp/shared';
+import {
+  TASK_TYPES,
+  createRng,
+  generatePuzzle,
+  solveFromData,
+  solvePuzzle,
+  verifyAnswer,
+} from '@corp/shared';
 
 describe('task minigames', () => {
   for (const type of TASK_TYPES) {
@@ -13,7 +20,8 @@ describe('task minigames', () => {
       });
       it('rejects wrong / malformed answers', () => {
         const p = generatePuzzle(type, createRng(42));
-        for (const bad of [null, undefined, 42, 'done', {}, [], { completed: true }, [[0, 0]]]) expect(verifyAnswer(p, bad)).toBe(false);
+        for (const bad of [null, undefined, 42, 'done', {}, [], { completed: true }, [[0, 0]]])
+          expect(verifyAnswer(p, bad)).toBe(false);
       });
       it('randomizes starting state', () => {
         const a = JSON.stringify(generatePuzzle(type, createRng(1)).data);
@@ -26,7 +34,7 @@ describe('task minigames', () => {
   it('specific wrong answers fail', () => {
     const w = generatePuzzle('wifi', createRng(3));
     const good = solvePuzzle(w) as number[][];
-    const swapped = good.map(([l, r], i) => [l, good[(i + 1) % good.length][1]]);
+    const swapped = good.map(([l], i) => [l, good[(i + 1) % good.length][1]]);
     expect(verifyAnswer(w, swapped)).toBe(false);
     const ex = generatePuzzle('excel', createRng(3));
     const ans = solvePuzzle(ex) as Record<string, number>;

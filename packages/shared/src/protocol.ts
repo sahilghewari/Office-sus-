@@ -42,7 +42,7 @@ export const NameSchema = z
   .trim()
   .min(2)
   .max(NAME_MAX_LEN)
-  .regex(/^[\p{L}\p{N} _.\-']+$/u, 'Letters, numbers, spaces and _.-\' only');
+  .regex(/^[\p{L}\p{N} _.\-']+$/u, "Letters, numbers, spaces and _.-' only");
 
 const finite = z.number().finite();
 const id = z.string().min(1).max(64);
@@ -78,7 +78,12 @@ export const ClientMessageSchema = z.discriminatedUnion('t', [
     name: NameSchema,
     appearance: AppearanceSchema,
   }),
-  z.object({ t: z.literal('input'), seq: z.number().int().nonnegative(), mx: finite.min(-1).max(1), my: finite.min(-1).max(1) }),
+  z.object({
+    t: z.literal('input'),
+    seq: z.number().int().nonnegative(),
+    mx: finite.min(-1).max(1),
+    my: finite.min(-1).max(1),
+  }),
   z.object({ t: z.literal('ready'), ready: z.boolean() }),
   z.object({ t: z.literal('profile'), name: NameSchema, appearance: AppearanceSchema }),
   z.object({ t: z.literal('settings'), settings: SettingsPatchSchema }),
@@ -108,7 +113,11 @@ export const ClientMessageSchema = z.discriminatedUnion('t', [
   z.object({ t: z.literal('ping'), ts: finite }),
   z.object({ t: z.literal('cctv'), open: z.boolean() }),
   z.object({ t: z.literal('leave') }),
-  z.object({ t: z.literal('test'), cmd: z.string().max(40), args: z.record(z.string(), z.unknown()).optional() }),
+  z.object({
+    t: z.literal('test'),
+    cmd: z.string().max(40),
+    args: z.record(z.string(), z.unknown()).optional(),
+  }),
 ]);
 
 export type ClientMessage = z.infer<typeof ClientMessageSchema>;
@@ -297,7 +306,13 @@ export type ServerMessage =
   | { t: 'youDied'; variant: number }
   | { t: 'ventFx'; vent: string; kind: 'enter' | 'exit' }
   | { t: 'cctv'; online: boolean; feeds: CctvFeed[] }
-  | { t: 'voiceToken'; url: string; token: string; room: string; mode: 'lobby' | 'alive' | 'ghost' | 'spectator' }
+  | {
+      t: 'voiceToken';
+      url: string;
+      token: string;
+      room: string;
+      mode: 'lobby' | 'alive' | 'ghost' | 'spectator';
+    }
   | { t: 'voiceUnavailable'; reason: string }
   | { t: 'voiceGains'; g: Record<string, number> }
   | { t: 'pong'; ts: number; serverTime: number }

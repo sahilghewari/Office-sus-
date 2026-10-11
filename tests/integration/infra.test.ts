@@ -41,7 +41,9 @@ describe.skipIf(!pgOk)('PostgreSQL store (Prisma)', () => {
     store = await PrismaStore.connect(PG);
     const name = `pg_${Date.now() % 1e9}`;
     const u = await store.createUser(name, 'scrypt$hash', { ...DEFAULT_APPEARANCE, color: 'mint' });
-    await expect(store.createUser(name.toUpperCase(), 'x', DEFAULT_APPEARANCE)).rejects.toThrow('USERNAME_TAKEN');
+    await expect(store.createUser(name.toUpperCase(), 'x', DEFAULT_APPEARANCE)).rejects.toThrow(
+      'USERNAME_TAKEN',
+    );
     expect((await store.getAppearance(u.id)).color).toBe('mint');
     await store.createSession(`sid-${name}`, u.id, new Date(Date.now() + 60_000));
     expect(await store.sessionValid(`sid-${name}`, u.id)).toBe(true);
@@ -55,12 +57,26 @@ describe.skipIf(!pgOk)('PostgreSQL store (Prisma)', () => {
       reason: 'parity',
       players: [
         { userId: u.id, displayName: name, role: 'manager', won: true, tasksCompleted: 0, eliminations: 3 },
-        { userId: null, displayName: 'Guest', role: 'employee', won: false, tasksCompleted: 2, eliminations: 0 },
+        {
+          userId: null,
+          displayName: 'Guest',
+          role: 'employee',
+          won: false,
+          tasksCompleted: 2,
+          eliminations: 0,
+        },
       ],
     });
     const st = await store.getStats(u.id);
     expect(st).toMatchObject({ gamesPlayed: 1, wins: 1, managerWins: 1, eliminations: 3 });
-    await store.createReport({ reporterUserId: u.id, reporterName: name, reportedId: 'g_x', reportedName: 'Troll', roomCode: 'PGTEST', category: 'spam' });
+    await store.createReport({
+      reporterUserId: u.id,
+      reporterName: name,
+      reportedId: 'g_x',
+      reportedName: 'Troll',
+      roomCode: 'PGTEST',
+      category: 'spam',
+    });
     await store.deleteUser(u.id);
     expect(await store.findUserById(u.id)).toBeNull();
     expect(await store.health()).toBe(true);
@@ -70,8 +86,30 @@ describe.skipIf(!pgOk)('PostgreSQL store (Prisma)', () => {
 describe.skipIf(!redisOk)('Redis room directory (multi-instance)', () => {
   it('codes are unique across instances and quick match finds rooms on other instances', async () => {
     process.env.REDIS_URL = REDIS;
-    const a: GameServer = await createGameServer({ config: { port: 0, host: '127.0.0.1', redisUrl: REDIS, databaseUrl: null, livekit: null, instanceUrl: 'http://instance-a' }, store: new MemoryStore(), quiet: true });
-    const b: GameServer = await createGameServer({ config: { port: 0, host: '127.0.0.1', redisUrl: REDIS, databaseUrl: null, livekit: null, instanceUrl: 'http://instance-b' }, store: new MemoryStore(), quiet: true });
+    const a: GameServer = await createGameServer({
+      config: {
+        port: 0,
+        host: '127.0.0.1',
+        redisUrl: REDIS,
+        databaseUrl: null,
+        livekit: null,
+        instanceUrl: 'http://instance-a',
+      },
+      store: new MemoryStore(),
+      quiet: true,
+    });
+    const b: GameServer = await createGameServer({
+      config: {
+        port: 0,
+        host: '127.0.0.1',
+        redisUrl: REDIS,
+        databaseUrl: null,
+        livekit: null,
+        instanceUrl: 'http://instance-b',
+      },
+      store: new MemoryStore(),
+      quiet: true,
+    });
     try {
       expect(a.directory.kind).toBe('redis');
       const codes = new Set<string>();

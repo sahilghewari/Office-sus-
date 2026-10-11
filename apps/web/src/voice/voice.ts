@@ -1,4 +1,4 @@
-import { Room, RoomEvent, Track, createLocalAudioTrack, type LocalAudioTrack, type RemoteParticipant, type RemoteTrack } from 'livekit-client';
+import type { LocalAudioTrack, RemoteParticipant, RemoteTrack, Room } from 'livekit-client';
 import { useGame } from '../stores/game';
 import { useSettings } from '../stores/settings';
 import { send } from '../networking/connection';
@@ -58,6 +58,8 @@ class VoiceManager {
     if (!this.wanted) return;
     await this.teardown();
     this.status({ status: 'connecting', mode });
+    // LiveKit is only downloaded when someone actually opts into voice.
+    const { Room, RoomEvent, Track, createLocalAudioTrack } = await import('livekit-client');
     const room = new Room({ adaptiveStream: false, dynacast: false, disconnectOnPageLeave: true });
     this.room = room;
     room
@@ -79,7 +81,8 @@ class VoiceManager {
       .on(RoomEvent.Disconnected, () => {
         if (this.room === room) this.status({ status: this.wanted ? 'connecting' : 'off' });
         // the server may have moved us (e.g. eliminated → ghost room); ask for a fresh token
-        if (this.room === room && this.wanted) setTimeout(() => this.wanted && send({ t: 'voiceToken' }), 800);
+        if (this.room === room && this.wanted)
+          setTimeout(() => this.wanted && send({ t: 'voiceToken' }), 800);
       });
     try {
       await room.connect(url, token, { autoSubscribe: true });
@@ -91,13 +94,22 @@ class VoiceManager {
     if (mode !== 'spectator') {
       try {
         const deviceId = useSettings.getState().micDeviceId ?? undefined;
-        this.mic = await createLocalAudioTrack({ deviceId, echoCancellation: true, noiseSuppression: true, autoGainControl: true });
+        this.mic = await createLocalAudioTrack({
+          deviceId,
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true,
+        });
         await room.localParticipant.publishTrack(this.mic, { source: Track.Source.Microphone });
         await this.setTransmitting(useSettings.getState().voiceMode === 'open');
         this.status({ status: 'on', mode, detail: undefined });
       } catch (e) {
         const denied = (e as Error).name === 'NotAllowedError';
-        this.status({ status: denied ? 'denied' : 'on', mode, detail: denied ? 'Microphone blocked — you can still listen.' : (e as Error).message });
+        this.status({
+          status: denied ? 'denied' : 'on',
+          mode,
+          detail: denied ? 'Microphone blocked — you can still listen.' : (e as Error).message,
+        });
       }
     } else this.status({ status: 'on', mode, detail: 'Listening only' });
     this.applyGains();

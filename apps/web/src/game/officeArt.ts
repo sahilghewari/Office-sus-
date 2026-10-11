@@ -1,6 +1,18 @@
-import { DOORS, FURNITURE, MAP, MAP_H, MAP_W, ROOMS, Tile, VENTS, type Furniture, type RoomDef, type WallPiece } from '@corp/shared';
+import {
+  DOORS,
+  FURNITURE,
+  MAP,
+  MAP_H,
+  MAP_W,
+  ROOMS,
+  Tile,
+  VENTS,
+  type Furniture,
+  type RoomDef,
+  type WallPiece,
+} from '@corp/shared';
 import { shade } from './characterArt';
-import { HH, HW, OX, OY, WALL_Z, WORLD_H, WORLD_W, ZH, iso } from './iso';
+import { HH, HW, WALL_Z, WORLD_H, WORLD_W, ZH, iso } from './iso';
 
 /**
  * Procedural, original environment art for NEXUS HQ, drawn with Canvas2D into
@@ -41,15 +53,54 @@ export class Painter {
   }
 
   /** Axis-aligned box; draws the three faces visible from the camera. */
-  box(x0: number, y0: number, x1: number, y1: number, z0: number, z1: number, base: string, o: { top?: string; left?: string; right?: string; stroke?: string | null; lw?: number } = {}) {
+  box(
+    x0: number,
+    y0: number,
+    x1: number,
+    y1: number,
+    z0: number,
+    z1: number,
+    base: string,
+    o: { top?: string; left?: string; right?: string; stroke?: string | null; lw?: number } = {},
+  ) {
     const stroke = o.stroke === undefined ? OUT : o.stroke;
     const lw = o.lw ?? 1;
     // +x face (screen right)
-    this.poly([[x1, y0, z1], [x1, y1, z1], [x1, y1, z0], [x1, y0, z0]], o.right ?? shade(base, -0.22), stroke, lw);
+    this.poly(
+      [
+        [x1, y0, z1],
+        [x1, y1, z1],
+        [x1, y1, z0],
+        [x1, y0, z0],
+      ],
+      o.right ?? shade(base, -0.22),
+      stroke,
+      lw,
+    );
     // +y face (screen left)
-    this.poly([[x0, y1, z1], [x1, y1, z1], [x1, y1, z0], [x0, y1, z0]], o.left ?? base, stroke, lw);
+    this.poly(
+      [
+        [x0, y1, z1],
+        [x1, y1, z1],
+        [x1, y1, z0],
+        [x0, y1, z0],
+      ],
+      o.left ?? base,
+      stroke,
+      lw,
+    );
     // top
-    this.poly([[x0, y0, z1], [x1, y0, z1], [x1, y1, z1], [x0, y1, z1]], o.top ?? shade(base, 0.14), stroke, lw);
+    this.poly(
+      [
+        [x0, y0, z1],
+        [x1, y0, z1],
+        [x1, y1, z1],
+        [x0, y1, z1],
+      ],
+      o.top ?? shade(base, 0.14),
+      stroke,
+      lw,
+    );
   }
 
   /** Draw on the south (+y) face plane y = const, u → +x (1 unit = 1/32 tile), v ↓ from zTop. */
@@ -82,7 +133,15 @@ export class Painter {
     c.restore();
   }
 
-  ellipse(x: number, y: number, z: number, rx: number, ry: number, fill: string | CanvasGradient, stroke: string | null = OUT) {
+  ellipse(
+    x: number,
+    y: number,
+    z: number,
+    rx: number,
+    ry: number,
+    fill: string | CanvasGradient,
+    stroke: string | null = OUT,
+  ) {
     // an iso circle of radius r on the ground: screen ellipse rx*HW*√2, ry*HH*√2
     const [sx, sy] = this.P(x, y, z);
     const c = this.ctx;
@@ -181,9 +240,32 @@ export function drawFloor(quality: 'high' | 'low'): HTMLCanvasElement {
   const p = new Painter(c, 0, 0);
 
   // Building slab under everything (gives thickness to the diorama)
-  const slab: V3[] = [[0, 0, 0], [MAP_W, 0, 0], [MAP_W, MAP_H, 0], [0, MAP_H, 0]];
-  p.poly([[MAP_W, 0, 0], [MAP_W, MAP_H, 0], [MAP_W, MAP_H, -0.8], [MAP_W, 0, -0.8]], '#1d2558', null);
-  p.poly([[0, MAP_H, 0], [MAP_W, MAP_H, 0], [MAP_W, MAP_H, -0.8], [0, MAP_H, -0.8]], '#283276', null);
+  const slab: V3[] = [
+    [0, 0, 0],
+    [MAP_W, 0, 0],
+    [MAP_W, MAP_H, 0],
+    [0, MAP_H, 0],
+  ];
+  p.poly(
+    [
+      [MAP_W, 0, 0],
+      [MAP_W, MAP_H, 0],
+      [MAP_W, MAP_H, -0.8],
+      [MAP_W, 0, -0.8],
+    ],
+    '#1d2558',
+    null,
+  );
+  p.poly(
+    [
+      [0, MAP_H, 0],
+      [MAP_W, MAP_H, 0],
+      [MAP_W, MAP_H, -0.8],
+      [0, MAP_H, -0.8],
+    ],
+    '#283276',
+    null,
+  );
   p.poly(slab, '#2a2f4f', null);
 
   const roomOf = (x: number, y: number): RoomDef | undefined => {
@@ -197,7 +279,13 @@ export function drawFloor(quality: 'high' | 'low'): HTMLCanvasElement {
       if (t === Tile.Void) continue;
       // wall tiles get the floor of a neighbour so the floor runs under thin walls
       let room = roomOf(x, y);
-      if (!room) room = roomOf(x, y + 1) ?? roomOf(x + 1, y) ?? roomOf(x, y - 1) ?? roomOf(x - 1, y) ?? roomOf(x + 1, y + 1);
+      if (!room)
+        room =
+          roomOf(x, y + 1) ??
+          roomOf(x + 1, y) ??
+          roomOf(x, y - 1) ??
+          roomOf(x - 1, y) ??
+          roomOf(x + 1, y + 1);
       const style = t === Tile.Door ? 'hall' : (room?.floor ?? 'hall');
       drawFloorTile(p, x, y, style, quality);
     }
@@ -207,16 +295,63 @@ export function drawFloor(quality: 'high' | 'low'): HTMLCanvasElement {
 
   // Hallway runner carpets
   for (const r of ROOMS.filter((rr) => rr.isHall)) {
-    p.poly([[r.x0 + 0.3, r.y0 + 0.55, 0], [r.x1 + 0.7, r.y0 + 0.55, 0], [r.x1 + 0.7, r.y1 + 0.45, 0], [r.x0 + 0.3, r.y1 + 0.45, 0]], 'rgba(61,123,255,0.22)', null);
-    p.poly([[r.x0 + 0.3, r.y0 + 0.62, 0], [r.x1 + 0.7, r.y0 + 0.62, 0], [r.x1 + 0.7, r.y0 + 0.68, 0], [r.x0 + 0.3, r.y0 + 0.68, 0]], 'rgba(255,255,255,0.25)', null);
-    p.poly([[r.x0 + 0.3, r.y1 + 0.32, 0], [r.x1 + 0.7, r.y1 + 0.32, 0], [r.x1 + 0.7, r.y1 + 0.38, 0], [r.x0 + 0.3, r.y1 + 0.38, 0]], 'rgba(255,255,255,0.25)', null);
+    p.poly(
+      [
+        [r.x0 + 0.3, r.y0 + 0.55, 0],
+        [r.x1 + 0.7, r.y0 + 0.55, 0],
+        [r.x1 + 0.7, r.y1 + 0.45, 0],
+        [r.x0 + 0.3, r.y1 + 0.45, 0],
+      ],
+      'rgba(61,123,255,0.22)',
+      null,
+    );
+    p.poly(
+      [
+        [r.x0 + 0.3, r.y0 + 0.62, 0],
+        [r.x1 + 0.7, r.y0 + 0.62, 0],
+        [r.x1 + 0.7, r.y0 + 0.68, 0],
+        [r.x0 + 0.3, r.y0 + 0.68, 0],
+      ],
+      'rgba(255,255,255,0.25)',
+      null,
+    );
+    p.poly(
+      [
+        [r.x0 + 0.3, r.y1 + 0.32, 0],
+        [r.x1 + 0.7, r.y1 + 0.32, 0],
+        [r.x1 + 0.7, r.y1 + 0.38, 0],
+        [r.x0 + 0.3, r.y1 + 0.38, 0],
+      ],
+      'rgba(255,255,255,0.25)',
+      null,
+    );
   }
 
   // Door thresholds
   for (const d of DOORS) {
     for (const [x, y] of d.tiles) {
-      if (d.orient === 'h') p.poly([[x, y + 0.3, 0], [x + 1, y + 0.3, 0], [x + 1, y + 0.7, 0], [x, y + 0.7, 0]], d.lockable ? 'rgba(255,210,63,0.35)' : 'rgba(255,255,255,0.28)', null);
-      else p.poly([[x + 0.3, y, 0], [x + 0.7, y, 0], [x + 0.7, y + 1, 0], [x + 0.3, y + 1, 0]], d.lockable ? 'rgba(255,210,63,0.35)' : 'rgba(255,255,255,0.28)', null);
+      if (d.orient === 'h')
+        p.poly(
+          [
+            [x, y + 0.3, 0],
+            [x + 1, y + 0.3, 0],
+            [x + 1, y + 0.7, 0],
+            [x, y + 0.7, 0],
+          ],
+          d.lockable ? 'rgba(255,210,63,0.35)' : 'rgba(255,255,255,0.28)',
+          null,
+        );
+      else
+        p.poly(
+          [
+            [x + 0.3, y, 0],
+            [x + 0.7, y, 0],
+            [x + 0.7, y + 1, 0],
+            [x + 0.3, y + 1, 0],
+          ],
+          d.lockable ? 'rgba(255,210,63,0.35)' : 'rgba(255,255,255,0.28)',
+          null,
+        );
     }
   }
 
@@ -224,8 +359,26 @@ export function drawFloor(quality: 'high' | 'low'): HTMLCanvasElement {
   if (quality === 'high') {
     for (const w of MAP.walls) {
       const g = 0.45;
-      p.poly([[w.x0 - 0.05, w.y1, 0], [w.x1 + 0.05, w.y1, 0], [w.x1 + 0.05, w.y1 + g, 0], [w.x0 - 0.05, w.y1 + g, 0]], 'rgba(10,10,40,0.10)', null);
-      p.poly([[w.x1, w.y0 - 0.05, 0], [w.x1 + g, w.y0 - 0.05, 0], [w.x1 + g, w.y1 + 0.05, 0], [w.x1, w.y1 + 0.05, 0]], 'rgba(10,10,40,0.10)', null);
+      p.poly(
+        [
+          [w.x0 - 0.05, w.y1, 0],
+          [w.x1 + 0.05, w.y1, 0],
+          [w.x1 + 0.05, w.y1 + g, 0],
+          [w.x0 - 0.05, w.y1 + g, 0],
+        ],
+        'rgba(10,10,40,0.10)',
+        null,
+      );
+      p.poly(
+        [
+          [w.x1, w.y0 - 0.05, 0],
+          [w.x1 + g, w.y0 - 0.05, 0],
+          [w.x1 + g, w.y1 + 0.05, 0],
+          [w.x1, w.y1 + 0.05, 0],
+        ],
+        'rgba(10,10,40,0.10)',
+        null,
+      );
     }
   }
 
@@ -262,14 +415,46 @@ function drawFloorTile(p: Painter, x: number, y: number, style: string, quality:
   const checker = (x + y) % 2 === 0;
   let col = style === 'checker' ? (checker ? a : b) : checker ? a : b;
   if (style === 'checker' && !checker) col = '#ffd9bd';
-  const pts: V3[] = [[x, y, 0], [x + 1, y, 0], [x + 1, y + 1, 0], [x, y + 1, 0]];
-  p.poly(pts, col, style === 'wood' || style === 'tile' || style === 'marble' || style === 'checker' || style === 'hall' ? 'rgba(0,0,0,0.07)' : null, 1);
+  const pts: V3[] = [
+    [x, y, 0],
+    [x + 1, y, 0],
+    [x + 1, y + 1, 0],
+    [x, y + 1, 0],
+  ];
+  p.poly(
+    pts,
+    col,
+    style === 'wood' || style === 'tile' || style === 'marble' || style === 'checker' || style === 'hall'
+      ? 'rgba(0,0,0,0.07)'
+      : null,
+    1,
+  );
   if (quality === 'low') return;
   const c = p.ctx;
   switch (style) {
     case 'wood':
-      for (let i = 1; i < 4; i++) p.poly([[x, y + i / 4, 0], [x + 1, y + i / 4, 0], [x + 1, y + i / 4 + 0.02, 0], [x, y + i / 4 + 0.02, 0]], 'rgba(120,70,30,0.18)', null);
-      if (h > 0.6) p.poly([[x + h * 0.6, y + 0.1, 0], [x + h * 0.6 + 0.02, y + 0.1, 0], [x + h * 0.6 + 0.02, y + 0.35, 0], [x + h * 0.6, y + 0.35, 0]], 'rgba(120,70,30,0.15)', null);
+      for (let i = 1; i < 4; i++)
+        p.poly(
+          [
+            [x, y + i / 4, 0],
+            [x + 1, y + i / 4, 0],
+            [x + 1, y + i / 4 + 0.02, 0],
+            [x, y + i / 4 + 0.02, 0],
+          ],
+          'rgba(120,70,30,0.18)',
+          null,
+        );
+      if (h > 0.6)
+        p.poly(
+          [
+            [x + h * 0.6, y + 0.1, 0],
+            [x + h * 0.6 + 0.02, y + 0.1, 0],
+            [x + h * 0.6 + 0.02, y + 0.35, 0],
+            [x + h * 0.6, y + 0.35, 0],
+          ],
+          'rgba(120,70,30,0.15)',
+          null,
+        );
       break;
     case 'marble':
       if (h > 0.55) {
@@ -296,12 +481,49 @@ function drawFloorTile(p: Painter, x: number, y: number, style: string, quality:
       }
       break;
     case 'carpetNeon':
-      p.poly([[x, y, 0], [x + 1, y, 0], [x + 1, y + 0.03, 0], [x, y + 0.03, 0]], 'rgba(46,230,240,0.25)', null);
-      p.poly([[x, y, 0], [x + 0.03, y, 0], [x + 0.03, y + 1, 0], [x, y + 1, 0]], 'rgba(255,111,181,0.22)', null);
+      p.poly(
+        [
+          [x, y, 0],
+          [x + 1, y, 0],
+          [x + 1, y + 0.03, 0],
+          [x, y + 0.03, 0],
+        ],
+        'rgba(46,230,240,0.25)',
+        null,
+      );
+      p.poly(
+        [
+          [x, y, 0],
+          [x + 0.03, y, 0],
+          [x + 0.03, y + 1, 0],
+          [x, y + 1, 0],
+        ],
+        'rgba(255,111,181,0.22)',
+        null,
+      );
       break;
     case 'concrete':
-      p.poly([[x, y + 0.48, 0], [x + 1, y + 0.48, 0], [x + 1, y + 0.52, 0], [x, y + 0.52, 0]], 'rgba(46,230,240,0.08)', null);
-      if (h > 0.7) p.poly([[x + 0.48, y, 0], [x + 0.52, y, 0], [x + 0.52, y + 1, 0], [x + 0.48, y + 1, 0]], 'rgba(46,230,240,0.08)', null);
+      p.poly(
+        [
+          [x, y + 0.48, 0],
+          [x + 1, y + 0.48, 0],
+          [x + 1, y + 0.52, 0],
+          [x, y + 0.52, 0],
+        ],
+        'rgba(46,230,240,0.08)',
+        null,
+      );
+      if (h > 0.7)
+        p.poly(
+          [
+            [x + 0.48, y, 0],
+            [x + 0.52, y, 0],
+            [x + 0.52, y + 1, 0],
+            [x + 0.48, y + 1, 0],
+          ],
+          'rgba(46,230,240,0.08)',
+          null,
+        );
       break;
     case 'hazard':
       if (h > 0.85) {
@@ -313,31 +535,84 @@ function drawFloorTile(p: Painter, x: number, y: number, style: string, quality:
       }
       break;
     case 'tile':
-      p.poly([[x + 0.5, y, 0], [x + 0.52, y, 0], [x + 0.52, y + 1, 0], [x + 0.5, y + 1, 0]], 'rgba(0,0,0,0.05)', null);
-      p.poly([[x, y + 0.5, 0], [x + 1, y + 0.5, 0], [x + 1, y + 0.52, 0], [x, y + 0.52, 0]], 'rgba(0,0,0,0.05)', null);
+      p.poly(
+        [
+          [x + 0.5, y, 0],
+          [x + 0.52, y, 0],
+          [x + 0.52, y + 1, 0],
+          [x + 0.5, y + 1, 0],
+        ],
+        'rgba(0,0,0,0.05)',
+        null,
+      );
+      p.poly(
+        [
+          [x, y + 0.5, 0],
+          [x + 1, y + 0.5, 0],
+          [x + 1, y + 0.52, 0],
+          [x, y + 0.52, 0],
+        ],
+        'rgba(0,0,0,0.05)',
+        null,
+      );
       break;
   }
 }
 
 function drawRug(p: Painter, f: Furniture) {
   const { x, y, w, h } = f;
-  const pts: V3[] = [[x, y, 0.005], [x + w, y, 0.005], [x + w, y + h, 0.005], [x, y + h, 0.005]];
+  const pts: V3[] = [
+    [x, y, 0.005],
+    [x + w, y, 0.005],
+    [x + w, y + h, 0.005],
+    [x, y + h, 0.005],
+  ];
   switch (f.variant) {
     case 'cable':
       // cable tray in the server room floor
       p.poly(pts, '#2f3550', 'rgba(46,230,240,0.4)');
-      for (let i = 0; i < 4; i++) p.poly([[x + 0.2 + i * 1.1, y + 0.1, 0.01], [x + 0.9 + i * 1.1, y + 0.1, 0.01], [x + 0.9 + i * 1.1, y + h - 0.1, 0.01], [x + 0.2 + i * 1.1, y + h - 0.1, 0.01]], i % 2 ? '#2ee6f0' : '#8a5cf6', null);
+      for (let i = 0; i < 4; i++)
+        p.poly(
+          [
+            [x + 0.2 + i * 1.1, y + 0.1, 0.01],
+            [x + 0.9 + i * 1.1, y + 0.1, 0.01],
+            [x + 0.9 + i * 1.1, y + h - 0.1, 0.01],
+            [x + 0.2 + i * 1.1, y + h - 0.1, 0.01],
+          ],
+          i % 2 ? '#2ee6f0' : '#8a5cf6',
+          null,
+        );
       break;
     case 'royal':
       p.poly(pts, '#7b2c4a', '#ffd23f', 2);
-      p.poly([[x + 0.3, y + 0.3, 0.01], [x + w - 0.3, y + 0.3, 0.01], [x + w - 0.3, y + h - 0.3, 0.01], [x + 0.3, y + h - 0.3, 0.01]], '#94385a', 'rgba(255,210,63,0.6)', 1);
+      p.poly(
+        [
+          [x + 0.3, y + 0.3, 0.01],
+          [x + w - 0.3, y + 0.3, 0.01],
+          [x + w - 0.3, y + h - 0.3, 0.01],
+          [x + 0.3, y + h - 0.3, 0.01],
+        ],
+        '#94385a',
+        'rgba(255,210,63,0.6)',
+        1,
+      );
       break;
     case 'conf':
       p.poly(pts, 'rgba(255,255,255,0.08)', 'rgba(255,255,255,0.25)', 1.5);
       break;
     case 'neon':
       p.poly(pts, '#2a1d55', '#ff6fb5', 2);
-      p.poly([[x + 0.25, y + 0.25, 0.01], [x + w - 0.25, y + 0.25, 0.01], [x + w - 0.25, y + h - 0.25, 0.01], [x + 0.25, y + h - 0.25, 0.01]], 'rgba(0,0,0,0)', '#2ee6f0', 1.5);
+      p.poly(
+        [
+          [x + 0.25, y + 0.25, 0.01],
+          [x + w - 0.25, y + 0.25, 0.01],
+          [x + w - 0.25, y + h - 0.25, 0.01],
+          [x + 0.25, y + h - 0.25, 0.01],
+        ],
+        'rgba(0,0,0,0)',
+        '#2ee6f0',
+        1.5,
+      );
       break;
     case 'brand':
       p.poly(pts, '#2b3a8f', '#ffd23f', 2);
@@ -353,10 +628,29 @@ function drawRug(p: Painter, f: Furniture) {
 
 function drawVent(p: Painter, x: number, y: number) {
   const r = 0.36;
-  p.poly([[x - r, y - r, 0.01], [x + r, y - r, 0.01], [x + r, y + r, 0.01], [x - r, y + r, 0.01]], '#4a5068', 'rgba(20,20,40,0.6)', 1.2);
+  p.poly(
+    [
+      [x - r, y - r, 0.01],
+      [x + r, y - r, 0.01],
+      [x + r, y + r, 0.01],
+      [x - r, y + r, 0.01],
+    ],
+    '#4a5068',
+    'rgba(20,20,40,0.6)',
+    1.2,
+  );
   for (let i = 0; i < 5; i++) {
     const yy = y - r + 0.1 + i * 0.13;
-    p.poly([[x - r + 0.08, yy, 0.012], [x + r - 0.08, yy, 0.012], [x + r - 0.08, yy + 0.05, 0.012], [x - r + 0.08, yy + 0.05, 0.012]], '#252a3d', null);
+    p.poly(
+      [
+        [x - r + 0.08, yy, 0.012],
+        [x + r - 0.08, yy, 0.012],
+        [x + r - 0.08, yy + 0.05, 0.012],
+        [x - r + 0.08, yy + 0.05, 0.012],
+      ],
+      '#252a3d',
+      null,
+    );
   }
 }
 
@@ -377,8 +671,25 @@ export interface Piece {
   furniture?: Furniture;
 }
 
-function makePiece(key: string, x0: number, y0: number, x1: number, y1: number, zTop: number, draw: (p: Painter) => void, cache: Map<string, HTMLCanvasElement>, extraTop = 18): { canvas: HTMLCanvasElement; sx: number; sy: number } {
-  const corners = [iso(x0, y0, 0), iso(x1, y0, 0), iso(x0, y1, 0), iso(x1, y1, 0), iso(x0, y0, zTop), iso(x1, y0, zTop)];
+function makePiece(
+  key: string,
+  x0: number,
+  y0: number,
+  x1: number,
+  y1: number,
+  zTop: number,
+  draw: (p: Painter) => void,
+  cache: Map<string, HTMLCanvasElement>,
+  extraTop = 18,
+): { canvas: HTMLCanvasElement; sx: number; sy: number } {
+  const corners = [
+    iso(x0, y0, 0),
+    iso(x1, y0, 0),
+    iso(x0, y1, 0),
+    iso(x1, y1, 0),
+    iso(x0, y0, zTop),
+    iso(x1, y0, zTop),
+  ];
   const minX = Math.floor(Math.min(...corners.map((c) => c[0]))) - 6;
   const maxX = Math.ceil(Math.max(...corners.map((c) => c[0]))) + 6;
   const minY = Math.floor(Math.min(...corners.map((c) => c[1]))) - extraTop;
@@ -427,30 +738,127 @@ export function buildPieces(): Piece[] {
             stroke: 'rgba(230,245,255,0.55)',
           });
           // reflection streak
-          p.poly([[w.x0 + 0.1, w.y1, z * 0.85], [w.x0 + 0.25, w.y1, z * 0.85], [w.x0 + 0.05, w.y1, z * 0.25], [w.x0 - 0.1, w.y1, z * 0.25]], 'rgba(255,255,255,0.28)', null);
+          p.poly(
+            [
+              [w.x0 + 0.1, w.y1, z * 0.85],
+              [w.x0 + 0.25, w.y1, z * 0.85],
+              [w.x0 + 0.05, w.y1, z * 0.25],
+              [w.x0 - 0.1, w.y1, z * 0.25],
+            ],
+            'rgba(255,255,255,0.28)',
+            null,
+          );
         } else {
-          // No per-piece outlines: adjacent pieces merge into one continuous wall.
-          p.box(w.x0, w.y0, w.x1, w.y1, 0, z, WALL_BASE, { top: WALL_CAP, right: '#b4b9d8', left: '#e6e9fa', stroke: null });
+          // No per-piece outlines + a hair of overlap: adjacent pieces merge into one continuous wall.
+          const o = 0.025;
+          p.box(w.x0 - o, w.y0 - o, w.x1 + o, w.y1 + o, 0, z, WALL_BASE, {
+            top: WALL_CAP,
+            right: '#b4b9d8',
+            left: '#e6e9fa',
+            stroke: null,
+          });
           // skirting board + chair rail
-          p.poly([[w.x0, w.y1, 0.16], [w.x1, w.y1, 0.16], [w.x1, w.y1, 0], [w.x0, w.y1, 0]], '#8a92b8', null);
-          p.poly([[w.x1, w.y0, 0.16], [w.x1, w.y1, 0.16], [w.x1, w.y1, 0], [w.x1, w.y0, 0]], '#737ba3', null);
-          p.poly([[w.x0, w.y1, 0.62], [w.x1, w.y1, 0.62], [w.x1, w.y1, 0.57], [w.x0, w.y1, 0.57]], '#c9cdec', null);
-          p.poly([[w.x1, w.y0, 0.62], [w.x1, w.y1, 0.62], [w.x1, w.y1, 0.57], [w.x1, w.y0, 0.57]], '#a2a8cc', null);
+          p.poly(
+            [
+              [w.x0, w.y1, 0.16],
+              [w.x1, w.y1, 0.16],
+              [w.x1, w.y1, 0],
+              [w.x0, w.y1, 0],
+            ],
+            '#8a92b8',
+            null,
+          );
+          p.poly(
+            [
+              [w.x1, w.y0, 0.16],
+              [w.x1, w.y1, 0.16],
+              [w.x1, w.y1, 0],
+              [w.x1, w.y0, 0],
+            ],
+            '#737ba3',
+            null,
+          );
+          p.poly(
+            [
+              [w.x0, w.y1, 0.62],
+              [w.x1, w.y1, 0.62],
+              [w.x1, w.y1, 0.57],
+              [w.x0, w.y1, 0.57],
+            ],
+            '#c9cdec',
+            null,
+          );
+          p.poly(
+            [
+              [w.x1, w.y0, 0.62],
+              [w.x1, w.y1, 0.62],
+              [w.x1, w.y1, 0.57],
+              [w.x1, w.y0, 0.57],
+            ],
+            '#a2a8cc',
+            null,
+          );
           // cap highlight
-          p.poly([[w.x0, w.y1, z], [w.x1, w.y1, z], [w.x1, w.y1, z - 0.04], [w.x0, w.y1, z - 0.04]], '#4a5bc4', null);
-          p.poly([[w.x1, w.y0, z], [w.x1, w.y1, z], [w.x1, w.y1, z - 0.04], [w.x1, w.y0, z - 0.04]], '#3a49a8', null);
+          p.poly(
+            [
+              [w.x0, w.y1, z],
+              [w.x1, w.y1, z],
+              [w.x1, w.y1, z - 0.04],
+              [w.x0, w.y1, z - 0.04],
+            ],
+            '#4a5bc4',
+            null,
+          );
+          p.poly(
+            [
+              [w.x1, w.y0, z],
+              [w.x1, w.y1, z],
+              [w.x1, w.y1, z - 0.04],
+              [w.x1, w.y0, z - 0.04],
+            ],
+            '#3a49a8',
+            null,
+          );
         }
       },
       cache,
     );
-    out.push({ key, canvas, sx, sy, depthX: (w.x0 + w.x1) / 2, depthY: (w.y0 + w.y1) / 2, tall: true, wall: w });
+    out.push({
+      key,
+      canvas,
+      sx,
+      sy,
+      depthX: (w.x0 + w.x1) / 2,
+      depthY: (w.y0 + w.y1) / 2,
+      tall: true,
+      wall: w,
+    });
   }
   // furniture
   for (const f of FURNITURE) {
     if (f.kind === 'rug') continue;
     const z = f.z ?? 0.8;
-    const { canvas, sx, sy } = makePiece(`${f.kind}-${f.variant ?? ''}`, f.x, f.y, f.x + f.w, f.y + f.h, z + 0.6, (p) => drawFurniture(p, f), cache, 28);
-    out.push({ key: f.id, canvas, sx, sy, depthX: f.x + f.w / 2, depthY: f.y + f.h / 2, tall: z >= 1.2, furniture: f });
+    const { canvas, sx, sy } = makePiece(
+      `${f.kind}-${f.variant ?? ''}`,
+      f.x,
+      f.y,
+      f.x + f.w,
+      f.y + f.h,
+      z + 0.6,
+      (p) => drawFurniture(p, f),
+      cache,
+      28,
+    );
+    out.push({
+      key: f.id,
+      canvas,
+      sx,
+      sy,
+      depthX: f.x + f.w / 2,
+      depthY: f.y + f.h / 2,
+      tall: z >= 1.2,
+      furniture: f,
+    });
   }
   return out;
 }
@@ -482,11 +890,24 @@ function monitor(p: Painter, x: number, y: number, facing: 's' | 'n', z: number,
 
 function legs(p: Painter, x0: number, y0: number, x1: number, y1: number, z: number, col = PAL.metal) {
   const t = 0.06;
-  for (const [lx, ly] of [[x0 + 0.05, y0 + 0.05], [x1 - 0.05 - t, y0 + 0.05], [x0 + 0.05, y1 - 0.05 - t], [x1 - 0.05 - t, y1 - 0.05 - t]])
+  for (const [lx, ly] of [
+    [x0 + 0.05, y0 + 0.05],
+    [x1 - 0.05 - t, y0 + 0.05],
+    [x0 + 0.05, y1 - 0.05 - t],
+    [x1 - 0.05 - t, y1 - 0.05 - t],
+  ])
     p.box(lx, ly, lx + t, ly + t, 0, z, col, { lw: 0.5 });
 }
 
-function screenFace(p: Painter, x0: number, y: number, z: number, w: number, h: number, draw: (c: CanvasRenderingContext2D, W: number, H: number) => void) {
+function screenFace(
+  p: Painter,
+  x0: number,
+  y: number,
+  z: number,
+  w: number,
+  h: number,
+  draw: (c: CanvasRenderingContext2D, W: number, H: number) => void,
+) {
   p.faceS(x0, y, z, (c) => draw(c, w * 32, h * 32));
 }
 
@@ -508,7 +929,14 @@ export function drawFurniture(p: Painter, f: Furniture) {
       // keyboard + mug + papers
       const ky = south ? y1 - 0.38 : y + 0.18;
       p.box(x + 0.45, ky, x + 1.0, ky + 0.16, 0.5, 0.53, '#e9ebf5', { lw: 0.5 });
-      p.cylinder(x + 1.25, ky + 0.05, 0.07, 0.5, 0.62, ['#ef3e4a', '#3d7bff', '#ffd23f', '#3ddc97'][Math.floor((x * 7 + y * 3) % 4)]);
+      p.cylinder(
+        x + 1.25,
+        ky + 0.05,
+        0.07,
+        0.5,
+        0.62,
+        ['#ef3e4a', '#3d7bff', '#ffd23f', '#3ddc97'][Math.floor((x * 7 + y * 3) % 4)],
+      );
       p.box(x + 0.12, ky - 0.05, x + 0.38, ky + 0.25, 0.5, 0.515, '#ffffff', { lw: 0.4 });
       break;
     }
@@ -526,10 +954,12 @@ export function drawFurniture(p: Painter, f: Furniture) {
       p.ellipse(cx, cy, 0.02, 0.22, 0.22, 'rgba(40,40,70,0.5)', null);
       p.box(x + 0.05, y + 0.05, x1 - 0.05, y1 - 0.05, 0.24, 0.32, '#2d3348', { top: '#454d6e' });
       if (v === 's') p.box(x + 0.05, y + 0.02, x1 - 0.05, y + 0.12, 0.32, 0.8, '#2d3348', { top: '#454d6e' });
-      if (v === 'n') p.box(x + 0.05, y1 - 0.12, x1 - 0.05, y1 - 0.02, 0.32, 0.8, '#2d3348', { left: '#3d4566' });
+      if (v === 'n')
+        p.box(x + 0.05, y1 - 0.12, x1 - 0.05, y1 - 0.02, 0.32, 0.8, '#2d3348', { left: '#3d4566' });
       if (v === 'e') p.box(x + 0.02, y + 0.05, x + 0.12, y1 - 0.05, 0.32, 0.75, '#ff8a3d');
       if (v === 'w') p.box(x1 - 0.12, y + 0.05, x1 - 0.02, y1 - 0.05, 0.32, 0.75, '#ff8a3d');
-      if (v === 'exec') p.box(x + 0.02, y + 0.02, x1 - 0.02, y + 0.15, 0.32, 1.05, '#4a2a1e', { top: '#6b4330' });
+      if (v === 'exec')
+        p.box(x + 0.02, y + 0.02, x1 - 0.02, y + 0.15, 0.32, 1.05, '#4a2a1e', { top: '#6b4330' });
       break;
     }
     case 'plant':
@@ -563,7 +993,15 @@ export function drawFurniture(p: Painter, f: Furniture) {
       break;
     }
     case 'couch': {
-      const col = v.startsWith('mint') ? '#3ddc97' : v.startsWith('navy') ? '#34419a' : v.startsWith('blue') ? '#3d7bff' : v.startsWith('lilac') ? '#b39cff' : '#7a4a32';
+      const col = v.startsWith('mint')
+        ? '#3ddc97'
+        : v.startsWith('navy')
+          ? '#34419a'
+          : v.startsWith('blue')
+            ? '#3d7bff'
+            : v.startsWith('lilac')
+              ? '#b39cff'
+              : '#7a4a32';
       p.box(x, y, x1, y1, 0.05, 0.32, shade(col, -0.1));
       p.box(x + 0.06, y + 0.06, x1 - 0.06, y1 - 0.06, 0.32, 0.42, col, { top: shade(col, 0.2) });
       if (v.endsWith('-n')) p.box(x, y1 - 0.25, x1, y1, 0.32, 0.72, shade(col, -0.05));
@@ -574,7 +1012,8 @@ export function drawFurniture(p: Painter, f: Furniture) {
       break;
     }
     case 'beanbag': {
-      const col = v === 'orange' ? PAL.orange : v === 'purple' ? PAL.purple : v === 'pink' ? '#ff6fb5' : PAL.cyan;
+      const col =
+        v === 'orange' ? PAL.orange : v === 'purple' ? PAL.purple : v === 'pink' ? '#ff6fb5' : PAL.cyan;
       const [sx, sy] = p.P(x + w / 2, y + h / 2, 0);
       const c = p.ctx;
       const g = c.createRadialGradient(sx - 8, sy - 16, 3, sx, sy - 8, 30);
@@ -604,16 +1043,64 @@ export function drawFurniture(p: Painter, f: Furniture) {
       break;
     }
     case 'console': {
-      const col = v === 'critA' || v === 'critB' ? '#4a2030' : v === 'outage' ? '#2b3a8f' : v === 'cctv' || v === 'doors' ? '#22304a' : '#283048';
+      const col =
+        v === 'critA' || v === 'critB'
+          ? '#4a2030'
+          : v === 'outage'
+            ? '#2b3a8f'
+            : v === 'cctv' || v === 'doors'
+              ? '#22304a'
+              : '#283048';
       p.box(x, y, x1, y1, 0, z * 0.75, col, { top: shade(col, 0.15) });
       // sloped screen top
-      const screenCol = v === 'critA' || v === 'critB' ? '#ff5662' : v === 'outage' ? '#ffd23f' : v === 'doors' ? '#ff8a3d' : '#2ee6f0';
+      const screenCol =
+        v === 'critA' || v === 'critB'
+          ? '#ff5662'
+          : v === 'outage'
+            ? '#ffd23f'
+            : v === 'doors'
+              ? '#ff8a3d'
+              : '#2ee6f0';
       if (w < h) {
-        p.poly([[x + 0.1, y + 0.1, z * 0.75], [x1 - 0.05, y + 0.1, z], [x1 - 0.05, y1 - 0.1, z], [x + 0.1, y1 - 0.1, z * 0.75]], '#1a1e2c');
-        p.poly([[x + 0.18, y + 0.18, z * 0.77], [x1 - 0.12, y + 0.18, z * 0.98], [x1 - 0.12, y1 - 0.18, z * 0.98], [x + 0.18, y1 - 0.18, z * 0.77]], screenCol, null);
+        p.poly(
+          [
+            [x + 0.1, y + 0.1, z * 0.75],
+            [x1 - 0.05, y + 0.1, z],
+            [x1 - 0.05, y1 - 0.1, z],
+            [x + 0.1, y1 - 0.1, z * 0.75],
+          ],
+          '#1a1e2c',
+        );
+        p.poly(
+          [
+            [x + 0.18, y + 0.18, z * 0.77],
+            [x1 - 0.12, y + 0.18, z * 0.98],
+            [x1 - 0.12, y1 - 0.18, z * 0.98],
+            [x + 0.18, y1 - 0.18, z * 0.77],
+          ],
+          screenCol,
+          null,
+        );
       } else {
-        p.poly([[x + 0.1, y + 0.1, z], [x1 - 0.1, y + 0.1, z], [x1 - 0.1, y1 - 0.05, z * 0.75], [x + 0.1, y1 - 0.05, z * 0.75]], '#1a1e2c');
-        p.poly([[x + 0.18, y + 0.18, z * 0.98], [x1 - 0.18, y + 0.18, z * 0.98], [x1 - 0.18, y1 - 0.12, z * 0.77], [x + 0.18, y1 - 0.12, z * 0.77]], screenCol, null);
+        p.poly(
+          [
+            [x + 0.1, y + 0.1, z],
+            [x1 - 0.1, y + 0.1, z],
+            [x1 - 0.1, y1 - 0.05, z * 0.75],
+            [x + 0.1, y1 - 0.05, z * 0.75],
+          ],
+          '#1a1e2c',
+        );
+        p.poly(
+          [
+            [x + 0.18, y + 0.18, z * 0.98],
+            [x1 - 0.18, y + 0.18, z * 0.98],
+            [x1 - 0.18, y1 - 0.12, z * 0.77],
+            [x + 0.18, y1 - 0.12, z * 0.77],
+          ],
+          screenCol,
+          null,
+        );
       }
       // label stripe
       p.faceS(x, y1, z * 0.6, (c) => {
@@ -621,7 +1108,16 @@ export function drawFurniture(p: Painter, f: Furniture) {
         c.fillRect(2, 2, w * 32 - 4, 3);
         c.fillStyle = 'rgba(255,255,255,0.85)';
         c.font = 'bold 6px sans-serif';
-        const label = { server: 'SRV-01', critA: 'CORE A', critB: 'CORE B', network: 'NET', outage: 'SYS', cctv: 'CCTV', doors: 'DOORS' }[v] ?? '';
+        const label =
+          {
+            server: 'SRV-01',
+            critA: 'CORE A',
+            critB: 'CORE B',
+            network: 'NET',
+            outage: 'SYS',
+            cctv: 'CCTV',
+            doors: 'DOORS',
+          }[v] ?? '';
         c.fillText(label, 3, 12);
       });
       break;
@@ -650,7 +1146,11 @@ export function drawFurniture(p: Painter, f: Furniture) {
         p.cylinder(x + w / 2, y + h / 2, 0.22, z, z + 0.1, '#e0784a');
         const c = p.ctx;
         const [sx, sy] = p.P(x + w / 2, y + h / 2, z + 0.12);
-        for (const [dx, dy, col] of [[-5, -2, '#ef3e4a'], [4, -3, '#ffd23f'], [0, -6, '#3ddc97']] as const) {
+        for (const [dx, dy, col] of [
+          [-5, -2, '#ef3e4a'],
+          [4, -3, '#ffd23f'],
+          [0, -6, '#3ddc97'],
+        ] as const) {
           c.beginPath();
           c.arc(sx + dx, sy + dy, 4, 0, Math.PI * 2);
           c.fillStyle = col;
@@ -809,7 +1309,12 @@ export function drawFurniture(p: Painter, f: Furniture) {
         c.fillStyle = 'rgba(0,0,0,0.35)';
         c.fillRect(2, 2, W - 4, H - 4);
         const rows = 4;
-        const colors = f.kind === 'bookshelf' ? ['#ef3e4a', '#3d7bff', '#ffd23f', '#3ddc97', '#8a5cf6', '#ff8a3d'] : f.kind === 'partsShelf' ? ['#2ee6f0', '#3a3f55', '#3ddc97', '#c3c8d8'] : ['#c8a06a', '#e0c08a', '#ffffff', '#3d7bff'];
+        const colors =
+          f.kind === 'bookshelf'
+            ? ['#ef3e4a', '#3d7bff', '#ffd23f', '#3ddc97', '#8a5cf6', '#ff8a3d']
+            : f.kind === 'partsShelf'
+              ? ['#2ee6f0', '#3a3f55', '#3ddc97', '#c3c8d8']
+              : ['#c8a06a', '#e0c08a', '#ffffff', '#3d7bff'];
         for (let r = 0; r < rows; r++) {
           const ry = 3 + r * ((H - 4) / rows);
           c.fillStyle = shade(frame, 0.1);
@@ -874,7 +1379,15 @@ export function drawFurniture(p: Painter, f: Furniture) {
       });
       // laptop + nameplate + gold pen
       p.box(x + 0.5, y + 0.25, x + 1.05, y + 0.65, 0.62, 0.64, '#c3c8d8', { lw: 0.5 });
-      p.poly([[x + 0.5, y + 0.25, 0.64], [x + 1.05, y + 0.25, 0.64], [x + 1.05, y + 0.25, 0.95], [x + 0.5, y + 0.25, 0.95]], '#2b2f3f');
+      p.poly(
+        [
+          [x + 0.5, y + 0.25, 0.64],
+          [x + 1.05, y + 0.25, 0.64],
+          [x + 1.05, y + 0.25, 0.95],
+          [x + 0.5, y + 0.25, 0.95],
+        ],
+        '#2b2f3f',
+      );
       p.box(x + 0.3, y1 - 0.3, x + 0.7, y1 - 0.2, 0.62, 0.7, '#ffd23f');
       break;
     case 'trophy':
@@ -885,10 +1398,17 @@ export function drawFurniture(p: Painter, f: Furniture) {
       break;
     case 'aquarium':
       p.box(x, y, x1, y1, 0, 0.6, '#2b2f3f', { top: '#3a3f55' });
-      p.box(x + 0.05, y + 0.05, x1 - 0.05, y1 - 0.05, 0.6, z, 'rgba(46,170,240,0.55)', { top: 'rgba(150,230,255,0.6)', stroke: 'rgba(230,250,255,0.8)' });
+      p.box(x + 0.05, y + 0.05, x1 - 0.05, y1 - 0.05, 0.6, z, 'rgba(46,170,240,0.55)', {
+        top: 'rgba(150,230,255,0.6)',
+        stroke: 'rgba(230,250,255,0.8)',
+      });
       p.faceS(x + 0.05, y1 - 0.05, z, (c) => {
         const W = (w - 0.1) * 32;
-        for (const [fx, fy, col] of [[W * 0.2, 6, '#ff8a3d'], [W * 0.55, 11, '#ffd23f'], [W * 0.8, 5, '#ff6fb5']] as const) {
+        for (const [fx, fy, col] of [
+          [W * 0.2, 6, '#ff8a3d'],
+          [W * 0.55, 11, '#ffd23f'],
+          [W * 0.8, 5, '#ff6fb5'],
+        ] as const) {
           c.fillStyle = col;
           c.beginPath();
           c.ellipse(fx, fy, 3, 1.8, 0, 0, Math.PI * 2);
@@ -933,7 +1453,9 @@ export function drawFurniture(p: Painter, f: Furniture) {
     case 'turnstile':
       p.box(x, y, x1, y + 0.2, 0, z, '#c3c8d8');
       p.box(x, y1 - 0.2, x1, y1, 0, z, '#c3c8d8');
-      p.box(x + 0.05, y + 0.2, x + 0.1, y1 - 0.2, 0.3, z, 'rgba(170,215,255,0.4)', { stroke: 'rgba(255,255,255,0.6)' });
+      p.box(x + 0.05, y + 0.2, x + 0.1, y1 - 0.2, 0.3, z, 'rgba(170,215,255,0.4)', {
+        stroke: 'rgba(255,255,255,0.6)',
+      });
       break;
     case 'monitorWall':
       p.box(x, y, x1, y1, 0.35, z, '#151a2a');
@@ -1043,7 +1565,8 @@ export function drawFurniture(p: Painter, f: Furniture) {
       break;
     }
     case 'pipes':
-      for (let i = 0; i < 3; i++) p.cylinder(x + w / 2, y + 0.4 + i * 0.8, 0.12, 0, z, ['#ef3e4a', '#3d7bff', '#ffd23f'][i]);
+      for (let i = 0; i < 3; i++)
+        p.cylinder(x + w / 2, y + 0.4 + i * 0.8, 0.12, 0, z, ['#ef3e4a', '#3d7bff', '#ffd23f'][i]);
       break;
     case 'waterCooler':
       p.box(x + 0.1, y + 0.1, x1 - 0.1, y1 - 0.1, 0, 0.8, '#f3f4fa');
