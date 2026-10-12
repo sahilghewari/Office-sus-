@@ -1,0 +1,33 @@
+# Render Blueprint: Corporate Sus game server (also serves the web client).
+# Dashboard → New → Blueprint → pick this repo. Secrets marked `sync: false`
+# are entered in the dashboard and never stored in git.
+services:
+  - type: web
+    name: corporate-sus
+    runtime: node
+    plan: starter # not "free": free instances sleep and wipe live rooms
+    region: singapore # closest Render region to Supabase ap-south-1 (Mumbai)
+    # --include=dev: build tools (vite, esbuild, prisma CLI) are devDependencies
+    buildCommand: npm ci --include=dev && npm run build
+    preDeployCommand: npm run db:deploy
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: NODE_ENV
+        value: production
+      - key: SERVE_WEB
+        value: "true"
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: PUBLIC_ORIGIN
+        sync: false # e.g. https://corporate-sus.onrender.com (or your custom domain)
+      - key: DATABASE_URL
+        sync: false # Supabase *Session pooler* URI (Render has no IPv6 egress)
+      - key: LIVEKIT_URL
+        sync: false # optional, voice
+      - key: LIVEKIT_API_KEY
+        sync: false
+      - key: LIVEKIT_API_SECRET
+        sync: false
