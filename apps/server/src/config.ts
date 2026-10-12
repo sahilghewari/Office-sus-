@@ -29,6 +29,8 @@ export interface Config {
   testHooks: boolean;
   /** Multiplies per-IP connection/API limits (load testing from one machine). */
   rateLimitScale: number;
+  /** Hosting on a local network: advertise this machine's LAN addresses to clients. */
+  lanMode: boolean;
 }
 
 export function loadConfig(overrides: Partial<Config> = {}): Config {
@@ -58,6 +60,7 @@ export function loadConfig(overrides: Partial<Config> = {}): Config {
     serveWeb: env.SERVE_WEB === 'true',
     testHooks,
     rateLimitScale: Math.max(1, Number(env.RATE_LIMIT_SCALE ?? 1) || 1),
+    lanMode: env.LAN_MODE === 'true',
     ...overrides,
   };
 }

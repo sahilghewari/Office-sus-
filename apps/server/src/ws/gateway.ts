@@ -42,7 +42,13 @@ export function attachGateway(o: GatewayOptions) {
     const url = new URL(req.url ?? '/', 'http://x');
     if (url.pathname !== '/ws') return socket.destroy();
     const origin = req.headers.origin;
-    if (o.enforceOrigin && origin && !o.allowedOrigins.includes(origin)) {
+    // Same-origin pages (e.g. a LAN host opened at http://192.168.x.x:2567) are always allowed;
+    // cross-origin pages must be listed in PUBLIC_ORIGIN.
+    let sameOrigin = false;
+    try {
+      sameOrigin = !!origin && new URL(origin).host === req.headers.host;
+    } catch {}
+    if (o.enforceOrigin && origin && !sameOrigin && !o.allowedOrigins.includes(origin)) {
       socket.write('HTTP/1.1 403 Forbidden\r\n\r\n');
       return socket.destroy();
     }

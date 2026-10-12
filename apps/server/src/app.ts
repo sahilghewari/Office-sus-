@@ -1,4 +1,5 @@
 import { existsSync } from 'node:fs';
+import { networkInterfaces } from 'node:os';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import Fastify from 'fastify';
@@ -24,6 +25,14 @@ export interface GameServer {
   url: string;
   port: number;
   close(): Promise<void>;
+}
+
+/** IPv4 addresses other devices on the network can use to reach this machine. */
+export function lanAddresses(): string[] {
+  const out: string[] = [];
+  for (const list of Object.values(networkInterfaces()))
+    for (const a of list ?? []) if (a.family === 'IPv4' && !a.internal && !a.address.startsWith('169.254.')) out.push(a.address);
+  return out;
 }
 
 export interface CreateOptions {
@@ -70,6 +79,7 @@ export async function createGameServer(opts: CreateOptions = {}): Promise<GameSe
     directory,
     startedAt: Date.now(),
     rateLimitScale: config.rateLimitScale,
+    lanUrls: config.lanMode ? lanAddresses().map((ip) => `http://${ip}:${config.port}`) : [],
   });
 
   if (config.serveWeb) {

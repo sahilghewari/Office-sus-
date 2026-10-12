@@ -3,7 +3,7 @@ import { MIN_PLAYERS, effectiveManagerCount, type GameSettings, type PublicPlaye
 import { useGame } from '../stores/game';
 import { useSettings } from '../stores/settings';
 import { send, leaveRoom } from '../networking/connection';
-import { inviteLink } from '../networking/flow';
+import { inviteLink, lanAddress } from '../networking/flow';
 import { Avatar } from '../components/Avatar';
 import { ChatPanel, muteKey } from './ChatPanel';
 import { useApp } from '../stores/app';
@@ -91,6 +91,11 @@ export function LobbyPanel() {
             {copied === 'link' ? '✓ Link copied' : '✉️ Invite friends'}
           </button>
         </div>
+        {lanAddress() && (
+          <div className="mb-3 rounded-xl bg-corp-mint/10 px-3 py-2 text-xs text-mist ring-1 ring-corp-mint/30" data-testid="lan-address">
+            📶 Friends on the same Wi-Fi open <b className="font-mono text-corp-mint select-all">{lanAddress()}</b> and enter the code.
+          </div>
+        )}
 
         <div className="mb-2 flex gap-1 rounded-xl bg-black/20 p-1">
           {(['players', 'settings'] as const).map((t) => (

@@ -22,6 +22,7 @@ export interface ApiDeps {
   directory: RoomDirectory;
   startedAt: number;
   rateLimitScale?: number;
+  lanUrls?: string[];
 }
 
 const SESSION_TTL_MS = 1000 * 60 * 60 * 24 * 30;
@@ -88,6 +89,8 @@ export function registerRoutes(app: FastifyInstance, d: ApiDeps) {
     voice: d.voice.enabled,
     accounts: true,
     persistentAccounts: d.store.kind === 'postgres',
+    // Only populated in LAN mode, so public servers never reveal internal addresses.
+    lanUrls: d.lanUrls ?? [],
   }));
 
   app.post('/api/auth/guest', lim(30), async () => ({

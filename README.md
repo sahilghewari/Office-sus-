@@ -8,6 +8,36 @@ The repository holds the complete game: an authoritative multiplayer server, the
 
 ---
 
+## 🎮 Play with friends on your network (LAN party, no cloud needed)
+
+One person hosts on their computer; everyone else just opens a browser.
+
+**Host (once):** install [Node.js 22+](https://nodejs.org), download this repo, then:
+
+```bash
+npm install
+```
+
+```bash
+npm run host
+```
+
+The terminal prints something like:
+
+```
+  You:      http://localhost:2567
+  Friends:  http://192.168.1.23:2567   (same Wi-Fi / LAN)
+```
+
+**Friends:** on the same Wi-Fi, open `http://192.168.1.23:2567` (use the address *your* terminal shows) on a laptop or desktop, enter a name, then **Join with Code**. Or the host clicks **Invite friends** in the lobby, which copies a link with that address already in it. Nothing to install.
+
+Tips:
+* The first time, your OS may ask whether to allow Node.js incoming connections. Click **Allow**, or no one can join.
+* Use a custom port with `npm run host -- 3000`. After pulling updates, run `npm run host -- --rebuild`.
+* No database is needed: accounts are kept in memory until you stop the server (guest play works as normal).
+* **Not on the same Wi-Fi?** Everyone installs [Tailscale](https://tailscale.com) (a free virtual LAN) and the host shares their Tailscale IP. Alternatively, forward TCP port 2567 on the host's router and share the public IP (less safe).
+* **Voice chat over LAN is not supported out of the box.** Browsers only allow the microphone on `https://` or `localhost` pages, and voice also needs a LiveKit server. Text chat in meetings works fine, and so does a call on Discord or a similar app.
+
 ## Contents
 
 1. [Project overview](#1-project-overview)
@@ -158,6 +188,7 @@ All variables are read by the game server. The web client has **no secrets**: it
 | `SERVE_WEB` | no | `false` | Serve the built client from the game server (single-container deploys) |
 | `ENABLE_TEST_HOOKS` | tests only | `false` | Enables forced roles, teleport and fast-forward for automated tests; **refused in production** |
 | `RATE_LIMIT_SCALE` | load tests | `1` | Multiplies per-IP limits so one machine can simulate hundreds of clients |
+| `LAN_MODE` | no | `false` | Advertise this machine's LAN addresses to clients (set automatically by `npm run host`) |
 
 See [`.env.example`](.env.example). Never commit a real `.env`.
 
@@ -181,6 +212,7 @@ Schema (in `apps/server/prisma/schema.prisma`): `User`, `Session` (stores only t
 
 | Command | What it does |
 |---|---|
+| `npm run host` | **LAN party:** build + serve the game for friends on your network |
 | `npm run dev` | Server (`:2567`, auto-reload) + Vite client (`:5173`) together |
 | `npm run dev:server` / `npm run dev:web` | Each on its own |
 | `npm run bots -- <CODE> 3` | Adds 3 autonomous bots to a room, so one person can play-test a full match (`--aggressive` makes bot managers sabotage and eliminate) |

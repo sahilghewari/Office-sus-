@@ -4,6 +4,9 @@ import './styles/index.css';
 import { App } from './App';
 import { unlockAudio } from './audio/audio';
 import './game/input';
+import { loadLanBase } from './networking/flow';
+
+void loadLanBase();
 
 if (new URLSearchParams(location.search).has('forceLoop')) sessionStorage.setItem('cs_forceLoop', '1');
 

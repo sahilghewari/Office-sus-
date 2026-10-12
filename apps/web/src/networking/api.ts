@@ -35,7 +35,7 @@ export interface UserView {
 }
 
 export const api = {
-  config: () => call<{ protocol: number; voice: boolean; persistentAccounts: boolean }>('/api/config'),
+  config: () => call<{ protocol: number; voice: boolean; persistentAccounts: boolean; lanUrls: string[] }>('/api/config'),
   guest: () => call<{ token: string }>('/api/auth/guest', { method: 'POST' }),
   register: (username: string, password: string, appearance: Appearance) =>
     call<{ token: string; user: UserView }>('/api/auth/register', {

@@ -48,6 +48,21 @@ export async function runIntent(intent: Intent) {
   }
 }
 
+let lanBase: string | null = null;
+/** In LAN mode the server tells us its network address, so invites work for friends on the same Wi-Fi. */
+export async function loadLanBase() {
+  try {
+    const cfg = await api.config();
+    lanBase = cfg.lanUrls?.[0] ?? null;
+  } catch {}
+}
+
 export function inviteLink(code: string): string {
-  return `${location.origin}/?room=${code}`;
+  const local = ['localhost', '127.0.0.1', '[::1]'].includes(location.hostname);
+  return `${local && lanBase ? lanBase : location.origin}/?room=${code}`;
+}
+
+/** Address friends should type into their browser (LAN mode), if any. */
+export function lanAddress(): string | null {
+  return lanBase;
 }
