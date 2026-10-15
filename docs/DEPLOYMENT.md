@@ -60,6 +60,29 @@ Migrations run automatically when the game container starts (`prisma migrate dep
 * `SERVE_WEB=true`, if the game server also serves the client.
 * `ENABLE_TEST_HOOKS` must stay unset (the server refuses to start with it in production).
 * `RATE_LIMIT_SCALE` should be left at 1.
+* `TRUST_PROXY`: set it to match what sits in front of the server (next section).
+
+## Client IPs behind a proxy
+
+Every per-IP limit (HTTP rate limits, WebSocket connects, failed room joins) keys on the client IP, so the server must not believe a forged `X-Forwarded-For`. `TRUST_PROXY` says which source to use:
+
+| Setup | Value | Why |
+|---|---|---|
+| Direct, or `npm run host` (LAN) | unset / `false` | No proxy: the socket address is the client. |
+| Docker Compose with Caddy | `1` | Caddy overwrites `X-Forwarded-For` with the real peer. |
+| Render | `1` | Render's proxy appends the client to `X-Forwarded-For`; earlier entries can be forged. |
+| Fly.io | `header:Fly-Client-IP` | fly-proxy sets this header itself. |
+| Your own chain of N proxies that each append | `N` | The client is N entries from the right. |
+
+`true` is rejected on purpose: trusting every hop means using the leftmost entry, which the client chooses.
+
+The server logs its choice at startup (`Client IPs from: …`). Platforms change, so check after deploying. Send a few requests with a forged header and confirm they are still limited together:
+
+```bash
+for i in $(seq 1 12); do curl -s -o /dev/null -w '%{http_code}\n' -X POST -H "X-Forwarded-For: 10.0.0.$i" https://your-app.example.com/api/auth/login -H 'content-type: application/json' -d '{"username":"nobody","password":"x"}'; done
+```
+
+The last two should be `429` (login allows 10 per minute). If every request returns `401`, the forged header is being trusted: lower the hop count or switch to a platform header.
 
 ## Database migrations
 

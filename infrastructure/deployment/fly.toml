@@ -11,6 +11,8 @@ primary_region = "ams"
   NODE_ENV = "production"
   PORT = "2567"
   SERVE_WEB = "true"
+  # fly-proxy sets Fly-Client-IP itself; X-Forwarded-For can carry client-forged entries.
+  TRUST_PROXY = "header:Fly-Client-IP"
   PUBLIC_ORIGIN = "https://corporate-sus.fly.dev"
 
 [http_service]

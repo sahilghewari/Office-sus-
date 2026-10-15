@@ -188,6 +188,7 @@ All variables are read by the game server. The web client has **no secrets**: it
 | `SERVE_WEB` | no | `false` | Serve the built client from the game server (single-container deploys) |
 | `ENABLE_TEST_HOOKS` | tests only | `false` | Enables forced roles, teleport and fast-forward for automated tests; **refused in production** |
 | `RATE_LIMIT_SCALE` | load tests | `1` | Multiplies per-IP limits so one machine can simulate hundreds of clients |
+| `TRUST_PROXY` | behind a proxy | `false` | Where client IPs come from for rate limits: `false` (socket), a hop count (`1`), or `header:<Name>` (e.g. `header:Fly-Client-IP`). See [DEPLOYMENT.md](docs/DEPLOYMENT.md#client-ips-behind-a-proxy) |
 | `LAN_MODE` | no | `false` | Advertise this machine's LAN addresses to clients (set automatically by `npm run host`) |
 
 See [`.env.example`](.env.example). Never commit a real `.env`.

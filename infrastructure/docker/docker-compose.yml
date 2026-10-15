@@ -13,6 +13,8 @@ services:
       NODE_ENV: production
       PORT: 2567
       SERVE_WEB: "true"
+      # Caddy overwrites X-Forwarded-For with the real peer (see Caddyfile): one trusted hop.
+      TRUST_PROXY: "1"
       PUBLIC_ORIGIN: https://${PUBLIC_DOMAIN:?set PUBLIC_DOMAIN}
       SESSION_SECRET: ${SESSION_SECRET:?set SESSION_SECRET}
       DATABASE_URL: postgresql://corp:${POSTGRES_PASSWORD:-corp}@postgres:5432/corporate_sus

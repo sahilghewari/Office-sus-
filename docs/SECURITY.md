@@ -12,6 +12,7 @@
 * In production, WebSocket upgrades require an `Origin` listed in `PUBLIC_ORIGIN`, and CORS is restricted to the same list.
 * Request bodies are limited to 16 kB and WebSocket frames to 16 kB.
 * Security headers: `X-Content-Type-Options`, `X-Frame-Options: DENY` and `Referrer-Policy` from the app; HSTS and `Permissions-Policy` from Caddy.
+* Client IPs for every limit below come from one resolver shared by HTTP and WebSocket. Proxy headers are ignored unless `TRUST_PROXY` is set to a hop count or a platform header, so a client can't change its IP by sending `X-Forwarded-For` (see [DEPLOYMENT.md](DEPLOYMENT.md#client-ips-behind-a-proxy)).
 * Rate limits:
   * global 300 requests/min per IP
   * auth endpoints 10/min

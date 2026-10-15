@@ -1,5 +1,6 @@
 import { readFileSync, existsSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { parseProxyTrust, type ProxyTrust } from './security/clientIp';
 
 /** Minimal .env loader (no extra dependency). Real env vars always win. */
 function loadDotEnv() {
@@ -29,6 +30,8 @@ export interface Config {
   testHooks: boolean;
   /** Multiplies per-IP connection/API limits (load testing from one machine). */
   rateLimitScale: number;
+  /** Which proxy headers (if any) decide a client's IP for per-IP limits. Default: none. */
+  trustProxy: ProxyTrust;
   /** Hosting on a local network: advertise this machine's LAN addresses to clients. */
   lanMode: boolean;
 }
@@ -61,6 +64,7 @@ export function loadConfig(overrides: Partial<Config> = {}): Config {
     testHooks,
     rateLimitScale: Math.max(1, Number(env.RATE_LIMIT_SCALE ?? 1) || 1),
     lanMode: env.LAN_MODE === 'true',
+    trustProxy: parseProxyTrust(env.TRUST_PROXY),
     ...overrides,
   };
 }

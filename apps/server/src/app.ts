@@ -14,6 +14,7 @@ import { createVoice, type VoiceService } from './voice/livekit';
 import { RoomManager } from './rooms/RoomManager';
 import { attachGateway } from './ws/gateway';
 import { registerRoutes } from './api/routes';
+import { describeProxyTrust, resolveClientIp } from './security/clientIp';
 
 export interface GameServer {
   config: Config;
@@ -61,9 +62,18 @@ export async function createGameServer(opts: CreateOptions = {}): Promise<GameSe
   });
   if (config.testHooks) log('⚠ Test hooks are ENABLED. Never use this configuration in production.');
 
-  const app = Fastify({ logger: false, bodyLimit: 16 * 1024, trustProxy: true });
+  // Fastify's own proxy handling stays off: every per-IP limit (HTTP and WebSocket) keys on
+  // resolveClientIp so the two can never disagree about who a client is.
+  const app = Fastify({ logger: false, bodyLimit: 16 * 1024, trustProxy: false });
+  const ipOf = (req: { raw: Parameters<typeof resolveClientIp>[0] }) => resolveClientIp(req.raw, config.trustProxy);
   await app.register(cors, { origin: config.production ? config.publicOrigin : true, credentials: false });
-  await app.register(rateLimit, { global: true, max: 300 * config.rateLimitScale, timeWindow: '1 minute' });
+  await app.register(rateLimit, {
+    global: true,
+    max: 300 * config.rateLimitScale,
+    timeWindow: '1 minute',
+    keyGenerator: ipOf,
+  });
+  log(`Client IPs from: ${describeProxyTrust(config.trustProxy)}`);
   if (config.rateLimitScale > 1) log(`⚠ Rate limits scaled ×${config.rateLimitScale} (load testing).`);
   app.addHook('onSend', async (_req, reply, payload) => {
     reply.header('X-Content-Type-Options', 'nosniff');
@@ -119,6 +129,7 @@ export async function createGameServer(opts: CreateOptions = {}): Promise<GameSe
     store,
     allowedOrigins: config.publicOrigin,
     enforceOrigin: config.production,
+    trustProxy: config.trustProxy,
     log,
     rateLimitScale: config.rateLimitScale,
   });

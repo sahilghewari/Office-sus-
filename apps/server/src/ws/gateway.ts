@@ -5,6 +5,7 @@ import type { TokenService } from '../authentication/tokens';
 import type { Store } from '../database/store';
 import { KeyedLimiter, TokenBucket } from '../security/rateLimit';
 import { sanitizeName } from '../security/moderation';
+import { resolveClientIp, type ProxyTrust } from '../security/clientIp';
 import type { RoomManager } from '../rooms/RoomManager';
 import type { Conn, GameRoom, Player } from '../rooms/GameRoom';
 
@@ -17,15 +18,11 @@ export interface GatewayOptions {
   enforceOrigin: boolean;
   log: (m: string) => void;
   rateLimitScale?: number;
+  /** Must be the same policy the HTTP rate limiter uses. Default: trust no proxy headers. */
+  trustProxy?: ProxyTrust;
 }
 
 const MAX_MESSAGE_BYTES = 16 * 1024;
-
-export function clientIp(req: IncomingMessage): string {
-  const fwd = req.headers['x-forwarded-for'];
-  if (typeof fwd === 'string' && fwd) return fwd.split(',')[0].trim();
-  return req.socket.remoteAddress ?? 'unknown';
-}
 
 export function attachGateway(o: GatewayOptions) {
   const wss = new WebSocketServer({
@@ -34,6 +31,8 @@ export function attachGateway(o: GatewayOptions) {
     perMessageDeflate: false,
   });
   const k = o.rateLimitScale ?? 1;
+  const trust: ProxyTrust = o.trustProxy ?? { mode: 'none' };
+  const clientIp = (req: IncomingMessage) => resolveClientIp(req, trust);
   const connectLimiter = new KeyedLimiter(30 * k, 0.5 * k); // per IP
   // Failed joins per IP (wrong/full codes) — makes brute-forcing private room codes impractical.
   const failedJoins = new KeyedLimiter(10, 0.1);

@@ -19,6 +19,11 @@ services:
         value: production
       - key: SERVE_WEB
         value: "true"
+      # Render's proxy appends the client to X-Forwarded-For (it does not strip what the
+      # client sent), so only the rightmost entry is trustworthy. Verify after deploy:
+      # see docs/DEPLOYMENT.md → "Client IPs behind a proxy".
+      - key: TRUST_PROXY
+        value: "1"
       - key: SESSION_SECRET
         generateValue: true
       - key: PUBLIC_ORIGIN

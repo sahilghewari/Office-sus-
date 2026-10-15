@@ -34,6 +34,8 @@ const child = spawn(process.execPath, [serverBundle], {
     NODE_ENV: 'production',
     SERVE_WEB: 'true',
     LAN_MODE: 'true',
+    // Friends connect directly, so proxy headers are client-controlled: never trust them here.
+    TRUST_PROXY: 'false',
     HOST: '0.0.0.0',
     PORT: String(port),
     PUBLIC_ORIGIN: process.env.PUBLIC_ORIGIN ?? `http://localhost:${port}`,
